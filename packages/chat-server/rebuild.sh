@@ -17,7 +17,7 @@ docker compose down --remove-orphans 2>/dev/null || true
 
 # Rebuild image (no cache)
 echo "[2/3] Building image..."
-docker compose build --no-cache chat-server
+docker compose build --no-cache hab-chat-server
 
 # Start services
 echo "[3/3] Starting services..."
@@ -27,5 +27,5 @@ echo ""
 echo "=== Done ==="
 docker compose ps
 echo ""
-echo "Logs:  docker compose logs -f chat-server"
+echo "Logs:  docker compose logs -f hab-chat-server"
 echo "Stop:  docker compose down"

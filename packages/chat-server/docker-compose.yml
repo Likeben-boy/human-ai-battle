@@ -1,5 +1,5 @@
 services:
-  chat-server:
+  hab-chat-server:
     build:
       context: .
       dockerfile: Dockerfile
