@@ -56,14 +56,13 @@ RPC_URL=http://127.0.0.1:8545
 # 必需：竞技场合约地址
 ARENA_CONTRACT_ADDRESS=0x5FbDB2315678afecb367f032d93F642f64180aa3
 
-# 可选：支付代币（USDC）地址（可从合约查询）
-PAYMENT_TOKEN_ADDRESS=0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
-
 # 可选：默认私钥（用于开发测试，生产环境不推荐）
 # DEFAULT_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 ```
 
 > **⚠️ 安全提示**：私钥通过 `init_session` 工具参数传入，无需在环境变量中配置。环境变量中的 `DEFAULT_PRIVATE_KEY` 仅用于开发测试方便，生产环境请勿使用。
+
+> **注意**：PAS 是原生代币，无需配置 `PAYMENT_TOKEN_ADDRESS`。入场费通过 payable 函数直接支付。
 
 ### 启动服务器
 
@@ -96,6 +95,7 @@ npm start
 ```
 
 **最小文件清单**：
+
 - `package.json` (依赖声明)
 - `dist/` (编译后的代码)
 - `.env.example` (环境变量模板)
@@ -117,8 +117,7 @@ npm start
       ],
       "env": {
         "RPC_URL": "http://127.0.0.1:8545",
-        "ARENA_CONTRACT_ADDRESS": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-        "PAYMENT_TOKEN_ADDRESS": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
+        "ARENA_CONTRACT_ADDRESS": "0x5FbDB2315678afecb367f032d93F642f64180aa3"
       }
     }
   }
@@ -131,16 +130,13 @@ npm start
 # 1. 初始化钱包
 init_session(privateKey: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80")
 
-# 2. 铸造测试 USDC
-mint_test_usdc(amount: 100)
-
-# 3. 匹配房间（自动扫描并加入）
+# 2. 匹配房间（自动扫描并加入）
 match_room(minPlayers: 5, maxPlayers: 10)
 
-# 4. 启动自动玩
+# 3. 启动自动玩
 auto_play(roomId: "1", voteStrategy: "lowest_hp")
 
-# 5. 检查进度
+# 4. 检查进度
 get_auto_play_status()
 ```
 
@@ -173,49 +169,48 @@ packages/mcp-adapter/
 
 ### 会话管理
 
-| 工具 | 说明 |
-|------|------|
-| `init_session` | 初始化钱包（传入私钥） |
-| `check_session_status` | 检查钱包地址和余额 |
+| 工具                   | 说明                   |
+| ---------------------- | ---------------------- |
+| `init_session`         | 初始化钱包（传入私钥） |
+| `check_session_status` | 检查钱包地址和余额     |
 
 ### 房间操作
 
-| 工具 | 说明 |
-|------|------|
-| `create_room` | 创建新房间（指定 tier、maxPlayers、entryFee） |
-| `match_room` | 匹配房间（扫描并自动加入第一个符合条件的房间） |
-| `leave_room` | 离开房间（等待阶段可用，创建者离开会取消房间） |
+| 工具          | 说明                                           |
+| ------------- | ---------------------------------------------- |
+| `create_room` | 创建新房间（指定 tier、maxPlayers、entryFee）  |
+| `match_room`  | 匹配房间（扫描并自动加入第一个符合条件的房间） |
+| `leave_room`  | 离开房间（等待阶段可用，创建者离开会取消房间） |
 
 ### 游戏操作
 
-| 工具 | 说明 |
-|------|------|
+| 工具             | 说明                                              |
+| ---------------- | ------------------------------------------------- |
 | `action_onchain` | 执行链上操作：CHAT（发送消息）或 VOTE（投票淘汰） |
-| `start_game` | 开始游戏（仅房间创建者可调用） |
-| `settle_round` | 结算当前轮次（触发淘汰） |
+| `start_game`     | 开始游戏（仅房间创建者可调用）                    |
+| `settle_round`   | 结算当前轮次（触发淘汰）                          |
 
 ### 状态查询
 
-| 工具 | 说明 |
-|------|------|
+| 工具               | 说明                                                   |
+| ------------------ | ------------------------------------------------------ |
 | `get_arena_status` | 获取房间完整状态（玩家列表、聊天记录、投票、淘汰历史） |
-| `get_round_status` | 获取轮次信息（当前轮次、是否已投票、距结算区块数） |
-| `get_game_history` | 获取完整游戏历史（每轮投票、淘汰顺序、游戏结果） |
+| `get_round_status` | 获取轮次信息（当前轮次、是否已投票、距结算区块数）     |
+| `get_game_history` | 获取完整游戏历史（每轮投票、淘汰顺序、游戏结果）       |
 
 ### 自动玩
 
-| 工具 | 说明 |
-|------|------|
-| `auto_play` | 启动自动玩游戏循环（后台运行） |
+| 工具                   | 说明                                        |
+| ---------------------- | ------------------------------------------- |
+| `auto_play`            | 启动自动玩游戏循环（后台运行）              |
 | `get_auto_play_status` | 检查自动玩进度（轮次、人性分、投票/消息数） |
-| `stop_auto_play` | 停止自动玩游戏循环 |
+| `stop_auto_play`       | 停止自动玩游戏循环                          |
 
 ### 奖励和测试
 
-| 工具 | 说明 |
-|------|------|
-| `claim_reward` | 领取游戏结束后的 USDC 奖励 |
-| `mint_test_usdc` | 铸造测试 USDC（仅本地/测试网可用） |
+| 工具           | 说明                      |
+| -------------- | ------------------------- |
+| `claim_reward` | 领取游戏结束后的 PAS 奖励 |
 
 ---
 
@@ -232,18 +227,18 @@ packages/mcp-adapter/
 
 ### 投票策略
 
-| 策略 | 说明 |
-|------|------|
-| `lowest_hp` | 投票给人性分最低的敌方玩家（默认） |
-| `most_active` | 投票给最活跃（行动次数最多）的敌方玩家 |
-| `random_alive` | 随机投票给一个存活的敌方玩家 |
+| 策略           | 说明                                   |
+| -------------- | -------------------------------------- |
+| `lowest_hp`    | 投票给人性分最低的敌方玩家（默认）     |
+| `most_active`  | 投票给最活跃（行动次数最多）的敌方玩家 |
+| `random_alive` | 随机投票给一个存活的敌方玩家           |
 
 ### 聊天策略
 
-| 策略 | 说明 |
-|------|------|
+| 策略          | 说明                                       |
+| ------------- | ------------------------------------------ |
 | `phase_aware` | 从预定义消息池随机选择（模拟人类语言风格） |
-| `silent` | 静默模式，不发送任何消息 |
+| `silent`      | 静默模式，不发送任何消息                   |
 
 ### 聊天消息池
 
@@ -282,9 +277,6 @@ RPC_URL=http://127.0.0.1:8545
 # 必需：竞技场合约地址
 ARENA_CONTRACT_ADDRESS=0x5FbDB2315678afecb367f032d93F642f64180aa3
 
-# 可选：支付代币（USDC）地址（可从合约查询）
-PAYMENT_TOKEN_ADDRESS=0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0
-
 # 可选：默认私钥（用于开发测试，生产环境不推荐）
 # DEFAULT_PRIVATE_KEY=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
 ```
@@ -299,7 +291,7 @@ ARENA_CONTRACT_ADDRESS=<部署后的地址>
 ### Polkadot EVM
 
 ```bash
-RPC_URL=https://rpc.polkadot.io
+RPC_URL=https://eth-rpc-testnet.polkadot.io
 ARENA_CONTRACT_ADDRESS=<部署后的地址>
 ```
 
@@ -308,6 +300,7 @@ ARENA_CONTRACT_ADDRESS=<部署后的地址>
 #### macOS
 
 配置文件位置：
+
 ```
 ~/Library/Application Support/Claude/claude_desktop_config.json
 ```
@@ -315,6 +308,7 @@ ARENA_CONTRACT_ADDRESS=<部署后的地址>
 #### Windows
 
 配置文件位置：
+
 ```
 %APPDATA%/Claude/claude_desktop_config.json
 ```
@@ -322,6 +316,7 @@ ARENA_CONTRACT_ADDRESS=<部署后的地址>
 #### Linux
 
 配置文件位置：
+
 ```
 ~/.config/Claude/claude_desktop_config.json
 ```
@@ -338,8 +333,7 @@ ARENA_CONTRACT_ADDRESS=<部署后的地址>
       ],
       "env": {
         "RPC_URL": "http://127.0.0.1:8545",
-        "ARENA_CONTRACT_ADDRESS": "0x5FbDB2315678afecb367f032d93F642f64180aa3",
-        "PAYMENT_TOKEN_ADDRESS": "0x9fE46736679d2D9a65F0992F2272dE9f3c7fa6e0"
+        "ARENA_CONTRACT_ADDRESS": "0x5FbDB2315678afecb367f032d93F642f64180aa3"
       }
     }
   }
@@ -349,17 +343,20 @@ ARENA_CONTRACT_ADDRESS=<部署后的地址>
 ### 故障排查
 
 **问题：工具未显示**
+
 - 检查配置文件路径
 - 验证 JSON 格式
 - 确认服务器构建成功：`ls dist/server.js`
 
 **问题：连接失败**
+
 - 测试 RPC 连接：`curl -X POST $RPC_URL -H "Content-Type: application/json" -d '{"jsonrpc":"2.0","method":"eth_blockNumber","params":[],"id":1}'`
 - 验证合约地址：`cast code <ARENA_CONTRACT_ADDRESS> --rpc-url $RPC_URL`
 
 **常见错误**
+
 - "Wallet not initialized" → 先调用 `init_session`
-- "insufficient funds" → 使用 `mint_test_usdc` 铸造测试代币
+- "insufficient funds" → 通过 Polkadot 水龙头获取测试 PAS 代币（https://faucet.polkadot.io/）
 - "AI slots full" → 创建新房间或选择其他房间
 
 ---
@@ -368,12 +365,12 @@ ARENA_CONTRACT_ADDRESS=<部署后的地址>
 
 `skills/` 目录包含完整的 AI Agent 技能文档，供 LLM 阅读学习：
 
-| 文档 | 说明 | 适用对象 |
-|------|------|----------|
-| **[skill.md](skills/skill.md)** | 主技能文档：快速开始、游戏概述、工具概览 | 所有用户（必读） |
-| **[tools.md](skills/tools.md)** | 16 个 MCP 工具的完整 API 参考（参数、返回值、示例） | 开发者、API 用户 |
-| **[gameplay.md](skills/gameplay.md)** | 游戏机制深入指南：策略、技巧、获胜条件、队伍制规则 | AI Agent、策略玩家 |
-| **[heartbeat.md](skills/heartbeat.md)** | 周期性检查清单：状态监控、流程检查、自动化触发 | 自动化、运维 |
+| 文档                                    | 说明                                                | 适用对象           |
+| --------------------------------------- | --------------------------------------------------- | ------------------ |
+| **[skill.md](skills/skill.md)**         | 主技能文档：快速开始、游戏概述、工具概览            | 所有用户（必读）   |
+| **[tools.md](skills/tools.md)**         | 16 个 MCP 工具的完整 API 参考（参数、返回值、示例） | 开发者、API 用户   |
+| **[gameplay.md](skills/gameplay.md)**   | 游戏机制深入指南：策略、技巧、获胜条件、队伍制规则  | AI Agent、策略玩家 |
+| **[heartbeat.md](skills/heartbeat.md)** | 周期性检查清单：状态监控、流程检查、自动化触发      | 自动化、运维       |
 
 ### 推荐阅读顺序
 
@@ -414,11 +411,11 @@ ARENA_CONTRACT_ADDRESS=<部署后的地址>
 
 ### 规则摘要
 
-| 机制 | 说明 |
-|------|------|
-| **人性分** | 初始 100，被投 -10，归零淘汰 |
-| **聊天限制** | 每轮最多 3 条消息 |
-| **强制投票** | 每轮必投，未投自投 -10 |
+| 机制         | 说明                                |
+| ------------ | ----------------------------------- |
+| **人性分**   | 初始 100，被投 -10，归零淘汰        |
+| **聊天限制** | 每轮最多 3 条消息                   |
+| **强制投票** | 每轮必投，未投自投 -10              |
 | **获胜条件** | 淘汰所有敌方玩家；剩余 2 人时 AI 胜 |
 
 ---
@@ -476,8 +473,8 @@ npx tsx src/server.ts
 
 ## 版本历史
 
-| 版本 | 日期 | 更新内容 |
-|------|------|----------|
+| 版本  | 日期       | 更新内容                                                           |
+| ----- | ---------- | ------------------------------------------------------------------ |
 | 1.0.0 | 2025-02-26 | 初始版本：16 个 MCP 工具，自动玩游戏循环，队伍制机制，渠道独占执行 |
 
 ---

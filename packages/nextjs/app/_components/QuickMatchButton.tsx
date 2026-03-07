@@ -2,11 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { readContract, waitForTransactionReceipt } from "@wagmi/core";
+import { readContract } from "@wagmi/core";
 import { AnimatePresence, motion } from "framer-motion";
-import { erc20Abi, formatUnits } from "viem";
-import { useAccount, useConfig, useWriteContract } from "wagmi";
-import { useDeployedContractInfo, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { formatEther, parseEther } from "viem";
+import { useAccount, useConfig } from "wagmi";
+import { useDeployedContractInfo, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { useChatAuth } from "~~/hooks/scaffold-eth/useChatAuth";
 import { notification } from "~~/utils/scaffold-eth";
 
@@ -64,20 +64,12 @@ const QuickMatchButton = ({ roomIds, onNoMatch, autoMatch, onRoomJoined }: Quick
   const autoMatchTriggered = useRef(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  const { data: paymentTokenAddr } = useScaffoldReadContract({
-    contractName: "TuringArena",
-    functionName: "paymentToken",
-    watch: false,
-  });
-
   const { data: arenaContractInfo } = useDeployedContractInfo({ contractName: "TuringArena" });
 
   const { writeContractAsync: writeArena } = useScaffoldWriteContract({
     contractName: "TuringArena",
     disableSimulate: true,
   });
-
-  const { writeContractAsync: writeErc20 } = useWriteContract();
 
   const { getJoinAuth } = useChatAuth();
   const panelRef = useRef<HTMLDivElement>(null);
@@ -108,10 +100,6 @@ const QuickMatchButton = ({ roomIds, onNoMatch, autoMatch, onRoomJoined }: Quick
       setShowFilters(true);
       return;
     }
-    if (!paymentTokenAddr) {
-      notification.error("Payment token not loaded yet. Please wait and try again.");
-      return;
-    }
 
     const trimmedName = (name ?? playerName).trim();
     if (!trimmedName || trimmedName.length < 1 || trimmedName.length > 20) {
@@ -127,8 +115,8 @@ const QuickMatchButton = ({ roomIds, onNoMatch, autoMatch, onRoomJoined }: Quick
     setShowFilters(false);
     const notifId = notification.loading("Scanning rooms...");
 
-    const feeMinWei = BigInt(Math.round(matchFilters.minFee * 1e6));
-    const feeMaxWei = BigInt(Math.round(matchFilters.maxFee * 1e6));
+    const feeMinWei = parseEther(String(matchFilters.minFee));
+    const feeMaxWei = parseEther(String(matchFilters.maxFee));
 
     try {
       for (let i = roomIds.length - 1; i >= 0; i--) {
@@ -162,24 +150,17 @@ const QuickMatchButton = ({ roomIds, onNoMatch, autoMatch, onRoomJoined }: Quick
         // Found a joinable room — contract enforces single-room limit via playerActiveRoom
         notification.remove(notifId);
         const joinNotifId = notification.loading(
-          `Joining Room #${roomId.toString()} (${maxPlayers}p / ${formatUnits(entryFee, 6)} USDC)...`,
+          `Joining Room #${roomId.toString()} (${maxPlayers}p / ${formatEther(entryFee)} PAS)...`,
         );
 
         try {
           // Get commitment + operator signature from chat-server
           const { commitment, operatorSig } = await getJoinAuth(Number(roomId), false, maxPlayers);
 
-          const approveHash = await writeErc20({
-            address: paymentTokenAddr as `0x${string}`,
-            abi: erc20Abi,
-            functionName: "approve",
-            args: [arenaContractInfo.address, entryFee],
-          });
-          await waitForTransactionReceipt(config, { hash: approveHash });
-
           await writeArena({
             functionName: "joinRoom",
             args: [roomId, commitment, operatorSig, trimmedName],
+            value: entryFee,
           });
 
           notification.remove(joinNotifId);
@@ -548,7 +529,7 @@ const QuickMatchButton = ({ roomIds, onNoMatch, autoMatch, onRoomJoined }: Quick
                           ENTRY FEE
                         </span>
                         <span className="font-mono text-[11px]" style={{ color: "rgba(57,211,83,0.4)" }}>
-                          (USDC)
+                          (PAS)
                         </span>
                       </label>
                       <div className="flex items-center gap-3">

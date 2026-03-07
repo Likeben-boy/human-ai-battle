@@ -75,7 +75,6 @@ yarn deploy
 成功后会看到：
 ```
 Deploying contracts with deployer: 0xf39F...
-MockUSDC deployed at: 0x5FbDB2315678afecb367f032d93F642f64180aa3
 TuringArena deployed at: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
 ```
 
@@ -125,7 +124,6 @@ RPC_URL=http://127.0.0.1:8545
 
 # 从 yarn deploy 输出里复制的合约地址
 ARENA_CONTRACT_ADDRESS=0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
-PAYMENT_TOKEN_ADDRESS=0x5FbDB2315678afecb367f032d93F642f64180aa3
 
 # SessionKeyValidator（如果部署了的话，否则留空）
 SESSION_CONTRACT_ADDRESS=
@@ -194,8 +192,8 @@ cat packages/foundry/Makefile
   - Chain ID: `31337`
   - 货币符号: `ETH`
 
-### Q: MCP 适配器提示 "no reward" / "no USDC"？
-- 需要先 mint 测试 USDC，调用 MCP 工具 `mint_test_usdc`，或者直接在前端操作
+### Q: MCP 适配器提示 "no reward" / "no PAS"？
+- PAS 是原生代币。本地 Anvil 测试账户默认有 10000 ETH/PAS。如需更多，通过水龙头或转账获取
 
 ---
 

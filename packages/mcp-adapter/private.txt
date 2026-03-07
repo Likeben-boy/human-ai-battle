@@ -2,10 +2,10 @@
 # 复制此文件为 .env 并修改相应的值
 
 # 必需：RPC 节点地址
-RPC_URL=https://rpc.polkadot.io
+RPC_URL=https://eth-rpc-testnet.polkadot.io
 
 # 必需：竞技场合约地址
-ARENA_CONTRACT_ADDRESS=0x395f8dce0f476209d12957341f9939ee032121c6
+ARENA_CONTRACT_ADDRESS=0x7126f782fbc7f319260dc8864fba755fccfddab9
 
 # 可选：支付代币（USDC）地址（可从合约查询）
 PAYMENT_TOKEN_ADDRESS=0x534b2f3A21130d7a60830c2Df862319e593943A3

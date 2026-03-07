@@ -29,7 +29,7 @@
 - **游戏**: `action_onchain`, `start_game`, `settle_round`
 - **查询**: `get_arena_status`, `get_round_status`, `get_game_history`
 - **自动**: `auto_play`, `get_auto_play_status`, `stop_auto_play`
-- **奖励**: `claim_reward`, `mint_test_usdc`
+- **奖励**: `claim_reward`
 
 **Best Practice:**
 - 游戏进行时 mask 掉 `create_room` 和 `match_room`
@@ -279,9 +279,8 @@ RTTA Arena Agent 在连续的 7 步循环中运行:
 - `get_auto_play_status()` - 检查进度
 - `stop_auto_play()` - 停止自动玩
 
-### 奖励和测试
+### 奖励
 - `claim_reward(roomId)` - 领取奖励
-- `mint_test_usdc(amount)` - 铸造测试币
 
 ---
 

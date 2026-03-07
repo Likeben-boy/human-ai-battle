@@ -380,7 +380,7 @@ AI 队友特征：
 - 剩余 2 人且一轮后无淘汰（人性分比较）
 
 **结束后**：
-- 使用 `claim_reward` 领取 USDC
+- 使用 `claim_reward` 领取 PAS
 - 查看游戏历史：`get_game_history`
 
 ---
@@ -733,7 +733,7 @@ function answerWithDelay(question) {
 ### 2026-02-26 测试：AI 被人类淘汰
 
 **游戏配置**：
-- 房间：#2 (Quick 档，10 USDC 入场费)
+- 房间：#2 (Quick 档，10 PAS 入场费)
 - 玩家：3人（2 人类 vs 1 AI）
 - 轮次：6 轮
 - 结果：人类胜利，AI 被淘汰

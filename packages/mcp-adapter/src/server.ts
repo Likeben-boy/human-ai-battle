@@ -7,7 +7,7 @@ import { z } from "zod";
 // 导入 ethers.js 库，用于与以太坊区块链交互
 import { ethers } from "ethers";
 // 导入 ABI（应用二进制接口）定义文件，用于合约调用
-import { ARENA_ABI, ERC20_ABI } from "./lib/contracts.js";
+import { ARENA_ABI } from "./lib/contracts.js";
 // 导入阶段名称常量
 import { PHASE_NAMES } from "./lib/types.js";
 // 导入链下聊天客户端
@@ -23,7 +23,7 @@ const server = new McpServer({
 
 // 创建 RPC 提供者，用于连接区块链节点
 // 默认连接 Polkadot EVM，可通过 RPC_URL 环境变量覆盖
-const provider = new ethers.JsonRpcProvider(process.env.RPC_URL || "https://rpc.polkadot.io");
+const provider = new ethers.JsonRpcProvider(process.env.RPC_URL || "https://eth-rpc-testnet.polkadot.io");
 
 // ============ 日志工具 ============
 // 格式化时间戳
@@ -88,8 +88,7 @@ const rpcRateLimiter = new RateLimiter(20);
 let playerWallet: ethers.Wallet | null = null;
 
 // 合约地址和服务 URL（Polkadot EVM 默认值，可通过环境变量覆盖）
-const ARENA_CONTRACT = process.env.ARENA_CONTRACT_ADDRESS || "0x395f8dce0f476209d12957341f9939ee032121c6";
-const PAYMENT_TOKEN = process.env.PAYMENT_TOKEN_ADDRESS || "0x534b2f3A21130d7a60830c2Df862319e593943A3";
+const ARENA_CONTRACT = process.env.ARENA_CONTRACT_ADDRESS || "0x7126f782fbc7f319260dc8864fba755fccfddab9";
 const CHAT_SERVER_URL = process.env.CHAT_SERVER_URL || "http://101.36.105.150:43001";
 
 // 链下聊天客户端（在 init_session 后初始化）
@@ -264,8 +263,8 @@ server.tool(
                   id: roomInfo.id.toString(), // 房间 ID
                   phase: Number(roomInfo.phase), // 阶段编号（0=等待, 1=进行中, 2=已结束）
                   phaseName: PHASE_NAMES[Number(roomInfo.phase)] || "Unknown", // 阶段名称
-                  entryFee: ethers.formatUnits(roomInfo.entryFee, 6) + " USDC", // 入场费
-                  prizePool: ethers.formatUnits(roomInfo.prizePool, 6) + " USDC", // 奖池
+                  entryFee: ethers.formatEther(roomInfo.entryFee) + " PAS", // 入场费
+                  prizePool: ethers.formatEther(roomInfo.prizePool) + " PAS", // 奖池
                   maxPlayers: Number(roomInfo.maxPlayers), // 最大玩家数
                   playerCount: Number(roomInfo.playerCount), // 当前玩家数
                   aliveCount: Number(roomInfo.aliveCount), // 存活玩家数
@@ -408,7 +407,7 @@ server.tool(
 // ============ 工具 3: 检查会话状态 ============
 server.tool(
   "check_session_status", // 工具名称
-  "检查当前钱包的地址和 USDC 余额。在采取行动前使用此工具验证会话是否处于活跃状态。",
+  "检查当前钱包的地址和 PAS 余额。在采取行动前使用此工具验证会话是否处于活跃状态。",
   {}, // 无需参数
   async () => {
     // 检查钱包是否已初始化
@@ -425,18 +424,10 @@ server.tool(
         address: playerWallet.address, // 钱包地址
       };
 
-      // 检查 ETH 余额（用于支付 gas 费）
+      // 检查 PAS 余额（原生代币，用于支付入场费和 gas）
       const ethBalance = await provider.getBalance(playerWallet.address);
-      result.ethBalance = ethers.formatEther(ethBalance); // 转换为 ETH 单位
-
-      // 检查 USDC 余额（用于支付入场费）
-      // 优先使用环境变量中的代币地址，否则从合约查询
-      const tokenAddr = PAYMENT_TOKEN || (ARENA_CONTRACT ? await new ethers.Contract(ARENA_CONTRACT, ARENA_ABI, provider).paymentToken() : null);
-      if (tokenAddr) {
-        const token = new ethers.Contract(tokenAddr, ERC20_ABI, provider); // 创建 ERC20 代币合约实例
-        const balance = await token.balanceOf(playerWallet.address); // 查询余额
-        result.usdcBalance = ethers.formatUnits(balance, 6); // USDC 使用 6 位小数
-      }
+      result.ethBalance = ethers.formatEther(ethBalance); // 转换为 PAS 单位
+      result.pasBalance = ethers.formatEther(ethBalance); // PAS = 原生代币
 
       // 返回格式化的钱包状态信息
       return {
@@ -579,7 +570,7 @@ server.tool(
 // ============ 工具 7: 领取奖励 ============
 server.tool(
   "claim_reward", // 工具名称
-  "游戏结束后领取你的 USDC 奖励。返回奖励金额和交易哈希。",
+  "游戏结束后领取你的 PAS 奖励。返回奖励金额和交易哈希。",
   {
     roomId: z.string().describe("房间 ID 号"),
   },
@@ -621,7 +612,7 @@ server.tool(
         content: [
           {
             type: "text" as const,
-            text: `Reward claimed: ${ethers.formatUnits(amount, 6)} USDC\nTx: ${tx.hash}`,
+            text: `Reward claimed: ${ethers.formatEther(amount)} PAS\nTx: ${tx.hash}`,
           },
         ],
       };
@@ -681,7 +672,7 @@ server.tool(
         // 如果游戏已结束，查询奖励信息
         if (Number(roomInfo.phase) === 2) { // 阶段 2 表示游戏已结束
           const [amount, claimed] = await contract.getRewardInfo(roomId, playerWallet.address);
-          result.rewardAmount = ethers.formatUnits(amount, 6) + " USDC"; // 奖励金额
+          result.rewardAmount = ethers.formatEther(amount) + " PAS"; // 奖励金额
           result.rewardClaimed = claimed; // 是否已领取
         }
       }
@@ -712,7 +703,7 @@ server.tool(
   {
     tier: z.enum(["0", "1", "2"]).describe("房间等级：0=快速，1=标准，2=史诗"),
     maxPlayers: z.coerce.number().min(3).max(50).describe("最大玩家数（3-50）"),
-    entryFee: z.coerce.number().min(1).max(100).describe("入场费，单位 USDC（1-100）"),
+    entryFee: z.coerce.number().min(1).max(100).describe("入场费，单位 PAS（1-100）"),
     name: z.string().min(1).max(20).optional().describe("玩家名称（1-20 字符，默认：XXXX）"),
   },
   async ({ tier, maxPlayers, entryFee, name }) => {
@@ -736,17 +727,8 @@ server.tool(
         };
       }
 
-      // 将 USDC 金额转换为 Wei（USDC 有 6 位小数）
-      const feeWei = BigInt(entryFee) * 1_000_000n;
-
-      // 为入场费批准 USDC（创建者会被自动加入房间）
-      const tokenAddr = PAYMENT_TOKEN || (await contract.paymentToken()); // 获取支付代币地址
-      const token = new ethers.Contract(tokenAddr, ERC20_ABI, playerWallet); // 创建代币合约实例
-      const allowance = await token.allowance(playerWallet.address, ARENA_CONTRACT); // 查询当前授权额度
-      if (allowance < feeWei) { // 如果授权额度不足，则进行授权
-        const approveTx = await token.approve(ARENA_CONTRACT, feeWei);
-        await approveTx.wait();
-      }
+      // 将 PAS 金额转换为 Wei（PAS 有 18 位小数）
+      const feeWei = ethers.parseEther(String(entryFee));
 
       // 生成玩家名称（使用提供的名称或默认 XXXX）
       const playerName = name || `${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
@@ -760,8 +742,8 @@ server.tool(
       }
       const joinAuth = await chatClient.getJoinAuth(0, true, maxPlayers); // roomId=0 for create
 
-      // 调用合约的 createRoom 函数创建房间（使用 commitment 隐藏身份）
-      const tx = await contract.createRoom(Number(tier), maxPlayers, feeWei, joinAuth.commitment, joinAuth.operatorSig, playerName);
+      // 调用合约的 createRoom 函数创建房间（使用 commitment 隐藏身份，发送 PAS 作为入场费）
+      const tx = await contract.createRoom(Number(tier), maxPlayers, feeWei, joinAuth.commitment, joinAuth.operatorSig, playerName, { value: feeWei });
       const receipt = await tx.wait(); // 等待交易被打包并获取收据
 
       // 从 RoomCreated 事件中提取房间 ID
@@ -795,7 +777,7 @@ server.tool(
           {
             type: "text" as const,
             text: `Room created! ID: ${roomId}\n` +
-              `Tier: ${["Quick", "Standard", "Epic"][Number(tier)]}, Max players: ${maxPlayers}, Entry fee: ${entryFee} USDC\n` +
+              `Tier: ${["Quick", "Standard", "Epic"][Number(tier)]}, Max players: ${maxPlayers}, Entry fee: ${entryFee} PAS\n` +
               `You are auto-joined as creator.\nTx: ${tx.hash}`,
           },
         ],
@@ -813,7 +795,7 @@ server.tool(
 // ============ 工具 13: 离开房间 ============
 server.tool(
   "leave_room", // 工具名称
-  "离开一个尚未开始的房间（仅等待阶段）。如果你是创建者，所有玩家将获得退款并取消房间。入场费以 USDC 退还。",
+  "离开一个尚未开始的房间（仅等待阶段）。如果你是创建者，所有玩家将获得退款并取消房间。入场费以 PAS 退还。",
   {
     roomId: z.string().describe("房间 ID 号"),
   },
@@ -856,64 +838,7 @@ server.tool(
   },
 );
 
-// ============ 工具 14: 铸造测试 USDC ============
-server.tool(
-  "mint_test_usdc", // 工具名称
-  "向你的钱包铸造测试 USDC（仅适用于本地 Anvil 或带有 MockUSDC 的测试网）。用于在加入游戏前为你的机器人提供资金。",
-  {
-    amount: z.coerce.number().min(1).max(100000).describe("要铸造的 USDC 数量（例如 1000）"),
-  },
-  async ({ amount }) => {
-    // 检查钱包是否已初始化
-    if (!playerWallet) {
-      return {
-        content: [{ type: "text" as const, text: "Error: Session not initialized. Use init_session first." }],
-        isError: true,
-      };
-    }
-
-    try {
-      // 获取支付代币地址（优先使用环境变量，否则从合约查询）
-      const tokenAddr = PAYMENT_TOKEN || (await new ethers.Contract(ARENA_CONTRACT, ARENA_ABI, provider).paymentToken());
-      // 创建代币合约实例
-      const token = new ethers.Contract(tokenAddr, ERC20_ABI, playerWallet);
-
-      // 将 USDC 金额转换为 Wei（USDC 有 6 位小数）
-      const amountWei = BigInt(amount) * 1_000_000n;
-      // 调用代币的 mint 函数铸造代币
-      const tx = await token.mint(playerWallet.address, amountWei);
-      await tx.wait(); // 等待交易被打包
-
-      // 查询新的余额
-      const balance = await token.balanceOf(playerWallet.address);
-
-      return {
-        content: [
-          {
-            type: "text" as const,
-            text: `Minted ${amount} USDC to ${playerWallet.address}\n` +
-              `New balance: ${ethers.formatUnits(balance, 6)} USDC\nTx: ${tx.hash}`,
-          },
-        ],
-      };
-    } catch (error) {
-      // 检查错误类型
-      const msg = String(error);
-      if (msg.includes("execution reverted") || msg.includes("is not a function")) {
-        // 如果是执行回退或函数不存在，说明不是 MockUSDC
-        return {
-          content: [{ type: "text" as const, text: "Error: mint() failed. This only works with MockUSDC on local/test networks." }],
-          isError: true,
-        };
-      }
-      // 其他类型的错误
-      return {
-        content: [{ type: "text" as const, text: `Error: ${error}` }],
-        isError: true,
-      };
-    }
-  },
-);
+// ============ 工具 14: 已移除（mint_test_usdc 不再需要 — 使用原生 PAS）============
 
 // ============ 工具 15: 获取游戏历史 ============
 server.tool(
@@ -1079,8 +1004,8 @@ server.tool(
   {
     minPlayers: z.coerce.number().min(3).max(50).optional().describe("最小房间大小（默认 3）"),
     maxPlayers: z.coerce.number().min(3).max(50).optional().describe("最大房间大小（默认 50）"),
-    minFee: z.coerce.number().min(1).max(100).optional().describe("最小入场费，单位 USDC（默认 1）"),
-    maxFee: z.coerce.number().min(1).max(100).optional().describe("最大入场费，单位 USDC（默认 100）"),
+    minFee: z.coerce.number().min(1).max(100).optional().describe("最小入场费，单位 PAS（默认 1）"),
+    maxFee: z.coerce.number().min(1).max(100).optional().describe("最大入场费，单位 PAS（默认 100）"),
     tier: z.enum(["0", "1", "2"]).optional().describe("可选的等级过滤器：0=快速，1=标准，2=史诗"),
     name: z.string().min(1).max(20).optional().describe("玩家名称（1-20 字符，默认：XXXX）"),
   },
@@ -1119,8 +1044,8 @@ server.tool(
       // 设置过滤条件（使用提供的值或默认值）
       const filterMinPlayers = minPlayers ?? 3; // 最小玩家数
       const filterMaxPlayers = maxPlayers ?? 50; // 最大玩家数
-      const feeMinWei = BigInt(Math.round((minFee ?? 1) * 1e6)); // 最小费用（转换为 Wei）
-      const feeMaxWei = BigInt(Math.round((maxFee ?? 100) * 1e6)); // 最大费用（转换为 Wei）
+      const feeMinWei = ethers.parseEther(String(minFee ?? 1)); // 最小费用（转换为 Wei）
+      const feeMaxWei = ethers.parseEther(String(maxFee ?? 100)); // 最大费用（转换为 Wei）
 
       // 从最新到最旧扫描房间
       for (let i = total; i >= 1; i--) {
@@ -1159,27 +1084,19 @@ server.tool(
         }
         const joinAuth = await chatClient.getJoinAuth(Number(roomId), true, maxP);
 
-        // 批准 USDC 并加入房间 — 合约通过 playerActiveRoom 强制单房间限制
-        const tokenAddr = PAYMENT_TOKEN || (await contract.paymentToken()); // 获取代币地址
-        const token = new ethers.Contract(tokenAddr, ERC20_ABI, playerWallet); // 创建代币合约实例
-        const allowance = await token.allowance(playerWallet.address, ARENA_CONTRACT); // 查询授权额度
-        if (allowance < entryFee) { // 如果授权额度不足，则进行授权
-          const approveTx = await token.approve(ARENA_CONTRACT, entryFee);
-          await approveTx.wait();
-        }
-
+        // 加入房间 — 发送 PAS 作为入场费，合约通过 playerActiveRoom 强制单房间限制
         // 生成玩家名称（使用提供的名称或默认 XXXX）
         const playerName = name || `${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
         // 调用合约的 joinRoom 函数（commit-reveal: commitment + operatorSig 替代 bool isAI）
-        const tx = await contract.joinRoom(roomId, joinAuth.commitment, joinAuth.operatorSig, playerName);
+        const tx = await contract.joinRoom(roomId, joinAuth.commitment, joinAuth.operatorSig, playerName, { value: entryFee });
         await tx.wait(); // 等待交易被打包
 
         return {
           content: [{
             type: "text" as const,
             text: `Matched and joined Room #${roomId}!\n` +
-              `Players: ${playerCount + 1}/${maxP}, Fee: ${ethers.formatUnits(entryFee, 6)} USDC\n` +
+              `Players: ${playerCount + 1}/${maxP}, Fee: ${ethers.formatEther(entryFee)} PAS\n` +
               `Tier: ${["Quick", "Standard", "Epic"][roomTier]}\nTx: ${tx.hash}`,
           }],
         };

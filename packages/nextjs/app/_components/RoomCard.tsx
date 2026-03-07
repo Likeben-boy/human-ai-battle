@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { formatUnits } from "viem";
+import { formatEther } from "viem";
 import { useAccount } from "wagmi";
 import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { useChatAuth } from "~~/hooks/scaffold-eth/useChatAuth";
@@ -15,7 +15,7 @@ const TIER_CONFIG = [
     color: "#CD7F32",
     borderClass: "tier-quick-border",
     textClass: "tier-quick",
-    fee: 10_000_000n, // 10 USDC
+    fee: 10_000_000_000_000_000_000n, // 10 PAS
   },
   {
     name: "STANDARD",
@@ -23,7 +23,7 @@ const TIER_CONFIG = [
     color: "#C0C0C0",
     borderClass: "tier-standard-border",
     textClass: "tier-standard",
-    fee: 50_000_000n, // 50 USDC
+    fee: 50_000_000_000_000_000_000n, // 50 PAS
   },
   {
     name: "EPIC",
@@ -31,7 +31,7 @@ const TIER_CONFIG = [
     color: "#FFD700",
     borderClass: "tier-epic-border",
     textClass: "tier-epic",
-    fee: 100_000_000n, // 100 USDC
+    fee: 100_000_000_000_000_000_000n, // 100 PAS
   },
 ] as const;
 
@@ -202,11 +202,11 @@ const RoomCard = ({ roomId, roomInfo: propRoomInfo, activeRoomId, onRoomChange }
         </div>
         <div className="flex flex-col">
           <span className="text-xs text-base-content/40">ENTRY FEE</span>
-          <span className="font-mono text-sm text-secondary">{formatUnits(entryFee, 6)} USDC</span>
+          <span className="font-mono text-sm text-secondary">{formatEther(entryFee)} PAS</span>
         </div>
         <div className="flex flex-col">
           <span className="text-xs text-base-content/40">PRIZE POOL</span>
-          <span className={`font-mono text-sm font-bold ${tier.textClass}`}>{formatUnits(prizePool, 6)} USDC</span>
+          <span className={`font-mono text-sm font-bold ${tier.textClass}`}>{formatEther(prizePool)} PAS</span>
         </div>
       </div>
 
@@ -268,7 +268,7 @@ const RoomCard = ({ roomId, roomInfo: propRoomInfo, activeRoomId, onRoomChange }
                 {isClaiming ? (
                   <span className="loading loading-spinner loading-xs" />
                 ) : (
-                  `CLAIM ${formatUnits(myRewardAmount, 6)}`
+                  `CLAIM ${formatEther(myRewardAmount)}`
                 )}
               </button>
             )}

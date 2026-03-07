@@ -5,9 +5,9 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { readContract, waitForTransactionReceipt } from "@wagmi/core";
 import { AnimatePresence, motion } from "framer-motion";
-import { erc20Abi } from "viem";
-import { useAccount, useConfig, useWriteContract } from "wagmi";
-import { useDeployedContractInfo, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { parseEther } from "viem";
+import { useAccount, useConfig } from "wagmi";
+import { useDeployedContractInfo, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { useChatAuth } from "~~/hooks/scaffold-eth/useChatAuth";
 import { notification } from "~~/utils/scaffold-eth";
 
@@ -95,14 +95,7 @@ const CreateRoomModal = ({ isOpen, onClose, onRoomChange }: CreateRoomModalProps
 
   const config = useConfig();
 
-  const { data: paymentTokenAddr } = useScaffoldReadContract({
-    contractName: "TuringArena",
-    functionName: "paymentToken",
-    watch: false,
-  });
-
   const { data: arenaContractInfo } = useDeployedContractInfo({ contractName: "TuringArena" });
-  const { writeContractAsync: writeErc20 } = useWriteContract();
 
   if (dialogRef.current) {
     if (isOpen && !dialogRef.current.open) {
@@ -127,26 +120,19 @@ const CreateRoomModal = ({ isOpen, onClose, onRoomChange }: CreateRoomModalProps
 
   const handleCreate = async () => {
     if (!isFormValid) return;
-    if (!paymentTokenAddr || !arenaContractInfo?.address) {
+    if (!arenaContractInfo?.address) {
       notification.error("Contract data not loaded yet. Please wait and try again.");
       return;
     }
     setIsCreating(true);
     try {
-      const feeInUnits = BigInt(Math.round(parsedEntryFee * 1e6));
+      const feeInUnits = parseEther(String(parsedEntryFee));
       const { commitment, operatorSig } = await getJoinAuth(0, false, parsedMaxPlayers);
-
-      const approveHash = await writeErc20({
-        address: paymentTokenAddr as `0x${string}`,
-        abi: erc20Abi,
-        functionName: "approve",
-        args: [arenaContractInfo.address, feeInUnits],
-      });
-      await waitForTransactionReceipt(config, { hash: approveHash });
 
       const createHash = await writeContractAsync({
         functionName: "createRoom",
         args: [selectedTier, BigInt(parsedMaxPlayers), feeInUnits, commitment, operatorSig, playerName.trim()],
+        value: feeInUnits,
       });
       if (createHash) {
         await waitForTransactionReceipt(config, { hash: createHash });
@@ -361,7 +347,7 @@ const CreateRoomModal = ({ isOpen, onClose, onRoomChange }: CreateRoomModalProps
                             </span>
                             <span className="text-xs tracking-wider text-base-content/40">{t.label}</span>
                             <span className="font-mono text-lg font-bold" style={{ color: t.color }}>
-                              {t.defaultFee} USDC
+                              {t.defaultFee} PAS
                             </span>
                             <div className="flex flex-col items-center gap-1 text-xs text-base-content/50">
                               <span>up to {t.defaultMaxPlayers} players</span>
@@ -442,7 +428,7 @@ const CreateRoomModal = ({ isOpen, onClose, onRoomChange }: CreateRoomModalProps
                           ENTRY FEE
                         </span>
                         <span className="font-mono text-[11px]" style={{ color: "rgba(57,211,83,0.4)" }}>
-                          (USDC)
+                          (PAS)
                         </span>
                       </label>
                       <input
@@ -460,7 +446,7 @@ const CreateRoomModal = ({ isOpen, onClose, onRoomChange }: CreateRoomModalProps
                       />
                       {!isValidFee && (
                         <p className="mt-1 font-mono text-xs" style={{ color: "rgba(255,120,120,0.9)" }}>
-                          ▲ Must be 1-100 USDC
+                          ▲ Must be 1-100 PAS
                         </p>
                       )}
                     </div>
@@ -570,7 +556,7 @@ const CreateRoomModal = ({ isOpen, onClose, onRoomChange }: CreateRoomModalProps
                         ENTRY FEE
                       </span>
                       <span className="font-mono text-sm font-bold" style={{ color: tier.color }}>
-                        {customEntryFee} USDC
+                        {customEntryFee} PAS
                       </span>
                     </div>
                   </div>

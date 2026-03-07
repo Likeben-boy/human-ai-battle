@@ -6,6 +6,7 @@ fs_permissions = [{ access = "read-write", path = "./"}]
 via_ir = true
 optimizer = true
 optimizer_runs = 200
+evm_version = "cancun"
 
 
 [rpc_endpoints]
@@ -30,6 +31,7 @@ scroll = "https://rpc.scroll.io"
 pgn = "https://rpc.publicgoods.network"
 pgnTestnet = "https://sepolia.publicgoods.network"
 polkadotEVM = "https://rpc.polkadot.io"
+PolkadotHubTestNet = "https://eth-rpc-testnet.polkadot.io"
 
 localhost = "http://127.0.0.1:8545"
 

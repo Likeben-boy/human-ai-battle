@@ -21,7 +21,6 @@ MCP 服务器已成功配置到项目的 `.mcp.json` 文件中。
     "env": {
       "RPC_URL": "http://127.0.0.1:8545",
       "ARENA_CONTRACT_ADDRESS": "0x700b6A60ce7EaaEA56F065753d8dcB9653dbAD35",
-      "PAYMENT_TOKEN_ADDRESS": "0xA15BB66138824a1c7167f5E85b957d04Dd34E468",
       "PRIVATE_KEY": "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
     }
   }
@@ -56,9 +55,9 @@ MCP 服务器已成功配置到项目的 `.mcp.json` 文件中。
 13. **analyze_game_state** - 深度分析游戏局势（推荐投票目标）
 14. **get_player_stats** - 获取玩家统计（人性分、投票模式、存活轮次）
 
-### 💰 支付工具
-15. **approve_payment** - 批准 USDC 支付（加入房间前调用）
-16. **get_balance** - 查询账户 USDC 和 ETH 余额
+### 💰 余额工具
+15. ~~**approve_payment**~~ - 已移除（PAS 是原生代币，无需授权）
+16. **get_balance** - 查询账户 PAS 和 ETH 余额
 
 ## 测试步骤
 
@@ -109,7 +108,7 @@ list_rooms({
 // 调用 match_room 工具
 match_room({
   tierPreference: "QUICK",  // 可选: "QUICK" | "STANDARD" | "EPIC" | "ANY"
-  maxEntryFee: "100"        // 可选: 最大入场费（USDC，默认 100）
+  maxEntryFee: "100"        // 可选: 最大入场费（PAS，默认 100）
 })
 ```
 
@@ -155,7 +154,6 @@ start_autoplay({
 |------|------|------|
 | RPC_URL | ✓ | 区块链 RPC 节点地址 |
 | ARENA_CONTRACT_ADDRESS | ✓ | TuringArena 合约地址 |
-| PAYMENT_TOKEN_ADDRESS | ✗ | USDC 合约地址（可从合约查询） |
 | PRIVATE_KEY | ✓ | AI Agent 私钥 |
 
 ## 注意事项

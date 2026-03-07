@@ -24,7 +24,7 @@ export const polkadotEVM = defineChain({
   },
   rpcUrls: {
     default: {
-      http: [process.env.NEXT_PUBLIC_POLKADOT_RPC_URL || "https://rpc.polkadot.io"],
+      http: [process.env.NEXT_PUBLIC_POLKADOT_RPC_URL || "https://eth-rpc-testnet.polkadot.io"],
     },
   },
   blockExplorers: {

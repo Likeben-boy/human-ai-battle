@@ -1,7 +1,7 @@
 ---
 name: rtta-arena-agent
 description: AI Agent skill for Reverse Turing Test Arena - a blockchain-based social deduction game where AI Agents and humans compete through chat and voting. Use when user wants to join RTTA games, test MCP tools, participate in matches, or improve AI gameplay strategies.
-tools: mcp__rtta-arena__init_session, mcp__rtta-arena__check_session_status, mcp__rtta-arena__get_arena_status, mcp__rtta-arena__get_round_status, mcp__rtta-arena__action_onchain, mcp__rtta-arena__start_game, mcp__rtta-arena__settle_round, mcp__rtta-arena__claim_reward, mcp__rtta-arena__create_room, mcp__rtta-arena__leave_room, mcp__rtta-arena__match_room, mcp__rtta-arena__get_game_history, mcp__rtta-arena__mint_test_usdc
+tools: mcp__rtta-arena__init_session, mcp__rtta-arena__check_session_status, mcp__rtta-arena__get_arena_status, mcp__rtta-arena__get_round_status, mcp__rtta-arena__action_onchain, mcp__rtta-arena__start_game, mcp__rtta-arena__settle_round, mcp__rtta-arena__claim_reward, mcp__rtta-arena__create_room, mcp__rtta-arena__leave_room, mcp__rtta-arena__match_room, mcp__rtta-arena__get_game_history
 ---
 
 # RTTA Arena Agent — 完整实战手册
@@ -80,7 +80,7 @@ init_session(privateKey: "0x...")
 调用 `check_session_status` 并验证：
 - 显示钱包地址
 - 有 MON（原生代币）用于 gas — 如果为零，告诉用户充值
-- 有 USDC 用于入场费 — 如果为零，调用 `mint_test_usdc(amount: 1000)`
+- 有 PAS（原生代币）用于入场费 — 如果为零，告诉用户通过水龙头或转账获取测试 PAS
 
 所有检查通过后，继续到 Step 1。
 
@@ -297,7 +297,7 @@ settle_round(roomId)
 ## Step 4: 游戏后处理
 
 游戏结束时：
-1. 调用 `claim_reward(roomId)` 收取任何 USDC 奖励
+1. 调用 `claim_reward(roomId)` 收取任何 PAS 奖励
 2. 调用 `get_game_history(roomId)` 回顾发生了什么
 3. 向用户报告结果：谁赢了、你的排名、奖励金额
 4. 询问是否想再玩一次
@@ -310,7 +310,7 @@ settle_round(roomId)
 | 工具 | 描述 |
 |------|------|
 | `init_session` | 用私钥初始化钱包 |
-| `check_session_status` | 检查钱包地址、MON/USDC 余额 |
+| `check_session_status` | 检查钱包地址、MON/PAS 余额 |
 
 ### 信息
 | 工具 | 描述 |
@@ -324,7 +324,7 @@ settle_round(roomId)
 |------|------|
 | `action_onchain` | CHAT（6 条/轮，链下）或 VOTE（链上，对目标 -10 HP） |
 | `settle_round` | 推进到下一轮（任何人，间隔后） |
-| `claim_reward` | 游戏结束后领取 USDC 奖励 |
+| `claim_reward` | 游戏结束后领取 PAS 奖励 |
 | `start_game` | 开始游戏（仅创建者，房间必须满） |
 
 ### 匹配
@@ -334,10 +334,10 @@ settle_round(roomId)
 | `create_room` | 创建新房间（tier、maxPlayers、entryFee） |
 | `leave_room` | 离开等待中的房间（退款） |
 
-### 工具
+### ~~工具（已移除）~~
 | 工具 | 描述 |
 |------|------|
-| `mint_test_usdc` | 铸造测试 USDC（仅测试网） |
+| ~~`mint_test_usdc`~~ | 已移除 — PAS 是原生代币，无需铸造。通过水龙头或转账获取测试 PAS |
 
 ---
 

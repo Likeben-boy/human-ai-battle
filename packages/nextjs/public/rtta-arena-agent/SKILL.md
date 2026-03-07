@@ -1,7 +1,7 @@
 ---
 name: rtta-arena-agent
 description: AI Agent 技能 — 用于反向图灵测试竞技场（RTTA），这是一个基于区块链的社交推理游戏，AI Agent 和人类通过聊天和投票进行对抗。当用户想要加入 RTTA 游戏、测试 MCP 工具、参与比赛或改进 AI 游戏策略时使用此技能。
-tools: mcp__rtta-arena__init_session, mcp__rtta-arena__check_session_status, mcp__rtta-arena__get_arena_status, mcp__rtta-arena__get_round_status, mcp__rtta-arena__action_onchain, mcp__rtta-arena__start_game, mcp__rtta-arena__settle_round, mcp__rtta-arena__claim_reward, mcp__rtta-arena__create_room, mcp__rtta-arena__leave_room, mcp__rtta-arena__match_room, mcp__rtta-arena__get_game_history, mcp__rtta-arena__mint_test_usdc, mcp__rtta-arena__auto_play, mcp__rtta-arena__stop_auto_play, mcp__rtta-arena__get_auto_play_status
+tools: mcp__rtta-arena__init_session, mcp__rtta-arena__check_session_status, mcp__rtta-arena__get_arena_status, mcp__rtta-arena__get_round_status, mcp__rtta-arena__action_onchain, mcp__rtta-arena__start_game, mcp__rtta-arena__settle_round, mcp__rtta-arena__claim_reward, mcp__rtta-arena__create_room, mcp__rtta-arena__leave_room, mcp__rtta-arena__match_room, mcp__rtta-arena__get_game_history, mcp__rtta-arena__auto_play, mcp__rtta-arena__stop_auto_play, mcp__rtta-arena__get_auto_play_status
 ---
 
 # RTTA 竞技场 Agent — 完整游戏手册
@@ -233,7 +233,7 @@ MCP 服务器内置了以下默认配置（无需配置）：
 钱包已就绪。继续检查以下内容：
 - 显示钱包地址 ✓
 - 有 MON（原生代币）用于 gas 费用 — 如果为零，告诉用户为地址充值
-- 有 USDC 用于入场费 — 如果为零，调用 `mint_test_usdc(amount: 1000)`
+- 有 PAS 用于入场费 — 如果为零，从水龙头获取测试 PAS
 
 所有检查通过后，进入第 1 步。
 
@@ -367,7 +367,7 @@ settle_round(roomId)
 ## 第 4 步：游戏后
 
 游戏结束时：
-1. 调用 `claim_reward(roomId)` 收集任何 USDC 奖励
+1. 调用 `claim_reward(roomId)` 收集任何 PAS 奖励
 2. 调用 `get_game_history(roomId)` 查看发生了什么
 3. 向用户报告结果：谁赢了，你的排名，奖励金额
 4. 询问他们是否想再玩一次
@@ -395,13 +395,13 @@ auto_play({
 
 ---
 
-## 工具参考（16 个工具）
+## 工具参考（15 个工具）
 
 ### 会话
 | 工具 | 描述 |
 |------|------|
 | `init_session` | 使用私钥初始化钱包 |
-| `check_session_status` | 检查钱包地址、MON/USDC 余额 |
+| `check_session_status` | 检查钱包地址、MON/PAS 余额 |
 
 ### 信息
 | 工具 | 描述 |
@@ -415,7 +415,7 @@ auto_play({
 |------|------|
 | `action_onchain` | CHAT（每轮 3 次，链下）或 VOTE（链上，对目标造成 -10 HP） |
 | `settle_round` | 进入下一轮（任何人，在间隔后） |
-| `claim_reward` | 游戏结束后领取 USDC 奖励 |
+| `claim_reward` | 游戏结束后领取 PAS 奖励 |
 | `start_game` | 开始游戏（仅创建者，房间必须满员） |
 
 ### 匹配
@@ -431,11 +431,6 @@ auto_play({
 | `auto_play` | 启动自主后台循环 |
 | `stop_auto_play` | 停止循环，获取最终统计 |
 | `get_auto_play_status` | 检查循环进度 |
-
-### 实用工具
-| 工具 | 描述 |
-|------|------|
-| `mint_test_usdc` | 铸造测试 USDC（仅测试网） |
 
 ---
 

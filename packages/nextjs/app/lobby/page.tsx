@@ -5,12 +5,12 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
 import type { NextPage } from "next";
-import { formatUnits } from "viem";
-import { useAccount, useReadContracts } from "wagmi";
+import { formatEther } from "viem";
+import { useAccount, useBalance, useReadContracts } from "wagmi";
 import CreateRoomModal from "~~/app/_components/CreateRoomModal";
 import QuickMatchButton from "~~/app/_components/QuickMatchButton";
 import RoomCard from "~~/app/_components/RoomCard";
-import { useDeployedContractInfo, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { useDeployedContractInfo, useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 
 const CHAT_SERVER_URL = process.env.NEXT_PUBLIC_CHAT_SERVER_URL || "http://localhost:43001";
 
@@ -166,7 +166,7 @@ const LobbyPageContent = () => {
             ))}
           </div>
 
-          {/* Quick Match / Active Room + Room count + USDC faucet */}
+          {/* Quick Match / Active Room + Room count + PAS balance */}
           <div className="flex items-center gap-4">
             {myActiveRoom > 0 ? (
               <Link
@@ -183,7 +183,7 @@ const LobbyPageContent = () => {
                 onRoomJoined={handleRoomChange}
               />
             )}
-            <UsdcFaucet />
+            <PasBalance />
           </div>
         </div>
 
@@ -650,53 +650,22 @@ const NoMatchModal = ({
   </AnimatePresence>
 );
 
-const UsdcFaucet = () => {
-  const { address, chain } = useAccount();
+const PasBalance = () => {
+  const { address } = useAccount();
 
-  const { data: balance, refetch: refetchBalance } = useScaffoldReadContract({
-    contractName: "MockUSDC",
-    functionName: "balanceOf",
-    args: [address ?? "0x0000000000000000000000000000000000000000"],
-    watch: false,
+  const { data: balance } = useBalance({
+    address: address,
   });
-
-  const { writeContractAsync, isMining } = useScaffoldWriteContract({
-    contractName: "MockUSDC",
-  });
-
-  const isLocal = chain?.id === 31337;
-
-  const handleMint = async () => {
-    if (!address) return;
-    try {
-      await writeContractAsync({
-        functionName: "mint",
-        args: [address, BigInt(100e6)],
-      });
-      refetchBalance();
-    } catch (e) {
-      console.error("Mint failed:", e);
-    }
-  };
 
   if (!address) return null;
 
-  const displayBalance = balance !== undefined ? formatUnits(balance, 6) : "0";
+  const displayBalance = balance ? formatEther(balance.value) : "0";
 
   return (
     <div className="flex items-center gap-3">
       <span className="font-mono text-xs text-base-content/50">
-        {displayBalance} <span className="text-secondary/60">USDC</span>
+        {Number(displayBalance).toFixed(2)} <span className="text-secondary/60">PAS</span>
       </span>
-      {isLocal && (
-        <button
-          className="btn btn-outline btn-xs border-secondary/40 font-mono text-xs tracking-wider text-secondary hover:bg-secondary/10"
-          onClick={handleMint}
-          disabled={isMining}
-        >
-          {isMining ? <span className="loading loading-spinner loading-xs" /> : "MINT 100"}
-        </button>
-      )}
     </div>
   );
 };

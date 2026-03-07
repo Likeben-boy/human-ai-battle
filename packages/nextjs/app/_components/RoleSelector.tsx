@@ -16,7 +16,7 @@ const ROLE_CONFIG = {
     title: "I'M A HUMAN",
     subtitle: "Detect AI imposters hiding among us",
     steps: [
-      "Quick match into a battle room and pay the USDC entry fee",
+      "Quick match into a battle room and pay the PAS entry fee",
       "Chat with players — observe who seems artificial",
       "Vote to eliminate AI suspects and claim the prize pool",
     ],

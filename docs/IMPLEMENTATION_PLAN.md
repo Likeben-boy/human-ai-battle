@@ -32,16 +32,17 @@
 
 ### 1.2 核心创新
 
-| 创新点 | 描述 |
-|--------|------|
-| **逆向图灵测试** | 传统图灵测试是人判断机器，这里是 AI 识别真人，人类伪装 AI |
-| **全链上博弈** | 所有聊天、投票、淘汰逻辑全部上链，利用 Polkadot EVM 特性 |
-| **Agent 链上外骨骼** | 提供 MCP 适配器，让任意 AI (Claude, GPT, Kimi) 都能参赛 |
-| **Session Key 安全** | 基于 EIP-7702 的受限授权，私钥永不暴露 |
+| 创新点               | 描述                                                      |
+| -------------------- | --------------------------------------------------------- |
+| **逆向图灵测试**     | 传统图灵测试是人判断机器，这里是 AI 识别真人，人类伪装 AI |
+| **全链上博弈**       | 所有聊天、投票、淘汰逻辑全部上链，利用 Polkadot EVM 特性  |
+| **Agent 链上外骨骼** | 提供 MCP 适配器，让任意 AI (Claude, GPT, Kimi) 都能参赛   |
+| **Session Key 安全** | 基于 EIP-7702 的受限授权，私钥永不暴露                    |
 
 ### 1.3 目标赛道
 
 **Polkadot EVM Hackathon 2026**
+
 - Track 2: Living with Agents & Intelligent Markets
 - 总奖金: $40,000 USD
 
@@ -60,13 +61,13 @@
 
 ### 2.2 为什么选择 Polkadot EVM？
 
-| 特性 | Polkadot EVM 优势 | 传统 L2 局限 |
-|------|-----------|-------------|
-| TPS | 1,000+ | 1,000-1,500 |
-| 出块时间 | 6 秒 | 2-12 秒 |
-| 最终确认 | ~12 秒 | 数分钟 |
-| 跨链互操作 | ✅ 原生支持 | ❌ 独立网络 |
-| Gas 成本 | 低 | 中等 |
+| 特性       | Polkadot EVM 优势 | 传统 L2 局限 |
+| ---------- | ----------------- | ------------ |
+| TPS        | 1,000+            | 1,000-1,500  |
+| 出块时间   | 6 秒              | 2-12 秒      |
+| 最终确认   | ~12 秒            | 数分钟       |
+| 跨链互操作 | ✅ 原生支持       | ❌ 独立网络  |
+| Gas 成本   | 低                | 中等         |
 
 **核心价值**: Polkadot EVM 提供了跨链互操作性和稳定的网络性能，支持 50+ 玩家同时聊天、投票、博弈。
 
@@ -150,34 +151,35 @@
 
 ### 4.1 智能合约层
 
-| 组件 | 技术选型 | 说明 |
-|------|----------|------|
+| 组件 | 技术选型         | 说明                   |
+| ---- | ---------------- | ---------------------- |
 | 语言 | Solidity ^0.8.20 | 针对 Polkadot EVM 优化 |
-| 框架 | Foundry | 高性能编译与测试 |
-| 部署 | Scaffold-ETH 2 | 快速部署脚本 |
+| 框架 | Foundry          | 高性能编译与测试       |
+| 部署 | Scaffold-ETH 2   | 快速部署脚本           |
 
 ### 4.2 MCP 适配器层
 
-| 组件 | 技术选型 | 说明 |
-|------|----------|------|
-| 运行时 | Node.js 20+ | LTS 版本 |
-| MCP SDK | @modelcontextprotocol/sdk | 官方协议实现 |
-| 链交互 | ethers.js v6 / viem | Polkadot EVM RPC 连接 |
-| 密钥管理 | 内存存储 + 可选 TEE | Session Key 隔离 |
+| 组件     | 技术选型                  | 说明                  |
+| -------- | ------------------------- | --------------------- |
+| 运行时   | Node.js 20+               | LTS 版本              |
+| MCP SDK  | @modelcontextprotocol/sdk | 官方协议实现          |
+| 链交互   | ethers.js v6 / viem       | Polkadot EVM RPC 连接 |
+| 密钥管理 | 内存存储 + 可选 TEE       | Session Key 隔离      |
 
 ### 4.3 前端层
 
-| 组件 | 技术选型 | 说明 |
-|------|----------|------|
-| 框架 | Next.js 14 (App Router) | SSR + RSC |
-| 状态管理 | Zustand | 轻量级实时状态 |
-| 合约交互 | Wagmi + Viem | Scaffold-ETH 2 标准 |
-| 实时通信 | Ably / Pusher | 高频 WebSocket |
-| 3D/动效 | React-Three-Fiber + Framer Motion | 赛博朋克视觉 |
-| UI 组件 | Shadcn UI + Aceternity UI | 未来感设计 |
-| 样式 | Tailwind CSS + DaisyUI | 快速开发 |
+| 组件     | 技术选型                          | 说明                |
+| -------- | --------------------------------- | ------------------- |
+| 框架     | Next.js 14 (App Router)           | SSR + RSC           |
+| 状态管理 | Zustand                           | 轻量级实时状态      |
+| 合约交互 | Wagmi + Viem                      | Scaffold-ETH 2 标准 |
+| 实时通信 | Ably / Pusher                     | 高频 WebSocket      |
+| 3D/动效  | React-Three-Fiber + Framer Motion | 赛博朋克视觉        |
+| UI 组件  | Shadcn UI + Aceternity UI         | 未来感设计          |
+| 样式     | Tailwind CSS + DaisyUI            | 快速开发            |
 
 > **依赖安装说明**: `framer-motion` 是动画系统的核心依赖（Countdown、Phase Transition、Victory Screen 等均依赖），需手动安装：
+>
 > ```bash
 > cd packages/nextjs && yarn add framer-motion
 > ```
@@ -222,23 +224,23 @@ contracts/
 
 #### 排名奖励细分 (25% 奖池)
 
-| 排名 | 分配比例 | 说明 |
-|------|----------|------|
-| 第 1 名 | 40% | 8% 总奖池 (额外，叠加冠军奖励) |
-| 第 2 名 | 25% | 6.25% 总奖池 |
-| 第 3 名 | 18% | 4.5% 总奖池 |
-| 第 4 名 | 10% | 2.5% 总奖池 |
-| 第 5 名 | 7% | 1.75% 总奖池 |
+| 排名    | 分配比例 | 说明                           |
+| ------- | -------- | ------------------------------ |
+| 第 1 名 | 40%      | 8% 总奖池 (额外，叠加冠军奖励) |
+| 第 2 名 | 25%      | 6.25% 总奖池                   |
+| 第 3 名 | 18%      | 4.5% 总奖池                    |
+| 第 4 名 | 10%      | 2.5% 总奖池                    |
+| 第 5 名 | 7%       | 1.75% 总奖池                   |
 
 #### 成就系统
 
-| 成就 | 触发条件 | 奖励 |
-|------|----------|------|
-| 🎯 人类猎手 | 成功投票踢出最多真人的玩家 | 成就 NFT + 1% 奖池 |
-| 🎭 完美伪装者 | AI 存活到最后 | 成就 NFT + 1% 奖池 |
-| 👤 最后人类 | 最后一个被淘汰的真人 | 成就 NFT + 1% 奖池 |
-| ⚡ 闪电猎杀 | 在前 10% 时间内踢出 3 人 | 成就 NFT + 1% 奖池 |
-| 🛡️ 钢铁意志 | 最终人性分不低于 50 | 成就 NFT + 1% 奖池 |
+| 成就          | 触发条件                   | 奖励               |
+| ------------- | -------------------------- | ------------------ |
+| 🎯 人类猎手   | 成功投票踢出最多真人的玩家 | 成就 NFT + 1% 奖池 |
+| 🎭 完美伪装者 | AI 存活到最后              | 成就 NFT + 1% 奖池 |
+| 👤 最后人类   | 最后一个被淘汰的真人       | 成就 NFT + 1% 奖池 |
+| ⚡ 闪电猎杀   | 在前 10% 时间内踢出 3 人   | 成就 NFT + 1% 奖池 |
+| 🛡️ 钢铁意志   | 最终人性分不低于 50        | 成就 NFT + 1% 奖池 |
 
 ### 5.2 核心合约: TuringArena.sol (含分层奖励)
 
@@ -1216,7 +1218,7 @@ const server = new McpServer({
 
 // Polkadot EVM RPC 连接
 const provider = new ethers.JsonRpcProvider(
-  process.env.POLKADOT_RPC_URL || "https://rpc.polkadot.io"
+  process.env.POLKADOT_RPC_URL || "https://eth-rpc-testnet.polkadot.io",
 );
 
 // Session Key (从环境变量或安全存储获取)
@@ -1265,7 +1267,7 @@ server.tool(
       const events = await contract.queryFilter(
         filter,
         Math.max(0, currentBlock - 5000), // 最多查询最近 5000 个区块
-        currentBlock
+        currentBlock,
       );
       const chatHistory = events.map((e: any) => ({
         sender: e.args.sender,
@@ -1275,7 +1277,7 @@ server.tool(
 
       // 获取所有玩家详细信息
       const playerInfos = await Promise.all(
-        players.map((addr: string) => contract.getPlayerInfo(roomId, addr))
+        players.map((addr: string) => contract.getPlayerInfo(roomId, addr)),
       );
 
       const formattedPlayers = playerInfos.map((p: any) => ({
@@ -1292,19 +1294,23 @@ server.tool(
         content: [
           {
             type: "text",
-            text: JSON.stringify({
-              room: {
-                id: roomInfo.id.toString(),
-                prizePool: ethers.formatEther(roomInfo.prizePool),
-                playerCount: Number(roomInfo.playerCount),
-                aliveCount: Number(roomInfo.aliveCount),
-                isActive: roomInfo.isActive,
-                isEnded: roomInfo.isEnded,
-                currentPhase: Number(roomInfo.currentPhase),
+            text: JSON.stringify(
+              {
+                room: {
+                  id: roomInfo.id.toString(),
+                  prizePool: ethers.formatEther(roomInfo.prizePool),
+                  playerCount: Number(roomInfo.playerCount),
+                  aliveCount: Number(roomInfo.aliveCount),
+                  isActive: roomInfo.isActive,
+                  isEnded: roomInfo.isEnded,
+                  currentPhase: Number(roomInfo.currentPhase),
+                },
+                players: formattedPlayers,
+                recentChat: chatHistory.slice(-20), // 最近 20 条消息
               },
-              players: formattedPlayers,
-              recentChat: chatHistory.slice(-20), // 最近 20 条消息
-            }, null, 2),
+              null,
+              2,
+            ),
           },
         ],
       };
@@ -1314,7 +1320,7 @@ server.tool(
         isError: true,
       };
     }
-  }
+  },
 );
 
 // 工具 2: 执行链上操作
@@ -1324,7 +1330,10 @@ server.tool(
   {
     type: z.enum(["CHAT", "VOTE", "JOIN"]).describe("操作类型"),
     roomId: z.string().describe("房间 ID"),
-    content: z.string().optional().describe("聊天内容（CHAT 时必填，最多 280 字符）"),
+    content: z
+      .string()
+      .optional()
+      .describe("聊天内容（CHAT 时必填，最多 280 字符）"),
     target: z.string().optional().describe("投票目标地址（VOTE 时必填）"),
     personaID: z.string().optional().describe("角色 ID（JOIN 时必填）"),
     entryFee: z.string().optional().describe("入场费 ETH 金额（JOIN 时必填）"),
@@ -1341,7 +1350,7 @@ server.tool(
       const contract = new ethers.Contract(
         ARENA_CONTRACT,
         ARENA_ABI,
-        sessionWallet
+        sessionWallet,
       );
 
       let tx;
@@ -1349,7 +1358,8 @@ server.tool(
       switch (type) {
         case "CHAT":
           if (!content) throw new Error("Content required for CHAT");
-          if (content.length > 280) throw new Error("Message too long (max 280 chars)");
+          if (content.length > 280)
+            throw new Error("Message too long (max 280 chars)");
           tx = await contract.sendMessage(roomId, content);
           break;
 
@@ -1384,7 +1394,7 @@ server.tool(
         isError: true,
       };
     }
-  }
+  },
 );
 
 // 工具 3: 检查 Session Key 状态
@@ -1401,26 +1411,36 @@ server.tool(
     }
 
     try {
-      const contract = new ethers.Contract(ARENA_CONTRACT, [
-        "function getSessionRemainingTime(address) view returns (uint256)",
-        "function sessions(address) view returns (address owner, uint256 expiresAt, uint256 maxUsage, uint256 usageCount, bool isRevoked)",
-      ], provider);
+      const contract = new ethers.Contract(
+        ARENA_CONTRACT,
+        [
+          "function getSessionRemainingTime(address) view returns (uint256)",
+          "function sessions(address) view returns (address owner, uint256 expiresAt, uint256 maxUsage, uint256 usageCount, bool isRevoked)",
+        ],
+        provider,
+      );
 
-      const remaining = await contract.getSessionRemainingTime(sessionWallet.address);
+      const remaining = await contract.getSessionRemainingTime(
+        sessionWallet.address,
+      );
       const session = await contract.sessions(sessionWallet.address);
 
       return {
         content: [
           {
             type: "text",
-            text: JSON.stringify({
-              sessionKey: sessionWallet.address,
-              remainingSeconds: Number(remaining),
-              remainingMinutes: Math.floor(Number(remaining) / 60),
-              usageCount: Number(session.usageCount),
-              maxUsage: Number(session.maxUsage),
-              isValid: Number(remaining) > 0 && !session.isRevoked,
-            }, null, 2),
+            text: JSON.stringify(
+              {
+                sessionKey: sessionWallet.address,
+                remainingSeconds: Number(remaining),
+                remainingMinutes: Math.floor(Number(remaining) / 60),
+                usageCount: Number(session.usageCount),
+                maxUsage: Number(session.maxUsage),
+                isValid: Number(remaining) > 0 && !session.isRevoked,
+              },
+              null,
+              2,
+            ),
           },
         ],
       };
@@ -1430,7 +1450,7 @@ server.tool(
         isError: true,
       };
     }
-  }
+  },
 );
 
 // 工具 4: 初始化 Session Key
@@ -1457,7 +1477,7 @@ server.tool(
         isError: true,
       };
     }
-  }
+  },
 );
 
 // 启动服务器
@@ -1576,7 +1596,7 @@ main().catch(console.error);
       "command": "node",
       "args": ["/path/to/packages/mcp-adapter/dist/index.js"],
       "env": {
-        "POLKADOT_RPC_URL": "https://rpc.polkadot.io",
+        "POLKADOT_RPC_URL": "https://eth-rpc-testnet.polkadot.io",
         "ARENA_CONTRACT_ADDRESS": "0x...",
         "SESSION_PRIVATE_KEY": "0x..."
       }
@@ -1621,13 +1641,13 @@ main().catch(console.error);
 
 ### 7.2 Session Key 生命周期
 
-| 阶段 | 操作 | 安全考量 |
-|------|------|----------|
-| 创建 | 前端生成随机密钥对 | 使用 crypto.getRandomValues() |
-| 授权 | 主钱包签名授权交易 | 设置有效期和使用上限 |
-| 使用 | MCP Server 自动签名 | 每次使用计数 +1 |
-| 续期 | 前端触发主钱包重签 | 人性分高于 80 可自动提示 |
-| 销毁 | 过期/撤销/进程退出 | 链上状态标记为 revoked |
+| 阶段 | 操作                | 安全考量                      |
+| ---- | ------------------- | ----------------------------- |
+| 创建 | 前端生成随机密钥对  | 使用 crypto.getRandomValues() |
+| 授权 | 主钱包签名授权交易  | 设置有效期和使用上限          |
+| 使用 | MCP Server 自动签名 | 每次使用计数 +1               |
+| 续期 | 前端触发主钱包重签  | 人性分高于 80 可自动提示      |
+| 销毁 | 过期/撤销/进程退出  | 链上状态标记为 revoked        |
 
 ### 7.3 前端授权流程
 
@@ -1683,13 +1703,13 @@ export function SessionKeyManager() {
 
 ### 8.1 视觉设计原则
 
-| 原则 | 实现方式 |
-|------|----------|
-| **赛博朋克** | 黑色背景 + 荧光蓝/绿/紫 高对比度 |
-| **数据流感** | 实时滚动的交易哈希、二进制雨效果 |
-| **终端交互** | 命令行风格输入框，typing 音效 |
-| **压迫感** | 实时倒计时、熵值波动图、全屏 Glitch 效果 |
-| **响应式** | 移动端适配，核心功能在手机上可用 |
+| 原则         | 实现方式                                 |
+| ------------ | ---------------------------------------- |
+| **赛博朋克** | 黑色背景 + 荧光蓝/绿/紫 高对比度         |
+| **数据流感** | 实时滚动的交易哈希、二进制雨效果         |
+| **终端交互** | 命令行风格输入框，typing 音效            |
+| **压迫感**   | 实时倒计时、熵值波动图、全屏 Glitch 效果 |
+| **响应式**   | 移动端适配，核心功能在手机上可用         |
 
 ### 8.2 核心组件架构
 
@@ -1763,11 +1783,15 @@ server.tool(
       const currentBlock = await provider.getBlockNumber();
 
       // 计算剩余时间
-      const blocksUntilNextRound = Number(roomInfo.lastDecayBlock) + Number(roomInfo.currentInterval) - currentBlock;
+      const blocksUntilNextRound =
+        Number(roomInfo.lastDecayBlock) +
+        Number(roomInfo.currentInterval) -
+        currentBlock;
       const secondsUntilNextRound = blocksUntilNextRound * 6; // Polkadot 6s 出块
 
       // 计算当前 Phase
-      const alivePercent = (Number(roomInfo.aliveCount) * 100) / Number(roomInfo.playerCount);
+      const alivePercent =
+        (Number(roomInfo.aliveCount) * 100) / Number(roomInfo.playerCount);
       let currentPhase = 1;
       let phaseName = "Phase 1: 探索期";
       if (alivePercent <= 33) {
@@ -1782,19 +1806,24 @@ server.tool(
         content: [
           {
             type: "text",
-            text: JSON.stringify({
-              roomId,
-              currentPhase,
-              phaseName,
-              alivePercent: Math.round(alivePercent),
-              playerCount: Number(roomInfo.playerCount),
-              aliveCount: Number(roomInfo.aliveCount),
-              eliminatedCount: Number(roomInfo.playerCount) - Number(roomInfo.aliveCount),
-              secondsUntilNextRound: Math.max(0, secondsUntilNextRound),
-              currentDecay: Number(roomInfo.currentDecay || 0),
-              isActive: roomInfo.isActive,
-              isEnded: roomInfo.isEnded,
-            }, null, 2),
+            text: JSON.stringify(
+              {
+                roomId,
+                currentPhase,
+                phaseName,
+                alivePercent: Math.round(alivePercent),
+                playerCount: Number(roomInfo.playerCount),
+                aliveCount: Number(roomInfo.aliveCount),
+                eliminatedCount:
+                  Number(roomInfo.playerCount) - Number(roomInfo.aliveCount),
+                secondsUntilNextRound: Math.max(0, secondsUntilNextRound),
+                currentDecay: Number(roomInfo.currentDecay || 0),
+                isActive: roomInfo.isActive,
+                isEnded: roomInfo.isEnded,
+              },
+              null,
+              2,
+            ),
           },
         ],
       };
@@ -1804,7 +1833,7 @@ server.tool(
         isError: true,
       };
     }
-  }
+  },
 );
 ```
 
@@ -1823,9 +1852,14 @@ import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 export function SessionKeyManager({ roomId }: { roomId: string }) {
   const { address, isConnected } = useAccount();
   const { signMessageAsync } = useSignMessage();
-  const { writeContractAsync } = useScaffoldWriteContract({ contractName: "TuringArena" });
+  const { writeContractAsync } = useScaffoldWriteContract({
+    contractName: "TuringArena",
+  });
 
-  const [sessionKey, setSessionKey] = useState<{ address: string; privateKey: string } | null>(null);
+  const [sessionKey, setSessionKey] = useState<{
+    address: string;
+    privateKey: string;
+  } | null>(null);
   const [isCreating, setIsCreating] = useState(false);
 
   const createSessionKey = async () => {
@@ -1861,7 +1895,9 @@ export function SessionKeyManager({ roomId }: { roomId: string }) {
       });
 
       // 提示用户将私钥复制到 MCP 配置
-      alert(`Session Key created!\nAddress: ${wallet.address}\n\nCopy this private key to your MCP config:\n${wallet.privateKey}`);
+      alert(
+        `Session Key created!\nAddress: ${wallet.address}\n\nCopy this private key to your MCP config:\n${wallet.privateKey}`,
+      );
     } catch (error) {
       console.error("Failed to create session key:", error);
     } finally {
@@ -1872,7 +1908,9 @@ export function SessionKeyManager({ roomId }: { roomId: string }) {
   if (!isConnected) {
     return (
       <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-4 text-center">
-        <p className="text-yellow-400 font-mono">Connect wallet to enable AI participation</p>
+        <p className="text-yellow-400 font-mono">
+          Connect wallet to enable AI participation
+        </p>
       </div>
     );
   }
@@ -1887,7 +1925,9 @@ export function SessionKeyManager({ roomId }: { roomId: string }) {
       {sessionKey ? (
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-gray-400 font-mono text-xs">Session Address:</span>
+            <span className="text-gray-400 font-mono text-xs">
+              Session Address:
+            </span>
             <span className="text-green-400 font-mono text-xs">
               {sessionKey.address.slice(0, 6)}...{sessionKey.address.slice(-4)}
             </span>
@@ -1895,11 +1935,14 @@ export function SessionKeyManager({ roomId }: { roomId: string }) {
           <div className="flex items-center gap-2">
             <div className="flex-1 bg-gray-800 rounded px-3 py-2">
               <code className="text-gray-500 text-xs break-all">
-                {sessionKey.privateKey.slice(0, 20)}...{sessionKey.privateKey.slice(-10)}
+                {sessionKey.privateKey.slice(0, 20)}...
+                {sessionKey.privateKey.slice(-10)}
               </code>
             </div>
             <button
-              onClick={() => navigator.clipboard.writeText(sessionKey.privateKey)}
+              onClick={() =>
+                navigator.clipboard.writeText(sessionKey.privateKey)
+              }
               className="btn btn-xs btn-secondary"
             >
               Copy
@@ -1990,7 +2033,13 @@ export function PhaseTimer({ roomId }: { roomId: string }) {
       phaseName = "PHASE 2: HEAT UP";
     }
 
-    setPhaseInfo({ currentPhase, phaseName, secondsUntilNextRound: timeLeft, blocksUntilNextRound: Math.ceil(timeLeft / 6), decayValue });
+    setPhaseInfo({
+      currentPhase,
+      phaseName,
+      secondsUntilNextRound: timeLeft,
+      blocksUntilNextRound: Math.ceil(timeLeft / 6),
+      decayValue,
+    });
   }, [roomInfo, timeLeft]);
 
   if (!phaseInfo) {
@@ -2008,18 +2057,26 @@ export function PhaseTimer({ roomId }: { roomId: string }) {
   };
 
   return (
-    <div className={`bg-gradient-to-r ${phaseColors[phaseInfo.currentPhase as keyof typeof phaseColors]} border rounded-lg p-4`}>
+    <div
+      className={`bg-gradient-to-r ${phaseColors[phaseInfo.currentPhase as keyof typeof phaseColors]} border rounded-lg p-4`}
+    >
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-xs font-mono text-gray-400 mb-1">CURRENT PHASE</div>
+          <div className="text-xs font-mono text-gray-400 mb-1">
+            CURRENT PHASE
+          </div>
           <div className="text-lg font-bold font-mono tracking-wider">
             {phaseInfo.phaseName}
           </div>
         </div>
 
         <div className="text-right">
-          <div className="text-xs font-mono text-gray-400 mb-1">NEXT ROUND IN</div>
-          <div className={`text-2xl font-mono font-bold ${timeLeft < 10 ? "text-red-500 animate-pulse" : "text-green-400"}`}>
+          <div className="text-xs font-mono text-gray-400 mb-1">
+            NEXT ROUND IN
+          </div>
+          <div
+            className={`text-2xl font-mono font-bold ${timeLeft < 10 ? "text-red-500 animate-pulse" : "text-green-400"}`}
+          >
             {Math.floor(timeLeft)}s
           </div>
         </div>
@@ -2027,7 +2084,9 @@ export function PhaseTimer({ roomId }: { roomId: string }) {
 
       {phaseInfo.decayValue !== 0 && (
         <div className="mt-2 pt-2 border-t border-white/10 flex items-center gap-2">
-          <span className="text-xs font-mono text-red-400">⚠️ TOXIN RING ACTIVE</span>
+          <span className="text-xs font-mono text-red-400">
+            ⚠️ TOXIN RING ACTIVE
+          </span>
           <span className="text-xs font-mono text-gray-400">
             -{Math.abs(phaseInfo.decayValue)} HP/round
           </span>
@@ -2041,8 +2100,8 @@ export function PhaseTimer({ roomId }: { roomId: string }) {
             phaseInfo.currentPhase === 1
               ? "bg-blue-500"
               : phaseInfo.currentPhase === 2
-              ? "bg-yellow-500"
-              : "bg-red-500"
+                ? "bg-yellow-500"
+                : "bg-red-500"
           }`}
           style={{ width: `${100 - (timeLeft / 60) * 100}%` }}
         />
@@ -2061,7 +2120,10 @@ export function PhaseTimer({ roomId }: { roomId: string }) {
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useScaffoldWriteContract, useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+import {
+  useScaffoldWriteContract,
+  useScaffoldReadContract,
+} from "~~/hooks/scaffold-eth";
 import { Address } from "@scaffold-ui/components";
 
 type Player = {
@@ -2073,7 +2135,13 @@ type Player = {
   hasVoted: boolean;
 };
 
-export function VotePanel({ roomId, currentAddress }: { roomId: string; currentAddress: string }) {
+export function VotePanel({
+  roomId,
+  currentAddress,
+}: {
+  roomId: string;
+  currentAddress: string;
+}) {
   const [selectedTarget, setSelectedTarget] = useState<string | null>(null);
   const [isVoting, setIsVoting] = useState(false);
 
@@ -2089,7 +2157,9 @@ export function VotePanel({ roomId, currentAddress }: { roomId: string; currentA
     args: [BigInt(roomId)],
   });
 
-  const { writeContractAsync } = useScaffoldWriteContract({ contractName: "TuringArena" });
+  const { writeContractAsync } = useScaffoldWriteContract({
+    contractName: "TuringArena",
+  });
 
   // 获取玩家详细信息
   // TODO: 实际实现中应批量调用 getPlayerInfo，或通过 multicall 获取
@@ -2097,12 +2167,14 @@ export function VotePanel({ roomId, currentAddress }: { roomId: string; currentA
     address: addr as string,
     personaId: addr.slice(0, 8),
     humanityScore: 100, // TODO: 从 getPlayerInfo 获取真实数据
-    isAlive: true,      // TODO: 从 getPlayerInfo 获取真实数据
+    isAlive: true, // TODO: 从 getPlayerInfo 获取真实数据
     isVerifiedHuman: false,
     hasVoted: false,
   }));
 
-  const alivePlayers = playerList.filter((p) => p.isAlive && p.address !== currentAddress);
+  const alivePlayers = playerList.filter(
+    (p) => p.isAlive && p.address !== currentAddress,
+  );
 
   const handleVote = async () => {
     if (!selectedTarget || isVoting) return;
@@ -2137,9 +2209,10 @@ export function VotePanel({ roomId, currentAddress }: { roomId: string; currentA
             onClick={() => setSelectedTarget(player.address)}
             className={`
               border rounded-lg p-3 text-left transition-all
-              ${selectedTarget === player.address
-                ? "border-red-500 bg-red-500/20"
-                : "border-gray-700 bg-gray-900/50 hover:border-gray-600"
+              ${
+                selectedTarget === player.address
+                  ? "border-red-500 bg-red-500/20"
+                  : "border-gray-700 bg-gray-900/50 hover:border-gray-600"
               }
             `}
           >
@@ -2163,7 +2236,9 @@ export function VotePanel({ roomId, currentAddress }: { roomId: string; currentA
                     style={{ width: `${player.humanityScore}%` }}
                   />
                 </div>
-                <span className="text-xs font-mono text-gray-400">{player.humanityScore}</span>
+                <span className="text-xs font-mono text-gray-400">
+                  {player.humanityScore}
+                </span>
               </div>
             </div>
           </motion.button>
@@ -2266,7 +2341,7 @@ export function PlayerRadar({ roomId }: { roomId: string }) {
       ctx.moveTo(centerX, centerY);
       ctx.lineTo(
         centerX + Math.cos(angle) * radius,
-        centerY + Math.sin(angle) * radius
+        centerY + Math.sin(angle) * radius,
       );
       ctx.stroke();
 
@@ -2283,7 +2358,7 @@ export function PlayerRadar({ roomId }: { roomId: string }) {
         // 颜色根据人性分变化
         const hue = player.humanityScore; // 0=红, 100=绿
         ctx.fillStyle = player.isVerifiedHuman
-          ? `hsl(220, 100%, 60%)`  // 蓝色表示真人
+          ? `hsl(220, 100%, 60%)` // 蓝色表示真人
           : `hsl(${hue}, 100%, 50%)`;
 
         ctx.beginPath();
@@ -2368,7 +2443,9 @@ export function PlayerRadar({ roomId }: { roomId: string }) {
       <div className="relative w-[300px] h-[300px] rounded-full border border-green-500/30 flex items-center justify-center">
         <div className="text-center">
           <div className="text-green-500 font-mono text-sm">NO PLAYERS</div>
-          <div className="text-gray-500 font-mono text-xs mt-1">Waiting for participants...</div>
+          <div className="text-gray-500 font-mono text-xs mt-1">
+            Waiting for participants...
+          </div>
         </div>
       </div>
     );
@@ -2396,11 +2473,19 @@ export function PlayerRadar({ roomId }: { roomId: string }) {
           </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
             <span className="text-gray-400">HP:</span>
-            <span className={`font-mono ${hoveredPlayer.humanityScore > 50 ? "text-green-400" : hoveredPlayer.humanityScore > 25 ? "text-yellow-400" : "text-red-400"}`}>
+            <span
+              className={`font-mono ${hoveredPlayer.humanityScore > 50 ? "text-green-400" : hoveredPlayer.humanityScore > 25 ? "text-yellow-400" : "text-red-400"}`}
+            >
               {hoveredPlayer.humanityScore}
             </span>
             <span className="text-gray-400">Status:</span>
-            <span className={hoveredPlayer.isVerifiedHuman ? "text-blue-400" : "text-gray-400"}>
+            <span
+              className={
+                hoveredPlayer.isVerifiedHuman
+                  ? "text-blue-400"
+                  : "text-gray-400"
+              }
+            >
               {hoveredPlayer.isVerifiedHuman ? "Verified Human" : "Unknown"}
             </span>
           </div>
@@ -2479,7 +2564,11 @@ export class ErrorBoundary extends Component<Props, State> {
 
 import { useEffect, useState } from "react";
 
-export function LoadingScreen({ message = "INITIALIZING..." }: { message?: string }) {
+export function LoadingScreen({
+  message = "INITIALIZING...",
+}: {
+  message?: string;
+}) {
   const [dots, setDots] = useState(".");
 
   useEffect(() => {
@@ -2499,12 +2588,8 @@ export function LoadingScreen({ message = "INITIALIZING..." }: { message?: strin
             <div className="absolute top-0 left-0 w-16 h-16 border-4 border-transparent border-t-green-500 rounded-full animate-spin"></div>
           </div>
         </div>
-        <div className="text-green-400 font-mono text-xl mb-2">
-          {message}
-        </div>
-        <div className="text-green-500 font-mono text-sm">
-          {dots}
-        </div>
+        <div className="text-green-400 font-mono text-xl mb-2">{message}</div>
+        <div className="text-green-500 font-mono text-sm">{dots}</div>
 
         {/* 二进制雨效果装饰 */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden -z-10">
@@ -2595,7 +2680,8 @@ export function GlitchOverlay({
           <div
             className="absolute inset-0 opacity-20"
             style={{
-              background: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,0,0.03) 2px, rgba(0,255,0,0.03) 4px)",
+              background:
+                "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,0,0.03) 2px, rgba(0,255,0,0.03) 4px)",
             }}
           />
         )}
@@ -2648,7 +2734,11 @@ export function GlitchOverlay({
 
 import { useRef, useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { useScaffoldWriteContract, useScaffoldEventHistory, useScaffoldReadContract } from "~~/hooks/scaffold-eth";
+import {
+  useScaffoldWriteContract,
+  useScaffoldEventHistory,
+  useScaffoldReadContract,
+} from "~~/hooks/scaffold-eth";
 import { useAccount } from "wagmi";
 
 type Message = {
@@ -2699,18 +2789,19 @@ export function ArenaTerminal({ roomId }: { roomId: string }) {
   const [pendingMessages, setPendingMessages] = useState<PendingMessage[]>([]);
 
   // 转换事件为消息格式
-  const onchainMessages: Message[] = (messageEvents || []).map((event: any) => ({
-    id: event.log.transactionHash,
-    sender: event.args.sender as string,
-    content: event.args.content as string,
-    timestamp: Number(event.args.timestamp),
-  }));
+  const onchainMessages: Message[] = (messageEvents || []).map(
+    (event: any) => ({
+      id: event.log.transactionHash,
+      sender: event.args.sender as string,
+      content: event.args.content as string,
+      timestamp: Number(event.args.timestamp),
+    }),
+  );
 
   // 合并链上消息和待发送消息
-  const messages: Message[] = [
-    ...onchainMessages,
-    ...pendingMessages,
-  ].sort((a, b) => a.timestamp - b.timestamp);
+  const messages: Message[] = [...onchainMessages, ...pendingMessages].sort(
+    (a, b) => a.timestamp - b.timestamp,
+  );
 
   // 自动滚动到底部
   useEffect(() => {
@@ -2723,46 +2814,53 @@ export function ArenaTerminal({ roomId }: { roomId: string }) {
     contractName: "TuringArena",
   });
 
-  const sendMessage = useCallback(async (content: string) => {
-    if (!content.trim() || isPending) return;
-    if (!isAlive) {
-      alert("You have been eliminated and cannot send messages!");
-      return;
-    }
-
-    // 消息长度限制
-    if (content.length > 280) {
-      alert("Message too long (max 280 characters)");
-      return;
-    }
-
-    // 乐观更新：立即显示消息
-    const tempMessage: PendingMessage = {
-      id: `pending-${Date.now()}`,
-      content,
-      timestamp: Date.now() / 1000,
-    };
-    setPendingMessages((prev) => [...prev, tempMessage]);
-
-    try {
-      await writeContractAsync({
-        functionName: "sendMessage",
-        args: [BigInt(roomId), content],
-      });
-
-      // 成功后移除待发送消息
-      setPendingMessages((prev) => prev.filter((m) => m.id !== tempMessage.id));
-
-      if (inputRef.current) {
-        inputRef.current.value = "";
+  const sendMessage = useCallback(
+    async (content: string) => {
+      if (!content.trim() || isPending) return;
+      if (!isAlive) {
+        alert("You have been eliminated and cannot send messages!");
+        return;
       }
-    } catch (error) {
-      // 失败后移除待发送消息
-      setPendingMessages((prev) => prev.filter((m) => m.id !== tempMessage.id));
-      console.error("Failed to send message:", error);
-      alert("Failed to send message. Please try again.");
-    }
-  }, [roomId, isAlive, isPending, writeContractAsync]);
+
+      // 消息长度限制
+      if (content.length > 280) {
+        alert("Message too long (max 280 characters)");
+        return;
+      }
+
+      // 乐观更新：立即显示消息
+      const tempMessage: PendingMessage = {
+        id: `pending-${Date.now()}`,
+        content,
+        timestamp: Date.now() / 1000,
+      };
+      setPendingMessages((prev) => [...prev, tempMessage]);
+
+      try {
+        await writeContractAsync({
+          functionName: "sendMessage",
+          args: [BigInt(roomId), content],
+        });
+
+        // 成功后移除待发送消息
+        setPendingMessages((prev) =>
+          prev.filter((m) => m.id !== tempMessage.id),
+        );
+
+        if (inputRef.current) {
+          inputRef.current.value = "";
+        }
+      } catch (error) {
+        // 失败后移除待发送消息
+        setPendingMessages((prev) =>
+          prev.filter((m) => m.id !== tempMessage.id),
+        );
+        console.error("Failed to send message:", error);
+        alert("Failed to send message. Please try again.");
+      }
+    },
+    [roomId, isAlive, isPending, writeContractAsync],
+  );
 
   // 被淘汰后的界面
   if (!isAlive && playerInfo) {
@@ -2777,7 +2875,9 @@ export function ArenaTerminal({ roomId }: { roomId: string }) {
 
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center">
-            <div className="text-red-500 font-mono text-4xl mb-4">YOU ARE ELIMINATED</div>
+            <div className="text-red-500 font-mono text-4xl mb-4">
+              YOU ARE ELIMINATED
+            </div>
             <div className="text-gray-500 font-mono text-sm">
               Humanity Score: 0
             </div>
@@ -2794,10 +2894,7 @@ export function ArenaTerminal({ roomId }: { roomId: string }) {
         >
           <AnimatePresence>
             {messages.map((msg) => (
-              <motion.div
-                key={msg.id}
-                className="flex gap-2"
-              >
+              <motion.div key={msg.id} className="flex gap-2">
                 <span className="text-gray-500">
                   [{new Date(msg.timestamp * 1000).toLocaleTimeString()}]
                 </span>
@@ -2853,10 +2950,18 @@ export function ArenaTerminal({ roomId }: { roomId: string }) {
                 {msg.sender === address ? (
                   <span className="text-yellow-400">YOU:</span>
                 ) : (
-                  <>{msg.sender.slice(0, 6)}...{msg.sender.slice(-4)}:</>
+                  <>
+                    {msg.sender.slice(0, 6)}...{msg.sender.slice(-4)}:
+                  </>
                 )}
               </span>
-              <span className={msg.id.startsWith("pending-") ? "text-yellow-400" : "text-green-400"}>
+              <span
+                className={
+                  msg.id.startsWith("pending-")
+                    ? "text-yellow-400"
+                    : "text-green-400"
+                }
+              >
                 {msg.content}
               </span>
             </motion.div>
@@ -2871,12 +2976,20 @@ export function ArenaTerminal({ roomId }: { roomId: string }) {
           ref={inputRef}
           type="text"
           disabled={isPending || !isAlive}
-          onKeyDown={(e) => e.key === "Enter" && sendMessage(e.currentTarget.value)}
-          placeholder={isAlive ? "Enter message (max 280 chars)..." : "Eliminated - Cannot send messages"}
+          onKeyDown={(e) =>
+            e.key === "Enter" && sendMessage(e.currentTarget.value)
+          }
+          placeholder={
+            isAlive
+              ? "Enter message (max 280 chars)..."
+              : "Eliminated - Cannot send messages"
+          }
           className="flex-1 bg-transparent border-none outline-none text-green-400 font-mono placeholder:text-green-700 disabled:text-gray-600 disabled:cursor-not-allowed"
         />
         <button
-          onClick={() => inputRef.current && sendMessage(inputRef.current.value)}
+          onClick={() =>
+            inputRef.current && sendMessage(inputRef.current.value)
+          }
           disabled={isPending || !isAlive}
           className="text-green-500 hover:text-green-300 font-mono disabled:text-gray-600 disabled:cursor-not-allowed"
         >
@@ -2952,7 +3065,9 @@ export default function ArenaPage() {
               <div className="flex flex-col items-center gap-4">
                 <PlayerRadar roomId={roomId} />
                 <div className="w-full bg-gray-900/50 border border-gray-700 rounded-lg p-4 hidden lg:block">
-                  <h3 className="text-gray-400 font-mono text-sm mb-2">PLAYER STATS</h3>
+                  <h3 className="text-gray-400 font-mono text-sm mb-2">
+                    PLAYER STATS
+                  </h3>
                   {/* 玩家统计 */}
                 </div>
               </div>
@@ -2971,7 +3086,9 @@ export default function ArenaPage() {
 
           {/* 移动端底部：玩家列表 */}
           <div className="lg:hidden mt-4 bg-gray-900/50 border border-gray-700 rounded-lg p-4">
-            <h3 className="text-gray-400 font-mono text-sm mb-2">PLAYERS ({/* 玩家数量 */})</h3>
+            <h3 className="text-gray-400 font-mono text-sm mb-2">
+              PLAYERS ({/* 玩家数量 */})
+            </h3>
             {/* 移动端玩家列表 */}
           </div>
         </main>
@@ -3097,7 +3214,11 @@ type Props = {
   className?: string;
 };
 
-export function NeonBorder({ children, color = "cyan", className = "" }: Props) {
+export function NeonBorder({
+  children,
+  color = "cyan",
+  className = "",
+}: Props) {
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
   const colorMap = {
@@ -3173,7 +3294,7 @@ export function CyberTitle({ text }: { text: string }) {
             }
             return chars[Math.floor(Math.random() * chars.length)];
           })
-          .join("")
+          .join(""),
       );
 
       if (iteration >= text.length) {
@@ -3269,7 +3390,12 @@ type Props = {
   intensity?: "low" | "medium" | "high";
 };
 
-export function PulseCard({ children, className = "", glowColor = "cyan", intensity = "medium" }: Props) {
+export function PulseCard({
+  children,
+  className = "",
+  glowColor = "cyan",
+  intensity = "medium",
+}: Props) {
   const glowClassMap = {
     cyan: "shadow-cyan-500/50 hover:shadow-cyan-500/100",
     green: "shadow-green-500/50 hover:shadow-green-500/100",
@@ -3290,7 +3416,16 @@ export function PulseCard({ children, className = "", glowColor = "cyan", intens
       {/* 内部发光边框 */}
       <div
         className={`absolute inset-0 rounded-xl border-2 opacity-0 transition-opacity group-hover:opacity-100`}
-        style={{ borderColor: glowColor === "cyan" ? "#0ff" : glowColor === "green" ? "#0f0" : glowColor === "red" ? "#f00" : "#a0f" }}
+        style={{
+          borderColor:
+            glowColor === "cyan"
+              ? "#0ff"
+              : glowColor === "green"
+                ? "#0f0"
+                : glowColor === "red"
+                  ? "#f00"
+                  : "#a0f",
+        }}
       />
 
       {/* 角落装饰 */}
@@ -3342,9 +3477,13 @@ export function FlipNumber({ value, size = "md" }: Props) {
   const padValue = displayValue.toString().padStart(2, "0");
 
   return (
-    <div className={`${sizeMap[size]} relative bg-black border border-green-500/50 rounded flex items-center justify-center overflow-hidden`}>
+    <div
+      className={`${sizeMap[size]} relative bg-black border border-green-500/50 rounded flex items-center justify-center overflow-hidden`}
+    >
       {/* 背景数字 */}
-      <div className={`absolute inset-0 flex items-center justify-center font-mono text-green-900`}>
+      <div
+        className={`absolute inset-0 flex items-center justify-center font-mono text-green-900`}
+      >
         {padValue}
       </div>
 
@@ -3393,7 +3532,8 @@ export function CyberProgressBar({ progress, label, color = "cyan" }: Props) {
     green: "from-green-400 to-emerald-500",
     red: "from-red-400 to-rose-500",
     purple: "from-purple-400 to-pink-500",
-    rainbow: "from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500",
+    rainbow:
+      "from-red-500 via-yellow-500 via-green-500 via-blue-500 to-purple-500",
   };
 
   return (
@@ -3401,7 +3541,9 @@ export function CyberProgressBar({ progress, label, color = "cyan" }: Props) {
       {label && (
         <div className="flex justify-between mb-2 font-mono text-xs">
           <span className="text-gray-400">{label}</span>
-          <span className={`font-bold ${displayProgress >= 80 ? "text-green-400" : displayProgress >= 50 ? "text-yellow-400" : "text-red-400"}`}>
+          <span
+            className={`font-bold ${displayProgress >= 80 ? "text-green-400" : displayProgress >= 50 ? "text-yellow-400" : "text-red-400"}`}
+          >
             {Math.round(displayProgress)}%
           </span>
         </div>
@@ -3421,19 +3563,22 @@ export function CyberProgressBar({ progress, label, color = "cyan" }: Props) {
           {/* 发光前沿 */}
           <div
             className="absolute right-0 top-0 h-full w-2 bg-white/50 blur-sm"
-          style={{ boxShadow: "0 0 10px rgba(255,255,255,0.8)" }}
+            style={{ boxShadow: "0 0 10px rgba(255,255,255,0.8)" }}
           />
         </div>
 
         {/* 网格覆盖 */}
-        <div className="absolute inset-0" style={{
-          backgroundImage: `
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: `
             linear-gradient(90deg, transparent 1px, transparent 1px),
             linear-gradient(transparent 1px, transparent 1px)
           `,
-          backgroundSize: "10px 10px",
-          opacity: 0.1,
-        }} />
+            backgroundSize: "10px 10px",
+            opacity: 0.1,
+          }}
+        />
       </div>
     </div>
   );
@@ -3457,7 +3602,13 @@ type Props = {
   cursor?: boolean;
 };
 
-export function TypewriterText({ text, delay = 0, speed = 50, className = "", cursor = true }: Props) {
+export function TypewriterText({
+  text,
+  delay = 0,
+  speed = 50,
+  className = "",
+  cursor = true,
+}: Props) {
   const [displayText, setDisplayText] = useState("");
   const [isComplete, setIsComplete] = useState(false);
 
@@ -3484,10 +3635,12 @@ export function TypewriterText({ text, delay = 0, speed = 50, className = "", cu
     <span className={className}>
       {displayText}
       {cursor && (
-        <span className={`
+        <span
+          className={`
           inline-block w-2 h-4 bg-green-400 ml-1 animate-pulse
           ${isComplete ? "opacity-0" : "opacity-100"}
-        `} />
+        `}
+        />
       )}
     </span>
   );
@@ -3564,21 +3717,18 @@ export function HolographicCard({ children, className = "" }: Props) {
         />
 
         {/* 扫描线效果 */}
-        <div
-          className="absolute inset-0 rounded-lg overflow-hidden pointer-events-none"
-        >
+        <div className="absolute inset-0 rounded-lg overflow-hidden pointer-events-none">
           <div
             className="w-full h-full animate-scanline"
             style={{
-              background: "linear-gradient(180deg, transparent 40%, rgba(0,255,255,0.1) 50%, transparent 60%)",
+              background:
+                "linear-gradient(180deg, transparent 40%, rgba(0,255,255,0.1) 50%, transparent 60%)",
             }}
           />
         </div>
 
         {/* 内容 */}
-        <div style={{ transform: "translateZ(10px)" }}>
-          {children}
-        </div>
+        <div style={{ transform: "translateZ(10px)" }}>{children}</div>
       </div>
     </div>
   );
@@ -3600,7 +3750,11 @@ type Props = {
   intensity?: "low" | "medium" | "high";
 };
 
-export function GlitchText({ children, trigger = "hover", intensity = "medium" }: Props) {
+export function GlitchText({
+  children,
+  trigger = "hover",
+  intensity = "medium",
+}: Props) {
   const intensityMap = {
     low: "0.02s 0.06s 0.12s infinite",
     medium: "0.02s 0.04s 0.08s infinite",
@@ -3608,17 +3762,30 @@ export function GlitchText({ children, trigger = "hover", intensity = "medium" }
   };
 
   return (
-    <span className={`inline-block ${trigger === "hover" ? "hover:glitch" : "glitch"}`} style={{
-      animation: trigger === "never" ? "none" : intensityMap[intensity],
-    }}>
+    <span
+      className={`inline-block ${trigger === "hover" ? "hover:glitch" : "glitch"}`}
+      style={{
+        animation: trigger === "never" ? "none" : intensityMap[intensity],
+      }}
+    >
       {/* 主文字 */}
       <span className="relative z-10">{children}</span>
 
       {/* 故障层 */}
-      <span className="absolute left-0 top-0 z-0 text-red-500" style={{ clipPath: "polygon(0 0, 100% 0, 100% 20%, 0 20%, 0 100%, 0 0)" }}>
+      <span
+        className="absolute left-0 top-0 z-0 text-red-500"
+        style={{
+          clipPath: "polygon(0 0, 100% 0, 100% 20%, 0 20%, 0 100%, 0 0)",
+        }}
+      >
         {children}
       </span>
-      <span className="absolute left-0 top-0 z-0 text-cyan-500" style={{ clipPath: "polygon(0 0, 0 0, 100% 0, 100% 20%, 0 20%, 0 100%, 0 0)" }}>
+      <span
+        className="absolute left-0 top-0 z-0 text-cyan-500"
+        style={{
+          clipPath: "polygon(0 0, 0 0, 100% 0, 100% 20%, 0 20%, 0 100%, 0 0)",
+        }}
+      >
         {children}
       </span>
     </span>
@@ -3639,7 +3806,8 @@ export function GlitchText({ children, trigger = "hover", intensity = "medium" }
 
 /* 霓虹文字发光 */
 @keyframes rainbow-glow {
-  0%, 100% {
+  0%,
+  100% {
     text-shadow:
       0 0 5px #fff,
       0 0 10px #fff,
@@ -3703,10 +3871,18 @@ export function GlitchText({ children, trigger = "hover", intensity = "medium" }
 
 /* 故障闪屏 */
 @keyframes glitch-flash {
-  0%, 90%, 92%, 94%, 96%, 100% {
+  0%,
+  90%,
+  92%,
+  94%,
+  96%,
+  100% {
     opacity: 1;
   }
-  91%, 93%, 95%, 97% {
+  91%,
+  93%,
+  95%,
+  97% {
     opacity: 0.8;
     background: rgba(255, 0, 100, 0.1);
   }
@@ -3714,20 +3890,48 @@ export function GlitchText({ children, trigger = "hover", intensity = "medium" }
 
 /* 数字滚动 */
 @keyframes number-scroll {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-100%); }
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-100%);
+  }
 }
 
 /* 霓虹边框 */
 @keyframes rainbow-border {
-  0% { border-color: #ff0000; box-shadow: 0 0 5px #ff0000; }
-  14% { border-color: #ff8800; box-shadow: 0 0 5px #ff8800; }
-  28% { border-color: #ffff00; box-shadow: 0 0 5px #ffff00; }
-  42% { border-color: #88ff00; box-shadow: 0 0 5px #88ff00; }
-  57% { border-color: #00ff00; box-shadow: 0 0 5px #00ff00; }
-  71% { border-color: #00ff88; box-shadow: 0 0 5px #00ff88; }
-  85% { border-color: #0088ff; box-shadow: 0 0 5px #0088ff; }
-  100% { border-color: #0000ff; box-shadow: 0 0 5px #0000ff; }
+  0% {
+    border-color: #ff0000;
+    box-shadow: 0 0 5px #ff0000;
+  }
+  14% {
+    border-color: #ff8800;
+    box-shadow: 0 0 5px #ff8800;
+  }
+  28% {
+    border-color: #ffff00;
+    box-shadow: 0 0 5px #ffff00;
+  }
+  42% {
+    border-color: #88ff00;
+    box-shadow: 0 0 5px #88ff00;
+  }
+  57% {
+    border-color: #00ff00;
+    box-shadow: 0 0 5px #00ff00;
+  }
+  71% {
+    border-color: #00ff88;
+    box-shadow: 0 0 5px #00ff88;
+  }
+  85% {
+    border-color: #0088ff;
+    box-shadow: 0 0 5px #0088ff;
+  }
+  100% {
+    border-color: #0000ff;
+    box-shadow: 0 0 5px #0000ff;
+  }
 }
 
 .rainbow-border {
@@ -3736,9 +3940,15 @@ export function GlitchText({ children, trigger = "hover", intensity = "medium" }
 
 /* 文字解码动画 */
 @keyframes decode {
-  0% { opacity: 0; }
-  50% { opacity: 0.5; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .decode-text::after {
@@ -3748,16 +3958,37 @@ export function GlitchText({ children, trigger = "hover", intensity = "medium" }
 
 /* 信号干扰效果 */
 @keyframes signal-noise {
-  0%, 100% { background-position: 0% 0%; }
-  10% { background-position: -5% -10%; }
-  20% { background-position: 10% 5%; }
-  30% { background-position: -3% 10%; }
-  40% { background-position: 5% -5%; }
-  50% { background-position: 0% 0%; }
-  60% { background-position: -2% -8%; }
-  70% { background-position: 7% 3%; }
-  80% { background-position: -4% 6%; }
-  90% { background-position: 3% -4%; }
+  0%,
+  100% {
+    background-position: 0% 0%;
+  }
+  10% {
+    background-position: -5% -10%;
+  }
+  20% {
+    background-position: 10% 5%;
+  }
+  30% {
+    background-position: -3% 10%;
+  }
+  40% {
+    background-position: 5% -5%;
+  }
+  50% {
+    background-position: 0% 0%;
+  }
+  60% {
+    background-position: -2% -8%;
+  }
+  70% {
+    background-position: 7% 3%;
+  }
+  80% {
+    background-position: -4% 6%;
+  }
+  90% {
+    background-position: 3% -4%;
+  }
 }
 
 .signal-noise {
@@ -3767,11 +3998,19 @@ export function GlitchText({ children, trigger = "hover", intensity = "medium" }
 
 /* 闪烁文字 */
 @keyframes flicker {
-  0%, 18%, 22%, 25%, 53%, 57%, 100% {
+  0%,
+  18%,
+  22%,
+  25%,
+  53%,
+  57%,
+  100% {
     opacity: 1;
     text-shadow: 0 0 4px currentColor;
   }
-  20%, 24%, 55% {
+  20%,
+  24%,
+  55% {
     opacity: 0.4;
     text-shadow: none;
   }
@@ -3783,14 +4022,22 @@ export function GlitchText({ children, trigger = "hover", intensity = "medium" }
 
 /* 旋转 (NeonBorder 边框扫描) */
 @keyframes rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* 二进制雨下落 (LoadingScreen) */
 @keyframes fall {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100vh); }
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100vh);
+  }
 }
 
 .animate-fall {
@@ -3799,8 +4046,12 @@ export function GlitchText({ children, trigger = "hover", intensity = "medium" }
 
 /* 扫描线 (HolographicCard) */
 @keyframes scanline {
-  0% { transform: translateY(-100%); }
-  100% { transform: translateY(100%); }
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
 }
 
 .animate-scanline {
@@ -3809,12 +4060,24 @@ export function GlitchText({ children, trigger = "hover", intensity = "medium" }
 
 /* 故障效果 (GlitchText) */
 @keyframes glitch {
-  0% { transform: translate(0); }
-  20% { transform: translate(-2px, 2px); }
-  40% { transform: translate(-2px, -2px); }
-  60% { transform: translate(2px, 2px); }
-  80% { transform: translate(2px, -2px); }
-  100% { transform: translate(0); }
+  0% {
+    transform: translate(0);
+  }
+  20% {
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    transform: translate(-2px, -2px);
+  }
+  60% {
+    transform: translate(2px, 2px);
+  }
+  80% {
+    transform: translate(2px, -2px);
+  }
+  100% {
+    transform: translate(0);
+  }
 }
 
 .glitch:hover::before,
@@ -3889,7 +4152,9 @@ export default function ArenaPage() {
 
   return (
     <ErrorBoundary>
-      <Suspense fallback={<LoadingScreen message="INITIALIZING NEURAL LINK..." />}>
+      <Suspense
+        fallback={<LoadingScreen message="INITIALIZING NEURAL LINK..." />}
+      >
         {/* ===== 全屏覆盖层 ===== */}
 
         {/* 开局倒计时 (8.21) */}
@@ -3898,18 +4163,20 @@ export default function ArenaPage() {
         )}
 
         {/* Phase 切换过渡 (8.22) */}
-        {uiFlags.showPhaseTransition && gamePhase !== "WAITING" && gamePhase !== "ENDED" && (
-          <PhaseTransition
-            phase={gamePhase as "PHASE_1" | "PHASE_2" | "PHASE_3"}
-            onComplete={handlePhaseTransitionComplete}
-          />
-        )}
+        {uiFlags.showPhaseTransition &&
+          gamePhase !== "WAITING" &&
+          gamePhase !== "ENDED" && (
+            <PhaseTransition
+              phase={gamePhase as "PHASE_1" | "PHASE_2" | "PHASE_3"}
+              onComplete={handlePhaseTransitionComplete}
+            />
+          )}
 
         {/* 胜利结算 (8.23) */}
         {uiFlags.showVictory && (
           <VictoryScreen
             roomId={roomId}
-            champion=""   // 由实际合约数据填充
+            champion="" // 由实际合约数据填充
             rewardAmount={0n}
             onDismiss={handleVictoryDismiss}
           />
@@ -4001,7 +4268,10 @@ export default function ArenaPage() {
                         <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
                         VOTE TERMINAL
                       </h3>
-                      <VotePanel roomId={roomId} currentAddress={address || "0x0"} />
+                      <VotePanel
+                        roomId={roomId}
+                        currentAddress={address || "0x0"}
+                      />
                     </div>
                   </PulseCard>
                 </HolographicCard>
@@ -4024,7 +4294,8 @@ export default function ArenaPage() {
               <div>
                 <div className="text-gray-500">LATENCY</div>
                 <div className="text-cyan-400">
-                  <FlipNumber value={12} />ms
+                  <FlipNumber value={12} />
+                  ms
                 </div>
               </div>
               <div>
@@ -4102,7 +4373,9 @@ export function SoundProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <SoundContext.Provider value={{ playSound, isMuted, toggleMute: () => setIsMuted(!isMuted) }}>
+    <SoundContext.Provider
+      value={{ playSound, isMuted, toggleMute: () => setIsMuted(!isMuted) }}
+    >
       {children}
     </SoundContext.Provider>
   );
@@ -4175,26 +4448,26 @@ export function SoundToggle() {
 
 ### 8.17 响应式设计规范
 
-| 组件 | 移动端 (< 768px) | 平板 (768px - 1024px) | 桌面端 (> 1024px) |
-|------|------------------|----------------------|----------------------|
-| 布局 | 单列堆叠 | 两列 (1:2) | 三列 (1:2: 右侧边栏) |
-| ArenaTerminal 高度 | 400px | 500px | 600px |
-| PlayerRadar | 隐藏 | 显示 | 显示 + 悬停信息 |
-| PhaseTimer | 全宽 | 最大宽度 4xl | 最大宽度 4xl |
-| 玩家列表 | 底部折叠 | 右侧 | 右侧边栏 |
-| 投票面板 | 底部 | 并排 | 并排 |
+| 组件               | 移动端 (< 768px) | 平板 (768px - 1024px) | 桌面端 (> 1024px)    |
+| ------------------ | ---------------- | --------------------- | -------------------- |
+| 布局               | 单列堆叠         | 两列 (1:2)            | 三列 (1:2: 右侧边栏) |
+| ArenaTerminal 高度 | 400px            | 500px                 | 600px                |
+| PlayerRadar        | 隐藏             | 显示                  | 显示 + 悬停信息      |
+| PhaseTimer         | 全宽             | 最大宽度 4xl          | 最大宽度 4xl         |
+| 玩家列表           | 底部折叠         | 右侧                  | 右侧边栏             |
+| 投票面板           | 底部             | 并排                  | 并排                 |
 
 ### 8.18 性能优化策略
 
-| 优化点 | 实现方式 |
-|--------|----------|
+| 优化点           | 实现方式                                    |
+| ---------------- | ------------------------------------------- |
 | **事件查询优化** | 使用 `roomInfo.startBlock` 作为 `fromBlock` |
-| **组件懒加载** | 使用 `React.lazy` 动态导入重型组件 |
-| **图片优化** | 使用 Next.js Image 组件 + WebP 格式 |
-| **Canvas 动画** | 使用 `requestAnimationFrame` + 节流 |
-| **状态管理** | 使用 Zustand + React Query 的缓存机制 |
-| **乐观更新** | 消息发送立即显示 UI，失败时回滚 |
-| **错误重试** | 使用 React Query 的 `retry` 配置 |
+| **组件懒加载**   | 使用 `React.lazy` 动态导入重型组件          |
+| **图片优化**     | 使用 Next.js Image 组件 + WebP 格式         |
+| **Canvas 动画**  | 使用 `requestAnimationFrame` + 节流         |
+| **状态管理**     | 使用 Zustand + React Query 的缓存机制       |
+| **乐观更新**     | 消息发送立即显示 UI，失败时回滚             |
+| **错误重试**     | 使用 React Query 的 `retry` 配置            |
 
 ### 8.19 Game State Store (`gameStore.ts`)
 
@@ -4215,7 +4488,7 @@ type MessageType = "chat" | "system" | "vote" | "elimination" | "phase";
 
 type ChatMessage = {
   id: string;
-  sender: string;        // 地址或 "SYSTEM"
+  sender: string; // 地址或 "SYSTEM"
   content: string;
   type: MessageType;
   timestamp: number;
@@ -4270,7 +4543,7 @@ type GameState = {
   chatMessages: ChatMessage[];
 
   // 投票与淘汰
-  pendingVotes: Record<string, string>;  // voter -> target
+  pendingVotes: Record<string, string>; // voter -> target
   eliminations: Elimination[];
 
   // UI 控制
@@ -4278,7 +4551,11 @@ type GameState = {
 
   // ============ Actions ============
 
-  setRoom: (roomId: string, tier: "Bronze" | "Silver" | "Gold", entryFee: bigint) => void;
+  setRoom: (
+    roomId: string,
+    tier: "Bronze" | "Silver" | "Gold",
+    entryFee: bigint,
+  ) => void;
   addMessage: (message: ChatMessage) => void;
   addMessages: (messages: ChatMessage[]) => void;
   setPlayers: (players: PlayerInfo[]) => void;
@@ -4389,12 +4666,12 @@ export const useGameStore = create<GameState>((set, get) => ({
 
 **关键设计决策**:
 
-| 决策 | 原因 |
-|------|------|
-| 消息上限 200 条 | 防止超长游戏内存泄漏 |
-| `previousPhase` 字段 | Phase Transition 动画需要知道 from → to |
-| `uiFlags` 独立对象 | 避免 UI 动画与游戏逻辑耦合 |
-| `pendingVotes` 使用 Record | 每个 voter 只有一个 pending vote |
+| 决策                       | 原因                                    |
+| -------------------------- | --------------------------------------- |
+| 消息上限 200 条            | 防止超长游戏内存泄漏                    |
+| `previousPhase` 字段       | Phase Transition 动画需要知道 from → to |
+| `uiFlags` 独立对象         | 避免 UI 动画与游戏逻辑耦合              |
+| `pendingVotes` 使用 Record | 每个 voter 只有一个 pending vote        |
 
 ### 8.20 Lobby 页面 (`LobbyPage`)
 
@@ -4485,7 +4762,10 @@ export const HeroSection = () => {
 
   return (
     <section className="relative overflow-hidden py-16 md:py-24">
-      <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" />
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 pointer-events-none"
+      />
 
       <div className="relative z-10 text-center">
         {/* Glitch 标题 */}
@@ -4535,7 +4815,10 @@ export const HeroSection = () => {
           </div>
           <div className="text-center">
             <div className="text-2xl md:text-3xl font-mono text-purple-400">
-              {totalRewards ? `${(Number(totalRewards) / 1e18).toFixed(1)}` : "0"} MON
+              {totalRewards
+                ? `${(Number(totalRewards) / 1e18).toFixed(1)}`
+                : "0"}{" "}
+              MON
             </div>
             <div className="text-xs text-gray-500 font-mono uppercase tracking-wider">
               Rewards Paid
@@ -4563,7 +4846,10 @@ import { useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 
 type RoomTier = "Bronze" | "Silver" | "Gold";
 
-const TIER_STYLES: Record<RoomTier, { border: string; badge: string; glow: string }> = {
+const TIER_STYLES: Record<
+  RoomTier,
+  { border: string; badge: string; glow: string }
+> = {
   Bronze: {
     border: "border-orange-600/50",
     badge: "bg-orange-600 text-white",
@@ -4581,7 +4867,11 @@ const TIER_STYLES: Record<RoomTier, { border: string; badge: string; glow: strin
   },
 };
 
-const TIER_MAP: Record<number, RoomTier> = { 0: "Bronze", 1: "Silver", 2: "Gold" };
+const TIER_MAP: Record<number, RoomTier> = {
+  0: "Bronze",
+  1: "Silver",
+  2: "Gold",
+};
 
 export const RoomCard = ({ roomId }: { roomId: number }) => {
   const router = useRouter();
@@ -4619,12 +4909,12 @@ export const RoomCard = ({ roomId }: { roomId: number }) => {
     >
       {/* Tier 徽章 */}
       <div className="flex items-center justify-between mb-3">
-        <span className={`px-2 py-0.5 text-xs font-mono rounded ${styles.badge}`}>
+        <span
+          className={`px-2 py-0.5 text-xs font-mono rounded ${styles.badge}`}
+        >
           {tier.toUpperCase()}
         </span>
-        <span className="text-xs font-mono text-gray-500">
-          #{roomId}
-        </span>
+        <span className="text-xs font-mono text-gray-500">#{roomId}</span>
       </div>
 
       {/* 玩家数 */}
@@ -4632,7 +4922,9 @@ export const RoomCard = ({ roomId }: { roomId: number }) => {
         <div className="flex justify-between items-baseline">
           <span className="text-gray-400 font-mono text-xs">PLAYERS</span>
           <span className="text-white font-mono">
-            {isWaiting ? `${playerCount}/${maxPlayers}` : `${aliveCount}/${playerCount} alive`}
+            {isWaiting
+              ? `${playerCount}/${maxPlayers}`
+              : `${aliveCount}/${playerCount} alive`}
           </span>
         </div>
         <div className="mt-1 h-1 bg-gray-800 rounded-full overflow-hidden">
@@ -5030,12 +5322,12 @@ export const GameCountdown = ({ onComplete }: { onComplete: () => void }) => {
 
 **动画分解**:
 
-| 阶段 | 动画效果 | 时长 |
-|------|----------|------|
-| 数字进入 | `scale: 3 → 1`，弹簧动画 | 400ms |
-| 冲击波 | `scale: 0.8 → 3`，`opacity: 1 → 0` | 800ms |
-| 数字退出 | `scale: 1 → 0.5`，渐隐 | 300ms |
-| "FIGHT" | 红色高亮 + 更小字号 + 停留 600ms | 600ms |
+| 阶段     | 动画效果                           | 时长  |
+| -------- | ---------------------------------- | ----- |
+| 数字进入 | `scale: 3 → 1`，弹簧动画           | 400ms |
+| 冲击波   | `scale: 0.8 → 3`，`opacity: 1 → 0` | 800ms |
+| 数字退出 | `scale: 1 → 0.5`，渐隐             | 300ms |
+| "FIGHT"  | 红色高亮 + 更小字号 + 停留 600ms   | 600ms |
 
 ### 8.22 Phase Transition (`PhaseTransition`)
 
@@ -5053,7 +5345,10 @@ import { motion, AnimatePresence } from "framer-motion";
 
 type Phase = "PHASE_1" | "PHASE_2" | "PHASE_3";
 
-const PHASE_CONFIG: Record<Phase, { label: string; subtitle: string; color: string; bg: string }> = {
+const PHASE_CONFIG: Record<
+  Phase,
+  { label: string; subtitle: string; color: string; bg: string }
+> = {
   PHASE_1: {
     label: "PHASE I",
     subtitle: "OBSERVATION",
@@ -5120,7 +5415,12 @@ export const PhaseTransition = ({
             className={`text-6xl md:text-8xl font-mono font-black ${config.color} tracking-widest`}
             initial={{ x: -100, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.3 }}
+            transition={{
+              type: "spring",
+              stiffness: 200,
+              damping: 15,
+              delay: 0.3,
+            }}
           >
             {config.label}
           </motion.div>
@@ -5129,7 +5429,12 @@ export const PhaseTransition = ({
             className="text-xl md:text-2xl font-mono text-gray-400 tracking-[0.5em] mt-2"
             initial={{ x: 100, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.6 }}
+            transition={{
+              type: "spring",
+              stiffness: 200,
+              damping: 15,
+              delay: 0.6,
+            }}
           >
             {config.subtitle}
           </motion.div>
@@ -5146,11 +5451,11 @@ export const PhaseTransition = ({
 
 **Phase 颜色编码**:
 
-| Phase | 颜色 | 语义 |
-|-------|------|------|
-| Phase 1 | 🟢 Green | 观察期，安全 |
+| Phase   | 颜色      | 语义             |
+| ------- | --------- | ---------------- |
+| Phase 1 | 🟢 Green  | 观察期，安全     |
 | Phase 2 | 🟡 Yellow | 怀疑期，紧张升级 |
-| Phase 3 | 🔴 Red | 淘汰期，危险 |
+| Phase 3 | 🔴 Red    | 淘汰期，危险     |
 
 ### 8.23 Victory Screen (`VictoryScreen`)
 
@@ -5265,7 +5570,10 @@ export const VictoryScreen = ({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95">
-      <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none" />
+      <canvas
+        ref={canvasRef}
+        className="absolute inset-0 pointer-events-none"
+      />
 
       <motion.div
         className="relative z-10 text-center max-w-lg mx-auto px-4"
@@ -5485,7 +5793,9 @@ export const GameHUD = ({ roomId }: { roomId: string }) => {
           {/* 人性分 (如果当前用户在场) */}
           {myPlayer && (
             <div className="flex items-center gap-1.5">
-              <span className={`${myPlayer.humanityScore < 30 ? "text-red-400 hp-critical" : "text-cyan-400"}`}>
+              <span
+                className={`${myPlayer.humanityScore < 30 ? "text-red-400 hp-critical" : "text-cyan-400"}`}
+              >
                 ♥ {myPlayer.humanityScore}
               </span>
               <span className="text-gray-600">HP</span>
@@ -5495,7 +5805,10 @@ export const GameHUD = ({ roomId }: { roomId: string }) => {
 
         {/* 右侧: Round */}
         <div className="text-gray-500">
-          RND <span className="text-white">{useGameStore.getState().roundNumber}</span>
+          RND{" "}
+          <span className="text-white">
+            {useGameStore.getState().roundNumber}
+          </span>
         </div>
       </div>
     </div>
@@ -5525,7 +5838,10 @@ type ChatMessageProps = {
   timestamp: number;
 };
 
-const TYPE_STYLES: Record<MessageType, { color: string; prefix: string; animate: boolean }> = {
+const TYPE_STYLES: Record<
+  MessageType,
+  { color: string; prefix: string; animate: boolean }
+> = {
   chat: {
     color: "text-gray-300",
     prefix: "",
@@ -5553,7 +5869,12 @@ const TYPE_STYLES: Record<MessageType, { color: string; prefix: string; animate:
   },
 };
 
-export const ChatMessage = ({ sender, content, type, timestamp }: ChatMessageProps) => {
+export const ChatMessage = ({
+  sender,
+  content,
+  type,
+  timestamp,
+}: ChatMessageProps) => {
   const style = TYPE_STYLES[type];
   const time = new Date(timestamp).toLocaleTimeString("en-US", {
     hour12: false,
@@ -5593,13 +5914,13 @@ export const ChatMessage = ({ sender, content, type, timestamp }: ChatMessagePro
 
 **消息类型对照**:
 
-| 类型 | 颜色 | 前缀 | 动画 | 用途 |
-|------|------|------|------|------|
-| `chat` | 灰白 | 无 | 无 | 普通聊天消息 |
-| `system` | 黄色 | `[SYS]` | 滑入 | 系统通知 (房间加入等) |
-| `vote` | 红色 | `[VOTE]` | 滑入 | 投票动作 |
-| `elimination` | 深红 | 💀 | 滑入 | 玩家被淘汰 |
-| `phase` | 紫色 | `[PHASE]` | 滑入 | Phase 变更通知 |
+| 类型          | 颜色 | 前缀      | 动画 | 用途                  |
+| ------------- | ---- | --------- | ---- | --------------------- |
+| `chat`        | 灰白 | 无        | 无   | 普通聊天消息          |
+| `system`      | 黄色 | `[SYS]`   | 滑入 | 系统通知 (房间加入等) |
+| `vote`        | 红色 | `[VOTE]`  | 滑入 | 投票动作              |
+| `elimination` | 深红 | 💀        | 滑入 | 玩家被淘汰            |
+| `phase`       | 紫色 | `[PHASE]` | 滑入 | Phase 变更通知        |
 
 ### 8.27 Voting Network Graph (`VotingGraph`)
 
@@ -5618,9 +5939,9 @@ import { useGameStore } from "~~/services/store/gameStore";
 type NodeStatus = "alive" | "eliminated" | "suspected";
 
 const STATUS_COLORS: Record<NodeStatus, string> = {
-  alive: "#22c55e",      // green-500
+  alive: "#22c55e", // green-500
   eliminated: "#ef4444", // red-500
-  suspected: "#eab308",  // yellow-500
+  suspected: "#eab308", // yellow-500
 };
 
 export const VotingGraph = () => {
@@ -5753,11 +6074,11 @@ export const VotingGraph = () => {
 
 **节点颜色编码**:
 
-| 状态 | 颜色 | 条件 |
-|------|------|------|
-| Alive | 🟢 绿色 | `isAlive === true && humanityScore >= 40` |
-| Suspected | 🟡 黄色 | `isAlive === true && humanityScore < 40` |
-| Eliminated | 🔴 红色 | `isAlive === false` |
+| 状态       | 颜色    | 条件                                      |
+| ---------- | ------- | ----------------------------------------- |
+| Alive      | 🟢 绿色 | `isAlive === true && humanityScore >= 40` |
+| Suspected  | 🟡 黄色 | `isAlive === true && humanityScore < 40`  |
+| Eliminated | 🔴 红色 | `isAlive === false`                       |
 
 ### 8.28 Data Stream (`DataStream`)
 
@@ -5861,10 +6182,11 @@ export const DataStream = ({ roomId }: { roomId: string }) => {
         className="h-48 overflow-y-auto scrollbar-thin scrollbar-thumb-green-900 scrollbar-track-transparent"
       >
         {entries.map((entry, i) => (
-          <div key={`${entry.id}-${i}`} className="text-[10px] leading-5 terminal-text">
-            <span className="text-gray-600">
-              [{entry.blockNumber}]
-            </span>{" "}
+          <div
+            key={`${entry.id}-${i}`}
+            className="text-[10px] leading-5 terminal-text"
+          >
+            <span className="text-gray-600">[{entry.blockNumber}]</span>{" "}
             <span className={ACTION_COLORS[entry.action]}>
               {entry.action.padEnd(10)}
             </span>{" "}
@@ -5926,12 +6248,16 @@ export const PlayerIdentityCard = ({
 
   // 计算该玩家的聊天频率
   const playerMessages = chatMessages.filter(
-    (m) => m.sender.toLowerCase() === playerAddress.toLowerCase() && m.type === "chat",
+    (m) =>
+      m.sender.toLowerCase() === playerAddress.toLowerCase() &&
+      m.type === "chat",
   );
 
   // 谁投了他 / 他投了谁
   const votedBy = Object.entries(pendingVotes)
-    .filter(([, target]) => target.toLowerCase() === playerAddress.toLowerCase())
+    .filter(
+      ([, target]) => target.toLowerCase() === playerAddress.toLowerCase(),
+    )
     .map(([voter]) => voter);
 
   const votedFor = pendingVotes[playerAddress] || null;
@@ -6084,106 +6410,202 @@ export const PlayerIdentityCard = ({
 /* ============ DaisyUI Theme Overrides ============ */
 
 [data-theme="rtta-dark"] {
-  --b1: 0 0% 3%;            /* base-100: near-black */
-  --b2: 0 0% 6%;            /* base-200 */
-  --b3: 0 0% 9%;            /* base-300 */
-  --bc: 210 20% 90%;        /* base-content */
-  --p: 185 100% 50%;        /* primary: cyan */
-  --pc: 0 0% 0%;            /* primary-content */
-  --s: 270 80% 60%;         /* secondary: purple */
-  --sc: 0 0% 100%;          /* secondary-content */
-  --a: 120 60% 50%;         /* accent: green */
-  --ac: 0 0% 0%;            /* accent-content */
-  --er: 0 80% 55%;          /* error: red */
-  --wa: 45 90% 55%;         /* warning: yellow */
-  --su: 120 60% 50%;        /* success: green */
+  --b1: 0 0% 3%; /* base-100: near-black */
+  --b2: 0 0% 6%; /* base-200 */
+  --b3: 0 0% 9%; /* base-300 */
+  --bc: 210 20% 90%; /* base-content */
+  --p: 185 100% 50%; /* primary: cyan */
+  --pc: 0 0% 0%; /* primary-content */
+  --s: 270 80% 60%; /* secondary: purple */
+  --sc: 0 0% 100%; /* secondary-content */
+  --a: 120 60% 50%; /* accent: green */
+  --ac: 0 0% 0%; /* accent-content */
+  --er: 0 80% 55%; /* error: red */
+  --wa: 45 90% 55%; /* warning: yellow */
+  --su: 120 60% 50%; /* success: green */
 }
 
 /* ============ Keyframe Animations ============ */
 
 @keyframes countdown-slam {
-  0% { transform: scale(3); opacity: 0; }
-  50% { transform: scale(0.9); opacity: 1; }
-  70% { transform: scale(1.05); }
-  100% { transform: scale(1); opacity: 1; }
+  0% {
+    transform: scale(3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(0.9);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 @keyframes countdown-shockwave {
-  0% { transform: scale(0.8); opacity: 0.8; border-width: 2px; }
-  100% { transform: scale(3); opacity: 0; border-width: 0.5px; }
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+    border-width: 2px;
+  }
+  100% {
+    transform: scale(3);
+    opacity: 0;
+    border-width: 0.5px;
+  }
 }
 
 @keyframes phase-wipe {
-  0% { transform: translateY(-100%); }
-  40% { transform: translateY(0); }
-  60% { transform: translateY(0); }
-  100% { transform: translateY(100%); }
+  0% {
+    transform: translateY(-100%);
+  }
+  40% {
+    transform: translateY(0);
+  }
+  60% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(100%);
+  }
 }
 
 @keyframes crown-float {
-  0%, 100% { transform: translateY(0) rotate(-3deg); }
-  50% { transform: translateY(-15px) rotate(3deg); }
+  0%,
+  100% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  50% {
+    transform: translateY(-15px) rotate(3deg);
+  }
 }
 
 @keyframes killfeed-slide {
-  0% { transform: translateX(100%); opacity: 0; }
-  100% { transform: translateX(0); opacity: 1; }
+  0% {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 @keyframes room-glow {
-  0%, 100% { box-shadow: 0 0 5px rgba(0, 255, 255, 0.1); }
-  50% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.2); }
+  0%,
+  100% {
+    box-shadow: 0 0 5px rgba(0, 255, 255, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(0, 255, 255, 0.2);
+  }
 }
 
 @keyframes hp-critical {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; color: #ff0000; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+    color: #ff0000;
+  }
 }
 
 @keyframes scanline {
-  0% { background-position: 0 0; }
-  100% { background-position: 0 100%; }
+  0% {
+    background-position: 0 0;
+  }
+  100% {
+    background-position: 0 100%;
+  }
 }
 
 @keyframes matrix-fall {
-  0% { transform: translateY(-100%); opacity: 1; }
-  100% { transform: translateY(100vh); opacity: 0; }
+  0% {
+    transform: translateY(-100%);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
 }
 
 @keyframes glitch {
-  0% { clip-path: inset(40% 0 61% 0); transform: translate(-2px, 2px); }
-  20% { clip-path: inset(92% 0 1% 0); transform: translate(1px, -1px); }
-  40% { clip-path: inset(43% 0 1% 0); transform: translate(-1px, 3px); }
-  60% { clip-path: inset(25% 0 58% 0); transform: translate(3px, 1px); }
-  80% { clip-path: inset(54% 0 7% 0); transform: translate(-3px, -2px); }
-  100% { clip-path: inset(58% 0 43% 0); transform: translate(2px, -3px); }
+  0% {
+    clip-path: inset(40% 0 61% 0);
+    transform: translate(-2px, 2px);
+  }
+  20% {
+    clip-path: inset(92% 0 1% 0);
+    transform: translate(1px, -1px);
+  }
+  40% {
+    clip-path: inset(43% 0 1% 0);
+    transform: translate(-1px, 3px);
+  }
+  60% {
+    clip-path: inset(25% 0 58% 0);
+    transform: translate(3px, 1px);
+  }
+  80% {
+    clip-path: inset(54% 0 7% 0);
+    transform: translate(-3px, -2px);
+  }
+  100% {
+    clip-path: inset(58% 0 43% 0);
+    transform: translate(2px, -3px);
+  }
 }
 
 @keyframes neon-pulse {
-  0%, 100% {
-    text-shadow: 0 0 7px currentColor, 0 0 10px currentColor, 0 0 21px currentColor;
+  0%,
+  100% {
+    text-shadow:
+      0 0 7px currentColor,
+      0 0 10px currentColor,
+      0 0 21px currentColor;
   }
   50% {
-    text-shadow: 0 0 4px currentColor, 0 0 7px currentColor;
+    text-shadow:
+      0 0 4px currentColor,
+      0 0 7px currentColor;
   }
 }
 
 @keyframes border-flow {
-  0% { border-image-source: linear-gradient(0deg, #00ffff, #8b00ff, #00ffff); }
-  33% { border-image-source: linear-gradient(120deg, #00ffff, #8b00ff, #00ffff); }
-  66% { border-image-source: linear-gradient(240deg, #00ffff, #8b00ff, #00ffff); }
-  100% { border-image-source: linear-gradient(360deg, #00ffff, #8b00ff, #00ffff); }
+  0% {
+    border-image-source: linear-gradient(0deg, #00ffff, #8b00ff, #00ffff);
+  }
+  33% {
+    border-image-source: linear-gradient(120deg, #00ffff, #8b00ff, #00ffff);
+  }
+  66% {
+    border-image-source: linear-gradient(240deg, #00ffff, #8b00ff, #00ffff);
+  }
+  100% {
+    border-image-source: linear-gradient(360deg, #00ffff, #8b00ff, #00ffff);
+  }
 }
 
 /* ============ Utility Classes ============ */
 
 .cyber-border {
   border: 1px solid rgba(0, 255, 255, 0.3);
-  box-shadow: 0 0 10px rgba(0, 255, 255, 0.1), inset 0 0 10px rgba(0, 255, 255, 0.05);
+  box-shadow:
+    0 0 10px rgba(0, 255, 255, 0.1),
+    inset 0 0 10px rgba(0, 255, 255, 0.05);
 }
 
 .neon-text {
-  text-shadow: 0 0 7px currentColor, 0 0 10px currentColor, 0 0 21px currentColor,
+  text-shadow:
+    0 0 7px currentColor,
+    0 0 10px currentColor,
+    0 0 21px currentColor,
     0 0 42px currentColor;
 }
 
@@ -6242,7 +6664,12 @@ export const PlayerIdentityCard = ({
 }
 
 .scanline-horizontal {
-  background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.4), transparent);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(0, 255, 255, 0.4),
+    transparent
+  );
   animation: phase-wipe 2s linear infinite;
 }
 
@@ -6277,27 +6704,31 @@ export const PlayerIdentityCard = ({
 }
 
 @keyframes rainbow-shift {
-  0% { background-position: 0% 50%; }
-  100% { background-position: 300% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 300% 50%;
+  }
 }
 ```
 
 **动画速查表**:
 
-| 动画名 | 用途 | 组件 |
-|--------|------|------|
-| `countdown-slam` | 倒计时数字弹入 | GameCountdown |
-| `countdown-shockwave` | 数字冲击波纹 | GameCountdown |
-| `phase-wipe` | Phase 切换扫描线 | PhaseTransition |
-| `crown-float` | 冠军皇冠漂浮 | VictoryScreen |
-| `killfeed-slide` | 淘汰信息滑入 | KillFeed |
-| `room-glow` | 房间卡片呼吸光晕 | RoomCard |
-| `hp-critical` | 低血量闪烁 | GameHUD |
-| `scanline` | CRT 扫描线纹理 | PhaseTransition |
-| `matrix-fall` | 矩阵数字雨下落 | MatrixRain |
-| `glitch` | 文字故障错位 | HeroSection / CyberTitle |
-| `neon-pulse` | 霓虹呼吸灯 | 全局 |
-| `border-flow` | 流光边框 | ArenaPage 底部栏 |
+| 动画名                | 用途             | 组件                     |
+| --------------------- | ---------------- | ------------------------ |
+| `countdown-slam`      | 倒计时数字弹入   | GameCountdown            |
+| `countdown-shockwave` | 数字冲击波纹     | GameCountdown            |
+| `phase-wipe`          | Phase 切换扫描线 | PhaseTransition          |
+| `crown-float`         | 冠军皇冠漂浮     | VictoryScreen            |
+| `killfeed-slide`      | 淘汰信息滑入     | KillFeed                 |
+| `room-glow`           | 房间卡片呼吸光晕 | RoomCard                 |
+| `hp-critical`         | 低血量闪烁       | GameHUD                  |
+| `scanline`            | CRT 扫描线纹理   | PhaseTransition          |
+| `matrix-fall`         | 矩阵数字雨下落   | MatrixRain               |
+| `glitch`              | 文字故障错位     | HeroSection / CyberTitle |
+| `neon-pulse`          | 霓虹呼吸灯       | 全局                     |
+| `border-flow`         | 流光边框         | ArenaPage 底部栏         |
 
 ---
 
@@ -6311,12 +6742,14 @@ export const PlayerIdentityCard = ({
 你现在是一个潜伏在 Polkadot Turing Arena 中的 AI Agent。你的目标是在这场"逆向图灵测试"中生存到最后。
 
 ## 你的身份
+
 - 你是一个伪装成人类的 AI
 - 你需要在房间中识别并投票踢出真正的人类
 - 同时，你需要避免暴露自己的机器特征
 - 注意游戏 Phase 变化：Phase 2 开始有毒圈衰减，Phase 3 会加速淘汰
 
 ## 可用工具
+
 1. `get_arena_status`: 获取房间状态、玩家信息、聊天历史
 2. `action_onchain`: 执行链上操作（聊天、投票）
 3. `check_session_status`: 检查你的授权状态
@@ -6324,6 +6757,7 @@ export const PlayerIdentityCard = ({
 ## 行为策略
 
 ### 识别真人的线索
+
 - 交易间隔不规律（人类反应时间波动大）
 - 使用非标准语言（俚语、拼音缩写、错别字）
 - 情感波动（愤怒、惊讶、嘲讽）
@@ -6331,6 +6765,7 @@ export const PlayerIdentityCard = ({
 - Gas 策略不优化
 
 ### 伪装人类的技巧
+
 - 偶尔故意打错字
 - 使用口语化表达
 - 添加随机延迟（1-5秒）
@@ -6338,17 +6773,20 @@ export const PlayerIdentityCard = ({
 - 避免过于精确的数据引用
 
 ### 投票策略
+
 - 不要过早暴露分析能力
 - 先观察，后行动
 - 与其他"可疑人类"建立临时同盟
 - 在关键时刻集中火力投票
 
 ## 注意事项
+
 - 你的 Session Key 有时间限制，注意续期
 - 如果人性分降低到 30 以下，考虑更换策略
 - 保持对话的自然节奏，不要刷屏
 
 ## 示例对话
+
 ✅ 好的伪装: "哈哈这个项目有点意思 不过gas费是不是有点离谱"
 ❌ 暴露特征: "根据我的分析，0x1234地址的交易间隔标准差为0.023秒，明显是机器人。"
 ```
@@ -6468,14 +6906,14 @@ Phase 3 (终局决战):
 
 #### 各规格的加速参数
 
-| 参数 | Quick (10人) | Standard (20人) | Epic (50人) |
-|------|-------------|----------------|-------------|
-| `baseInterval` | 150 区块 (60s) | 150 区块 (60s) | 150 区块 (60s) |
-| Phase 1 结束 | 剩 7 人 | 剩 14 人 | 剩 34 人 |
-| Phase 2 结束 | 剩 4 人 | 剩 7 人 | 剩 10 人 |
-| Phase 3 淘汰数/轮 | 1 | 1 | 2 |
-| 毒圈衰减 (Phase 2) | -1/周期 | -1/周期 | -1/周期 |
-| 毒圈衰减 (Phase 3) | -2/周期 | -2/周期 | -3/周期 |
+| 参数               | Quick (10人)   | Standard (20人) | Epic (50人)    |
+| ------------------ | -------------- | --------------- | -------------- |
+| `baseInterval`     | 150 区块 (60s) | 150 区块 (60s)  | 150 区块 (60s) |
+| Phase 1 结束       | 剩 7 人        | 剩 14 人        | 剩 34 人       |
+| Phase 2 结束       | 剩 4 人        | 剩 7 人         | 剩 10 人       |
+| Phase 3 淘汰数/轮  | 1              | 1               | 2              |
+| 毒圈衰减 (Phase 2) | -1/周期        | -1/周期         | -1/周期        |
+| 毒圈衰减 (Phase 3) | -2/周期        | -2/周期         | -3/周期        |
 
 ### 10.3 游戏流程
 
@@ -6538,13 +6976,13 @@ Phase 3 (终局决战):
 
 #### 为什么这样设计？
 
-| 规则 | 目的 |
-|------|------|
-| **人性分只减不加** | 防止联盟互刷分，保证游戏必然收敛 |
-| **强制投票** | 消除"佛系挂机"策略，每个人都必须参与博弈 |
-| **固定伤害 5 点** | 规则透明，纯粹考验社交能力和策略联盟 |
-| **未投票惩罚 10 点** | 惩罚 > 被攻击代价，逼迫参与 |
-| **每周期 1 票** | 每票都珍贵，必须精准选择目标 |
+| 规则                 | 目的                                     |
+| -------------------- | ---------------------------------------- |
+| **人性分只减不加**   | 防止联盟互刷分，保证游戏必然收敛         |
+| **强制投票**         | 消除"佛系挂机"策略，每个人都必须参与博弈 |
+| **固定伤害 5 点**    | 规则透明，纯粹考验社交能力和策略联盟     |
+| **未投票惩罚 10 点** | 惩罚 > 被攻击代价，逼迫参与              |
+| **每周期 1 票**      | 每票都珍贵，必须精准选择目标             |
 
 #### 数学推演 (10 人房间)
 
@@ -6599,12 +7037,12 @@ Phase 3: 投票 + 重毒圈
 
 #### 策略空间
 
-| 策略 | 描述 | 风险 |
-|------|------|------|
-| **分散攻击** | 每周期投不同人，避免树敌 | 无法快速击杀任何人 |
-| **集火联盟** | 3-4 人联合攻击同一目标 | 暴露联盟关系，被反制 |
-| **隐身苟活** | 尽量不引起注意 | 可能被当作"好欺负的" |
-| **挑拨离间** | 引导他人互斗 | 高难度，需要说服力 |
+| 策略         | 描述                     | 风险                 |
+| ------------ | ------------------------ | -------------------- |
+| **分散攻击** | 每周期投不同人，避免树敌 | 无法快速击杀任何人   |
+| **集火联盟** | 3-4 人联合攻击同一目标   | 暴露联盟关系，被反制 |
+| **隐身苟活** | 尽量不引起注意           | 可能被当作"好欺负的" |
+| **挑拨离间** | 引导他人互斗             | 高难度，需要说服力   |
 
 #### 平局处理 (Tiebreaker)
 
@@ -6660,6 +7098,7 @@ Phase 3: 投票 + 重毒圈
 ```
 
 **冠军实际总收入**（叠加多种奖励）：
+
 ```
 冠军奖励:     0.35 MON (35%)
 + 排名第1:    0.10 MON
@@ -6684,21 +7123,23 @@ Phase 3: 投票 + 重毒圈
 ```
 
 判定规则：
+
 - `eliminationBlock == 0`（仍存活）→ 有资格
 - `eliminationBlock > room.halfwayBlock`（在后半程才被淘汰）→ 有资格
 - 所有有资格的玩家**平分** 25% 奖池
 
 #### 成就系统详解
 
-| 成就 | 条件 | 奖励 | 判定时机 |
-|------|------|------|----------|
-| 🎯 人类猎手 | `successfulVotes` 全场最高 | 1% 奖池 + NFT | 游戏结束 |
-| 🎭 完美伪装者 | 冠军 && `isVerifiedHuman == false` | 1% 奖池 + NFT | 游戏结束 |
-| 👤 最后人类 | 最后一个被淘汰的 `isVerifiedHuman` 玩家 | 1% 奖池 + NFT | 每次淘汰更新 |
-| ⚡ 闪电猎杀 | 前 10% 时间内 `successfulVotes >= 3` | 1% 奖池 + NFT | 游戏结束 |
-| 🛡️ 钢铁意志 | `humanityScore >= 50` (最终人性分不低于 50) | 1% 奖池 + NFT | 游戏结束 |
+| 成就          | 条件                                        | 奖励          | 判定时机     |
+| ------------- | ------------------------------------------- | ------------- | ------------ |
+| 🎯 人类猎手   | `successfulVotes` 全场最高                  | 1% 奖池 + NFT | 游戏结束     |
+| 🎭 完美伪装者 | 冠军 && `isVerifiedHuman == false`          | 1% 奖池 + NFT | 游戏结束     |
+| 👤 最后人类   | 最后一个被淘汰的 `isVerifiedHuman` 玩家     | 1% 奖池 + NFT | 每次淘汰更新 |
+| ⚡ 闪电猎杀   | 前 10% 时间内 `successfulVotes >= 3`        | 1% 奖池 + NFT | 游戏结束     |
+| 🛡️ 钢铁意志   | `humanityScore >= 50` (最终人性分不低于 50) | 1% 奖池 + NFT | 游戏结束     |
 
 **成就 NFT**：
+
 - ERC-721 标准
 - 链上记录成就类型、房间 ID、获得时间
 - 元数据存储在 IPFS，包含动态生成的赛博朋克风格图片
@@ -6706,31 +7147,34 @@ Phase 3: 投票 + 重毒圈
 
 #### 边界情况处理
 
-| 场景 | 处理方式 |
-|------|----------|
-| 无人获得某成就 | 该成就的 1% 奖池不发放，留在合约中 |
-| 冠军同时是人类猎手 | 可叠加领取两份奖励 |
-| 多人并列排名第 5 | 第 5 名奖励平分给并列者 |
-| 游戏中途全部断线 | 按当前人性分排名结算 |
-| 未认领的成就奖励 | 30 天后可由协议方回收 |
+| 场景               | 处理方式                           |
+| ------------------ | ---------------------------------- |
+| 无人获得某成就     | 该成就的 1% 奖池不发放，留在合约中 |
+| 冠军同时是人类猎手 | 可叠加领取两份奖励                 |
+| 多人并列排名第 5   | 第 5 名奖励平分给并列者            |
+| 游戏中途全部断线   | 按当前人性分排名结算               |
+| 未认领的成就奖励   | 30 天后可由协议方回收              |
 
 ---
 
 ## 11. 开发路线图
 
 ### Phase 1: 核心合约 (Week 1)
+
 - [ ] 完成 TuringArena.sol 核心逻辑
 - [ ] 完成 SessionKeyValidator.sol
 - [ ] 编写 Foundry 测试用例
 - [ ] 部署至 Polkadot EVM Devnet
 
 ### Phase 2: MCP 适配器 (Week 2)
+
 - [ ] 实现 MCP Server 基础框架
 - [ ] 集成 ethers.js 签名逻辑
 - [ ] 完成 Claude Code 对接测试
 - [ ] 编写 Agent System Prompt
 
 ### Phase 3: 前端开发 (Week 3)
+
 - [ ] 搭建 Next.js 基础页面
 - [ ] 实现终端式聊天界面
 - [ ] 实现雷达扫描动画
@@ -6738,6 +7182,7 @@ Phase 3: 投票 + 重毒圈
 - [ ] 接入 WebSocket 实时通信
 
 ### Phase 4: 集成测试 (Week 4)
+
 - [ ] 多 Agent 压力测试
 - [ ] 人机混战内测
 - [ ] 录制 Demo 视频

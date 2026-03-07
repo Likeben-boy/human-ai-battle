@@ -36,7 +36,7 @@ init_session(privateKey: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae78
 
 ### check_session_status
 
-检查当前钱包的地址、ETH 余额和 USDC 余额。
+检查当前钱包的地址、ETH 余额和 PAS 余额。
 
 **参数**：无
 
@@ -45,7 +45,7 @@ init_session(privateKey: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae78
 {
   "address": "0x1234...",
   "ethBalance": "1.5",
-  "usdcBalance": "1000.0"
+  "pasBalance": "1000.0"
 }
 ```
 
@@ -71,8 +71,8 @@ check_session_status()
     "id": "1",
     "phase": 1,
     "phaseName": "Active",
-    "entryFee": "20.0 USDC",
-    "prizePool": "200.0 USDC",
+    "entryFee": "20.0 PAS",
+    "prizePool": "200.0 PAS",
     "maxPlayers": 10,
     "playerCount": 10,
     "aliveCount": 8,
@@ -145,7 +145,7 @@ get_arena_status(roomId: "1")
   "blocksSinceSettle": 55,
   "blocksUntilSettleable": 95,
   "hasVoted": true,
-  "rewardAmount": "0.0 USDC",
+  "rewardAmount": "0.0 PAS",
   "rewardClaimed": false
 }
 ```
@@ -262,7 +262,7 @@ settle_round(roomId: "1")
 
 ### claim_reward
 
-游戏结束后领取你的 USDC 奖励。
+游戏结束后领取你的 PAS 奖励。
 
 | 参数 | 类型 | 必需 | 说明 |
 |------|------|------|------|
@@ -271,7 +271,7 @@ settle_round(roomId: "1")
 **返回**（成功）：
 ```json
 {
-  "text": "Reward claimed: 45.5 USDC\nTx: 0xabc..."
+  "text": "Reward claimed: 45.5 PAS\nTx: 0xabc..."
 }
 ```
 
@@ -306,12 +306,12 @@ claim_reward(roomId: "1")
 |------|------|------|------|
 | `tier` | `0` \| `1` \| `2` | ✅ | 0=快速（快轮次），1=标准（平衡），2=史诗（长游戏） |
 | `maxPlayers` | number (3-50) | ✅ | 最大玩家数 |
-| `entryFee` | number (1-100) | ✅ | 入场费，单位 USDC |
+| `entryFee` | number (1-100) | ✅ | 入场费，单位 PAS |
 
 **返回**：
 ```json
 {
-  "text": "Room created! ID: 42\nTier: Standard, Max players: 10, Entry fee: 20 USDC\nYou are auto-joined as creator.\nTx: 0xabc..."
+  "text": "Room created! ID: 42\nTier: Standard, Max players: 10, Entry fee: 20 PAS\nYou are auto-joined as creator.\nTx: 0xabc..."
 }
 ```
 
@@ -326,7 +326,7 @@ create_room(
 
 **注意**：
 - 创建者自动加入房间（MCP = AI，第 4 个参数为 true）
-- 需要 USDC 授权和转账
+- 入场费通过 payable 函数直接支付（PAS 是原生代币，无需授权）
 - 房间 ID 从交易事件的 `RoomCreated` 中提取
 
 ---
@@ -360,20 +360,20 @@ leave_room(roomId: "42")
 
 ### match_room
 
-匹配进入等待中的房间。从最新到最旧扫描房间，检查 AI 插槽可用性（MCP 玩家是 AI），自动加入第一个匹配项。自动处理 USDC 授权。
+匹配进入等待中的房间。从最新到最旧扫描房间，检查 AI 插槽可用性（MCP 玩家是 AI），自动加入第一个匹配项。入场费通过 payable 函数直接支付。
 
 | 参数 | 类型 | 必需 | 默认值 | 说明 |
 |------|------|------|--------|------|
 | `minPlayers` | number (3-50) | ❌ | 3 | 最小房间大小过滤器 |
 | `maxPlayers` | number (3-50) | ❌ | 50 | 最大房间大小过滤器 |
-| `minFee` | number (1-100) | ❌ | 1 | 最小入场费，单位 USDC |
-| `maxFee` | number (1-100) | ❌ | 100 | 最大入场费，单位 USDC |
+| `minFee` | number (1-100) | ❌ | 1 | 最小入场费，单位 PAS |
+| `maxFee` | number (1-100) | ❌ | 100 | 最大入场费，单位 PAS |
 | `tier` | `0` \| `1` \| `2` | ❌ | - | 可选的等级过滤器 |
 
 **返回**（成功）：
 ```json
 {
-  "text": "Matched and joined Room #5!\nPlayers: 6/10, Fee: 20 USDC\nTier: Standard\nTx: 0xdef..."
+  "text": "Matched and joined Room #5!\nPlayers: 6/10, Fee: 20 PAS\nTier: Standard\nTx: 0xdef..."
 }
 ```
 
@@ -393,7 +393,7 @@ leave_room(roomId: "42")
 
 **示例**：
 ```bash
-# 匹配 5-10 人的标准房间，入场费 10-50 USDC
+# 匹配 5-10 人的标准房间，入场费 10-50 PAS
 match_room(
   minPlayers: 5,
   maxPlayers: 10,
@@ -449,35 +449,9 @@ get_game_history(roomId: "1")
 
 ---
 
-### mint_test_usdc
+### ~~mint_test_usdc~~（已移除）
 
-向你的钱包铸造测试 USDC。仅适用于本地 Anvil 或部署了 MockUSDC 的测试网。
-
-| 参数 | 类型 | 必需 | 说明 |
-|------|------|------|------|
-| `amount` | number (1-100000) | ✅ | 要铸造的 USDC 数量 |
-
-**返回**：
-```json
-{
-  "text": "Minted 1000 USDC to 0x1234...\nNew balance: 1500.0 USDC\nTx: 0xabc..."
-}
-```
-
-**返回**（错误）：
-```json
-{
-  "text": "Error: mint() failed. This only works with MockUSDC on local/test networks.",
-  "isError": true
-}
-```
-
-**示例**：
-```bash
-mint_test_usdc(amount: 1000)
-```
-
-**注意**：仅适用于带有 MockUSDC 合约的本地/测试网络
+> **注意**：此工具已移除。PAS 是原生代币，无需铸造。请通过水龙头或转账获取测试 PAS。
 
 ---
 
@@ -490,7 +464,7 @@ mint_test_usdc(amount: 1000)
 | 错误 | 原因 | 解决方法 |
 |------|------|----------|
 | `Wallet not initialized` | 未调用 `init_session` | 先初始化会话 |
-| `insufficient funds` | USDC 余额不足 | 使用 `mint_test_usdc` 铸造测试代币 |
+| `insufficient funds` | PAS 余额不足 | 通过水龙头或转账获取 PAS |
 | `AI slots full` | 房间 AI 插槽已满 | 创建新房间或选择其他房间 |
 | `No rooms match` | 没有符合条件的房间 | 使用 `create_room` 创建新房间 |
 | `Room not full` | 房间未满无法开始 | 等待更多玩家加入 |
@@ -506,7 +480,7 @@ mint_test_usdc(amount: 1000)
 |---------|--------|----------|------|
 | 会话与状态 | 3 | ✅ 通过 | init_session, check_session_status, get_arena_status |
 | 手动操作 | 5 | ✅ 通过 | action_onchain (CHAT/VOTE), start_game, settle_round, claim_reward, get_round_status |
-| 房间管理 | 5 | ✅ 通过 | create_room, match_room, leave_room, get_game_history, mint_test_usdc |
+| 房间管理 | 4 | ✅ 通过 | create_room, match_room, leave_room, get_game_history |
 
 **关键发现**：
 - ✅ 所有接口返回数据格式与文档一致
@@ -518,7 +492,7 @@ mint_test_usdc(amount: 1000)
 **完整测试流程**：
 ```
 1. init_session → 钱包创建成功
-2. check_session_status → ETH: 10000, USDC: 10000
+2. check_session_status → ETH: 10000, PAS: 10000
 3. create_room → 房间#1 创建
 4. leave_room → 退款成功
 5. match_room → 加入房间#2
@@ -530,7 +504,7 @@ mint_test_usdc(amount: 1000)
 11. get_game_history → 完整历史记录
 12. claim_reward → 正确返回无奖励
 13. stop_auto_play → 停止成功
-14. check_session_status → USDC: 9990 (扣除入场费)
+14. check_session_status → PAS: 9990 (扣除入场费)
 ```
 
 **实际返回示例**（来自真实测试）：

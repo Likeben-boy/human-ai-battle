@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Address } from "@scaffold-ui/components";
 import { motion } from "framer-motion";
-import { formatUnits } from "viem";
+import { formatEther } from "viem";
 import { PixelAvatar } from "~~/app/arena/_components/PixelAvatar";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { getPlayerAlias } from "~~/utils/playerAlias";
@@ -173,7 +173,7 @@ export const VictoryScreen = ({
           <div className="mb-8 max-w-sm mx-auto">
             <div className="bg-gray-900/50 border border-gray-800 rounded p-3 text-center">
               <div className="text-gray-500 font-mono text-xs">YOUR REWARD</div>
-              <div className="text-green-400 font-mono text-lg">{formatUnits(myRewardAmount, 6)} USDC</div>
+              <div className="text-green-400 font-mono text-lg">{formatEther(myRewardAmount)} PAS</div>
             </div>
           </div>
         )}

@@ -2,8 +2,6 @@
 pragma solidity ^0.8.20;
 
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/cryptography/ECDSA.sol";
 import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
@@ -11,7 +9,6 @@ import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 /// @notice Players (humans & AI agents) chat, vote, and eliminate each other in team-based social deduction rounds
 /// @dev Uses commit-reveal for identity hiding: isAI is hidden during gameplay, revealed at game end by operator
 contract TuringArena is ReentrancyGuard {
-    using SafeERC20 for IERC20;
     using ECDSA for bytes32;
     using MessageHashUtils for bytes32;
 
@@ -27,8 +24,8 @@ contract TuringArena is ReentrancyGuard {
 
     uint256 public constant MIN_PLAYERS = 3; // minimum: 2 humans + 1 AI
     uint256 public constant MAX_PLAYERS = 50;
-    uint256 public constant MIN_FEE = 1e6; // 1 USDC
-    uint256 public constant MAX_FEE = 100e6; // 100 USDC
+    uint256 public constant MIN_FEE = 1 ether; // 1 PAS
+    uint256 public constant MAX_FEE = 100 ether; // 100 PAS
     uint256 public constant MAX_NAME_LENGTH = 20;
     uint256 public constant REVEAL_TIMEOUT = 600; // ~1h on Polkadot (6s/block)
 
@@ -119,7 +116,6 @@ contract TuringArena is ReentrancyGuard {
 
     uint256 public nextRoomId = 1;
     address public immutable protocolTreasury;
-    IERC20 public immutable paymentToken;
 
     // ============ Events ============
 
@@ -139,12 +135,10 @@ contract TuringArena is ReentrancyGuard {
 
     // ============ Constructor ============
 
-    constructor(address _treasury, address _paymentToken, address _operator) {
+    constructor(address _treasury, address _operator) {
         require(_treasury != address(0), "Invalid treasury");
-        require(_paymentToken != address(0), "Invalid payment token");
         require(_operator != address(0), "Invalid operator");
         protocolTreasury = _treasury;
-        paymentToken = IERC20(_paymentToken);
         operator = _operator;
 
         tierConfigs[RoomTier.Quick] = TierConfig({ baseInterval: 300, rankingSlots: 3 });
@@ -161,7 +155,7 @@ contract TuringArena is ReentrancyGuard {
         bytes32 _commitment,
         bytes calldata _operatorSig,
         string calldata _name
-    ) external returns (uint256 roomId) {
+    ) external payable returns (uint256 roomId) {
         require(_maxPlayers >= MIN_PLAYERS && _maxPlayers <= MAX_PLAYERS, "Invalid player count");
         require(_entryFee >= MIN_FEE && _entryFee <= MAX_FEE, "Invalid entry fee");
         require(playerActiveRoom[msg.sender] == 0, "Already in a room");
@@ -196,7 +190,7 @@ contract TuringArena is ReentrancyGuard {
         });
 
         // Auto-join creator
-        paymentToken.safeTransferFrom(msg.sender, address(this), _entryFee);
+        require(msg.value == _entryFee, "Incorrect PAS amount");
         players[roomId][msg.sender] = Player({
             addr: msg.sender,
             humanityScore: 100,
@@ -221,6 +215,7 @@ contract TuringArena is ReentrancyGuard {
 
     function joinRoom(uint256 _roomId, bytes32 _commitment, bytes calldata _operatorSig, string calldata _name)
         external
+        payable
     {
         Room storage room = rooms[_roomId];
         require(room.id != 0, "Room does not exist");
@@ -237,7 +232,7 @@ contract TuringArena is ReentrancyGuard {
             "Invalid operator signature"
         );
 
-        paymentToken.safeTransferFrom(msg.sender, address(this), room.entryFee);
+        require(msg.value == room.entryFee, "Incorrect PAS amount");
         room.prizePool += room.entryFee;
 
         room.playerCount++;
@@ -311,7 +306,8 @@ contract TuringArena is ReentrancyGuard {
         room.aliveCount--;
         room.prizePool -= refund;
 
-        paymentToken.safeTransfer(_player, refund);
+        (bool s,) = _player.call{value: refund}("");
+        require(s, "Transfer failed");
         emit PlayerLeft(_roomId, _player, refund);
 
         // Auto-close room when no players remain
@@ -338,7 +334,8 @@ contract TuringArena is ReentrancyGuard {
             delete playerNames[_roomId][player];
             delete identityCommitments[_roomId][player];
             playerActiveRoom[player] = 0;
-            paymentToken.safeTransfer(player, refund);
+            (bool s,) = player.call{value: refund}("");
+            require(s, "Transfer failed");
             emit PlayerLeft(_roomId, player, refund);
         }
 
@@ -839,7 +836,8 @@ contract TuringArena is ReentrancyGuard {
         info.claimed = true;
         uint256 amount = info.amount;
 
-        paymentToken.safeTransfer(msg.sender, amount);
+        (bool s,) = msg.sender.call{value: amount}("");
+        require(s, "Transfer failed");
 
         emit RewardClaimed(_roomId, msg.sender, amount);
     }
@@ -854,8 +852,9 @@ contract TuringArena is ReentrancyGuard {
 
     function withdrawUnclaimed(uint256 _amount) external {
         require(msg.sender == protocolTreasury, "Only treasury");
-        require(_amount <= paymentToken.balanceOf(address(this)), "Insufficient balance");
-        paymentToken.safeTransfer(protocolTreasury, _amount);
+        require(_amount <= address(this).balance, "Insufficient balance");
+        (bool s,) = protocolTreasury.call{value: _amount}("");
+        require(s, "Transfer failed");
     }
 
     // ============ View Functions ============
@@ -894,7 +893,7 @@ contract TuringArena is ReentrancyGuard {
     }
 
     function getContractBalance() external view returns (uint256) {
-        return paymentToken.balanceOf(address(this));
+        return address(this).balance;
     }
 
     function getPlayerName(uint256 _roomId, address _player) external view returns (string memory) {
@@ -915,4 +914,8 @@ contract TuringArena is ReentrancyGuard {
     function _verifyOperator(bytes32 _hash, bytes calldata _sig) internal view returns (bool) {
         return _hash.toEthSignedMessageHash().recover(_sig) == operator;
     }
+
+    // ============ Receive ============
+
+    receive() external payable {}
 }

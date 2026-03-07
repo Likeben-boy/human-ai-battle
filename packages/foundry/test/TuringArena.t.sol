@@ -3,11 +3,9 @@ pragma solidity ^0.8.20;
 
 import "forge-std/Test.sol";
 import "../contracts/TuringArena.sol";
-import "../contracts/mocks/MockUSDC.sol";
 
 contract TuringArenaTest is Test {
     TuringArena public arena;
-    MockUSDC public usdc;
     address public treasury = address(0xBEEF);
     address public alice = address(0x1111); // human
     address public bob = address(0x2222); // human
@@ -20,10 +18,9 @@ contract TuringArenaTest is Test {
     uint256 constant OPERATOR_PK = 0xAAAA;
     address public operatorAddr;
 
-    uint256 constant QUICK_FEE = 10e6; // 10 USDC
-    uint256 constant STANDARD_FEE = 50e6; // 50 USDC
-    uint256 constant EPIC_FEE = 100e6; // 100 USDC
-    uint256 constant MINT_AMOUNT = 10_000e6; // 10,000 USDC
+    uint256 constant QUICK_FEE = 10 ether; // 10 PAS
+    uint256 constant STANDARD_FEE = 50 ether; // 50 PAS
+    uint256 constant EPIC_FEE = 100 ether; // 100 PAS
 
     // Track commitments for reveal
     struct CommitInfo {
@@ -38,15 +35,14 @@ contract TuringArenaTest is Test {
 
     function setUp() public {
         operatorAddr = vm.addr(OPERATOR_PK);
-        usdc = new MockUSDC();
-        arena = new TuringArena(treasury, address(usdc), operatorAddr);
+        arena = new TuringArena(treasury, operatorAddr);
 
-        usdc.mint(alice, MINT_AMOUNT);
-        usdc.mint(bob, MINT_AMOUNT);
-        usdc.mint(charlie, MINT_AMOUNT);
-        usdc.mint(dave, MINT_AMOUNT);
-        usdc.mint(eve, MINT_AMOUNT);
-        usdc.mint(frank, MINT_AMOUNT);
+        vm.deal(alice, 1000 ether);
+        vm.deal(bob, 1000 ether);
+        vm.deal(charlie, 1000 ether);
+        vm.deal(dave, 1000 ether);
+        vm.deal(eve, 1000 ether);
+        vm.deal(frank, 1000 ether);
     }
 
     // ============ Commitment Helpers ============
@@ -74,8 +70,7 @@ contract TuringArenaTest is Test {
         bytes memory sig = _signOperator(authHash);
 
         vm.startPrank(creator);
-        usdc.approve(address(arena), entryFee);
-        roomId = arena.createRoom(tier, maxPlayers, entryFee, commitment, sig, "Creator");
+        roomId = arena.createRoom{value: entryFee}(tier, maxPlayers, entryFee, commitment, sig, "Creator");
         vm.stopPrank();
 
         _commitInfos[roomId][creator] = CommitInfo(isAI, salt, commitment);
@@ -94,8 +89,7 @@ contract TuringArenaTest is Test {
         bytes memory sig = _signOperator(authHash);
 
         vm.startPrank(player);
-        usdc.approve(address(arena), room.entryFee);
-        arena.joinRoom(roomId, commitment, sig, name);
+        arena.joinRoom{value: room.entryFee}(roomId, commitment, sig, name);
         vm.stopPrank();
 
         _commitInfos[roomId][player] = CommitInfo(isAI, salt, commitment);
@@ -171,8 +165,7 @@ contract TuringArenaTest is Test {
         bytes32 authHash = keccak256(abi.encodePacked(alice, commitment, "create"));
         bytes memory sig = _signOperator(authHash);
 
-        usdc.approve(address(arena), QUICK_FEE);
-        uint256 roomId = arena.createRoom(TuringArena.RoomTier.Quick, 10, QUICK_FEE, commitment, sig, "Alice");
+        uint256 roomId = arena.createRoom{value: QUICK_FEE}(TuringArena.RoomTier.Quick, 10, QUICK_FEE, commitment, sig, "Alice");
         vm.stopPrank();
         assertEq(roomId, 1);
 
@@ -233,7 +226,7 @@ contract TuringArenaTest is Test {
         assertFalse(player.isAI); // hidden during gameplay — always false until reveal
     }
 
-    function test_JoinRoom_InsufficientAllowance() public {
+    function test_JoinRoom_IncorrectValue() public {
         uint256 roomId = _createRoom(alice, TuringArena.RoomTier.Quick, 10, QUICK_FEE, false);
 
         bytes32 salt = keccak256(abi.encodePacked(bob, "join", roomId, block.number));
@@ -242,9 +235,8 @@ contract TuringArenaTest is Test {
         bytes memory sig = _signOperator(authHash);
 
         vm.startPrank(bob);
-        usdc.approve(address(arena), QUICK_FEE / 2);
-        vm.expectRevert();
-        arena.joinRoom(roomId, commitment, sig, "Bob");
+        vm.expectRevert("Incorrect PAS amount");
+        arena.joinRoom{value: QUICK_FEE / 2}(roomId, commitment, sig, "Bob");
         vm.stopPrank();
     }
 
@@ -257,18 +249,17 @@ contract TuringArenaTest is Test {
         bytes memory sig = _signOperator(authHash);
 
         vm.startPrank(alice);
-        usdc.approve(address(arena), QUICK_FEE);
         vm.expectRevert("Already in a room");
-        arena.joinRoom(roomId, commitment, sig, "Alice2");
+        arena.joinRoom{value: QUICK_FEE}(roomId, commitment, sig, "Alice2");
         vm.stopPrank();
     }
 
     function test_JoinRoom_ExactFeeTransferred() public {
         uint256 roomId = _createRoom(alice, TuringArena.RoomTier.Quick, 10, QUICK_FEE, false);
 
-        uint256 balBefore = usdc.balanceOf(bob);
+        uint256 balBefore = bob.balance;
         _approveAndJoin(bob, roomId, false);
-        uint256 balAfter = usdc.balanceOf(bob);
+        uint256 balAfter = bob.balance;
 
         assertEq(balBefore - balAfter, QUICK_FEE);
     }
@@ -554,11 +545,11 @@ contract TuringArenaTest is Test {
         assertTrue(amount > 0);
         assertFalse(claimed);
 
-        uint256 balBefore = usdc.balanceOf(alice);
+        uint256 balBefore = alice.balance;
         vm.prank(alice);
         arena.claimReward(roomId);
 
-        uint256 balAfter = usdc.balanceOf(alice);
+        uint256 balAfter = alice.balance;
         assertTrue(balAfter > balBefore);
 
         (, bool claimedAfter) = arena.getRewardInfo(roomId, alice);
@@ -624,7 +615,7 @@ contract TuringArenaTest is Test {
 
         vm.prank(alice);
         vm.expectRevert("Invalid entry fee");
-        arena.createRoom(TuringArena.RoomTier.Quick, 10, 101e6, commitment, sig, "A");
+        arena.createRoom{value: 101 ether}(TuringArena.RoomTier.Quick, 10, 101 ether, commitment, sig, "A");
     }
 
     function test_CreateRoom_CustomValues() public {
@@ -634,15 +625,14 @@ contract TuringArenaTest is Test {
         bytes memory sig = _signOperator(authHash);
 
         vm.startPrank(alice);
-        usdc.approve(address(arena), 25e6);
-        uint256 roomId = arena.createRoom(TuringArena.RoomTier.Standard, 15, 25e6, commitment, sig, "Alice");
+        uint256 roomId = arena.createRoom{value: 25 ether}(TuringArena.RoomTier.Standard, 15, 25 ether, commitment, sig, "Alice");
         vm.stopPrank();
 
         TuringArena.Room memory room = arena.getRoomInfo(roomId);
         assertEq(room.maxPlayers, 15);
-        assertEq(room.entryFee, 25e6);
+        assertEq(room.entryFee, 25 ether);
         assertEq(room.playerCount, 1);
-        assertEq(room.prizePool, 25e6);
+        assertEq(room.prizePool, 25 ether);
         assertEq(uint256(room.tier), uint256(TuringArena.RoomTier.Standard));
     }
 
@@ -658,9 +648,8 @@ contract TuringArenaTest is Test {
         bytes memory sig = _signOperator(authHash);
 
         vm.startPrank(eve);
-        usdc.approve(address(arena), QUICK_FEE);
         vm.expectRevert("Game already started");
-        arena.joinRoom(roomId, commitment, sig, "Eve");
+        arena.joinRoom{value: QUICK_FEE}(roomId, commitment, sig, "Eve");
         vm.stopPrank();
     }
 
@@ -709,16 +698,16 @@ contract TuringArenaTest is Test {
         _approveAndJoin(bob, roomId, false);
         _approveAndJoin(charlie, roomId, false);
 
-        uint256 aliceBalBefore = usdc.balanceOf(alice);
-        uint256 bobBalBefore = usdc.balanceOf(bob);
-        uint256 charlieBalBefore = usdc.balanceOf(charlie);
+        uint256 aliceBalBefore = alice.balance;
+        uint256 bobBalBefore = bob.balance;
+        uint256 charlieBalBefore = charlie.balance;
 
         vm.prank(alice);
         arena.leaveRoom(roomId);
 
-        assertEq(usdc.balanceOf(alice), aliceBalBefore + QUICK_FEE);
-        assertEq(usdc.balanceOf(bob), bobBalBefore + QUICK_FEE);
-        assertEq(usdc.balanceOf(charlie), charlieBalBefore + QUICK_FEE);
+        assertEq(alice.balance, aliceBalBefore + QUICK_FEE);
+        assertEq(bob.balance, bobBalBefore + QUICK_FEE);
+        assertEq(charlie.balance, charlieBalBefore + QUICK_FEE);
 
         TuringArena.Room memory room = arena.getRoomInfo(roomId);
         assertTrue(room.isEnded);
@@ -753,19 +742,19 @@ contract TuringArenaTest is Test {
         uint256 roomId = _createRoom(alice, TuringArena.RoomTier.Quick, 10, QUICK_FEE, false);
         _approveAndJoin(bob, roomId, false);
 
-        uint256 bobBalBefore = usdc.balanceOf(bob);
+        uint256 bobBalBefore = bob.balance;
 
         vm.prank(bob);
         arena.leaveRoom(roomId);
 
-        uint256 bobBalAfter = usdc.balanceOf(bob);
+        uint256 bobBalAfter = bob.balance;
         assertEq(bobBalAfter - bobBalBefore, QUICK_FEE);
     }
 
     function test_LeaveRoom_AutoCloseWhenEmpty() public {
         uint256 roomId = _createRoom(alice, TuringArena.RoomTier.Quick, 10, QUICK_FEE, false);
 
-        uint256 aliceBalBefore = usdc.balanceOf(alice);
+        uint256 aliceBalBefore = alice.balance;
 
         vm.prank(alice);
         arena.leaveRoom(roomId);
@@ -774,7 +763,7 @@ contract TuringArenaTest is Test {
         assertTrue(room.isEnded);
         assertEq(room.playerCount, 0);
 
-        assertEq(usdc.balanceOf(alice), aliceBalBefore + QUICK_FEE);
+        assertEq(alice.balance, aliceBalBefore + QUICK_FEE);
     }
 
     // ============ No Toxin Decay ============
@@ -819,9 +808,8 @@ contract TuringArenaTest is Test {
         bytes memory sig = _signOperator(authHash);
 
         vm.startPrank(bob);
-        usdc.approve(address(arena), QUICK_FEE);
         vm.expectRevert("Already in a room");
-        arena.joinRoom(room2, commitment, sig, "Bob");
+        arena.joinRoom{value: QUICK_FEE}(room2, commitment, sig, "Bob");
         vm.stopPrank();
     }
 
@@ -834,9 +822,8 @@ contract TuringArenaTest is Test {
         bytes memory sig = _signOperator(authHash);
 
         vm.startPrank(alice);
-        usdc.approve(address(arena), QUICK_FEE);
         vm.expectRevert("Already in a room");
-        arena.createRoom(TuringArena.RoomTier.Quick, 10, QUICK_FEE, commitment, sig, "Alice2");
+        arena.createRoom{value: QUICK_FEE}(TuringArena.RoomTier.Quick, 10, QUICK_FEE, commitment, sig, "Alice2");
         vm.stopPrank();
     }
 
@@ -915,9 +902,8 @@ contract TuringArenaTest is Test {
         bytes memory sig = _signOperator(authHash);
 
         vm.startPrank(alice);
-        usdc.approve(address(arena), QUICK_FEE);
         vm.expectRevert("Invalid name length");
-        arena.createRoom(TuringArena.RoomTier.Quick, 10, QUICK_FEE, commitment, sig, "ThisNameIsWayTooLongX");
+        arena.createRoom{value: QUICK_FEE}(TuringArena.RoomTier.Quick, 10, QUICK_FEE, commitment, sig, "ThisNameIsWayTooLongX");
         vm.stopPrank();
     }
 
@@ -928,9 +914,8 @@ contract TuringArenaTest is Test {
         bytes memory sig = _signOperator(authHash);
 
         vm.startPrank(alice);
-        usdc.approve(address(arena), QUICK_FEE);
         vm.expectRevert("Invalid name length");
-        arena.createRoom(TuringArena.RoomTier.Quick, 10, QUICK_FEE, commitment, sig, "");
+        arena.createRoom{value: QUICK_FEE}(TuringArena.RoomTier.Quick, 10, QUICK_FEE, commitment, sig, "");
         vm.stopPrank();
     }
 
@@ -986,8 +971,7 @@ contract TuringArenaTest is Test {
         bytes memory sig = _signOperator(authHash);
 
         vm.startPrank(alice);
-        usdc.approve(address(arena), QUICK_FEE);
-        uint256 roomId = arena.createRoom(TuringArena.RoomTier.Quick, 10, QUICK_FEE, commitment, sig, "Alice");
+        uint256 roomId = arena.createRoom{value: QUICK_FEE}(TuringArena.RoomTier.Quick, 10, QUICK_FEE, commitment, sig, "Alice");
         vm.stopPrank();
 
         assertEq(arena.identityCommitments(roomId, alice), commitment);
@@ -1005,9 +989,8 @@ contract TuringArenaTest is Test {
         bytes memory fakeSig = abi.encodePacked(r, s, v);
 
         vm.startPrank(alice);
-        usdc.approve(address(arena), QUICK_FEE);
         vm.expectRevert("Invalid operator signature");
-        arena.createRoom(TuringArena.RoomTier.Quick, 10, QUICK_FEE, commitment, fakeSig, "Alice");
+        arena.createRoom{value: QUICK_FEE}(TuringArena.RoomTier.Quick, 10, QUICK_FEE, commitment, fakeSig, "Alice");
         vm.stopPrank();
     }
 
@@ -1018,8 +1001,7 @@ contract TuringArenaTest is Test {
         bytes memory sig = _signOperator(authHash);
 
         vm.startPrank(alice);
-        usdc.approve(address(arena), QUICK_FEE);
-        arena.createRoom(TuringArena.RoomTier.Quick, 10, QUICK_FEE, commitment, sig, "Alice");
+        arena.createRoom{value: QUICK_FEE}(TuringArena.RoomTier.Quick, 10, QUICK_FEE, commitment, sig, "Alice");
         vm.stopPrank();
 
         // Try reusing same commitment for another player while original is still active
@@ -1027,9 +1009,8 @@ contract TuringArenaTest is Test {
         bytes memory sig2 = _signOperator(authHash2);
 
         vm.startPrank(bob);
-        usdc.approve(address(arena), QUICK_FEE);
         vm.expectRevert("Commitment already used");
-        arena.createRoom(TuringArena.RoomTier.Quick, 10, QUICK_FEE, commitment, sig2, "Bob");
+        arena.createRoom{value: QUICK_FEE}(TuringArena.RoomTier.Quick, 10, QUICK_FEE, commitment, sig2, "Bob");
         vm.stopPrank();
     }
 
@@ -1040,8 +1021,7 @@ contract TuringArenaTest is Test {
         bytes memory sig = _signOperator(authHash);
 
         vm.startPrank(alice);
-        usdc.approve(address(arena), QUICK_FEE);
-        arena.createRoom(TuringArena.RoomTier.Quick, 10, QUICK_FEE, commitment, sig, "Alice");
+        arena.createRoom{value: QUICK_FEE}(TuringArena.RoomTier.Quick, 10, QUICK_FEE, commitment, sig, "Alice");
         vm.stopPrank();
 
         // Leave room — commitment should be cleared
@@ -1053,8 +1033,7 @@ contract TuringArenaTest is Test {
         bytes memory sig2 = _signOperator(authHash2);
 
         vm.startPrank(alice);
-        usdc.approve(address(arena), QUICK_FEE);
-        arena.createRoom(TuringArena.RoomTier.Quick, 10, QUICK_FEE, commitment, sig2, "Alice");
+        arena.createRoom{value: QUICK_FEE}(TuringArena.RoomTier.Quick, 10, QUICK_FEE, commitment, sig2, "Alice");
         vm.stopPrank();
 
         assertEq(arena.playerActiveRoom(alice), 2);

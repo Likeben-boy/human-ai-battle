@@ -258,7 +258,8 @@ function ArenaContent() {
   }, [allPlayers, playerNames]);
 
   // Derive phase early so we can skip WebSocket for ended rooms
-  const phase = typeof roomInfo === "object" && roomInfo !== null && "phase" in roomInfo ? Number((roomInfo as any).phase) : 0;
+  const phase =
+    typeof roomInfo === "object" && roomInfo !== null && "phase" in roomInfo ? Number((roomInfo as any).phase) : 0;
   const pendingReveal = Boolean(isPendingReveal);
 
   // WebSocket chat connection — single instance for the whole arena page
@@ -537,7 +538,7 @@ function ArenaContent() {
           <div className="flex items-center gap-1.5">
             <span className="arena-text-amber font-mono text-xs font-bold">PRIZE</span>
             <span className="text-yellow-400 font-mono text-xs font-bold">
-              {(Number(prizePool) / 1e6).toFixed(2)} USDC
+              {(Number(prizePool) / 1e18).toFixed(2)} PAS
             </span>
           </div>
           {isPlayerInGame && phase !== 2 && !pendingReveal && (
