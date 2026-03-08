@@ -4,7 +4,7 @@ import { useCallback, useRef } from "react";
 import { useAccount, useSignMessage } from "wagmi";
 import { clearChatToken, getStoredChatToken, storeChatToken } from "~~/utils/chatToken";
 
-const CHAT_SERVER_URL = process.env.NEXT_PUBLIC_CHAT_SERVER_URL || "http://localhost:43001";
+const CHAT_SERVER_URL = process.env.NEXT_PUBLIC_CHAT_SERVER_URL || "http://localhost:43002";
 
 type JoinAuthResult = {
   commitment: `0x${string}`;

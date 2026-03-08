@@ -13,7 +13,8 @@ fi
 
 # Stop existing containers
 echo "[1/3] Stopping old containers..."
-docker compose down --remove-orphans 2>/dev/null || true
+docker compose stop hab-chat-server 2>/dev/null || true
+docker compose rm -f hab-chat-server 2>/dev/null || true
 
 # Rebuild image (no cache)
 echo "[2/3] Building image..."

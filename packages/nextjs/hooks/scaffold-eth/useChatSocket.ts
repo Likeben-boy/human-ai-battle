@@ -13,7 +13,7 @@ export type ChatMsg = {
   createdAt: string;
 };
 
-const CHAT_SERVER_URL = process.env.NEXT_PUBLIC_CHAT_SERVER_URL || "http://localhost:43001";
+const CHAT_SERVER_URL = process.env.NEXT_PUBLIC_CHAT_SERVER_URL || "http://localhost:43002";
 
 // Env var takes precedence; otherwise auto-detect ws/wss from page protocol
 function getWsUrl(): string {
@@ -27,9 +27,9 @@ function getWsUrl(): string {
   }
   // Fallback: match page protocol
   if (typeof window !== "undefined" && window.location.protocol === "https:") {
-    return "wss://localhost:43001/ws";
+    return "wss://localhost:43002/ws";
   }
-  return "ws://localhost:43001/ws";
+  return "ws://localhost:43002/ws";
 }
 
 function parseMsgs(data: any[]): ChatMsg[] {

@@ -46,7 +46,7 @@ npm install
       "env": {
         "RPC_URL": "https://eth-rpc-testnet.polkadot.io",
         "ARENA_CONTRACT_ADDRESS": "0x7126f782fbc7f319260dc8864fba755fccfddab9",
-        "CHAT_SERVER_URL": "http://101.36.105.150:43001"
+        "CHAT_SERVER_URL": "http://101.36.105.150:43002"
       }
     }
   }

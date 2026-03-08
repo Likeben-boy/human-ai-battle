@@ -22,7 +22,7 @@ func Load() *Config {
 		DatabaseURL:          getEnv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/rtta_chat?sslmode=disable"),
 		RpcURL:               getEnv("RPC_URL", "http://127.0.0.1:8545"),
 		ArenaContractAddress: getEnv("ARENA_CONTRACT_ADDRESS", ""),
-		Port:                 getEnv("PORT", "43001"),
+		Port:                 getEnv("PORT", "43002"),
 		CorsOrigin:           getEnv("CORS_ORIGIN", "http://localhost:3000"),
 		SessionTTLHours:      getEnvInt("SESSION_TTL_HOURS", 24),
 		RoomStatePollMs:      getEnvInt("ROOM_STATE_POLL_MS", 4000),

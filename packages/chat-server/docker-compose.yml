@@ -1,5 +1,6 @@
 services:
   hab-chat-server:
+    container_name: hab-chat-server
     build:
       context: .
       dockerfile: Dockerfile

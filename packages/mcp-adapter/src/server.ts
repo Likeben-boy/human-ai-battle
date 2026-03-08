@@ -89,7 +89,7 @@ let playerWallet: ethers.Wallet | null = null;
 
 // 合约地址和服务 URL（Polkadot EVM 默认值，可通过环境变量覆盖）
 const ARENA_CONTRACT = process.env.ARENA_CONTRACT_ADDRESS || "0x7126f782fbc7f319260dc8864fba755fccfddab9";
-const CHAT_SERVER_URL = process.env.CHAT_SERVER_URL || "http://101.36.105.150:43001";
+const CHAT_SERVER_URL = process.env.CHAT_SERVER_URL || "http://101.36.105.150:43002";
 
 // 链下聊天客户端（在 init_session 后初始化）
 let chatClient: ChatClient | null = null;

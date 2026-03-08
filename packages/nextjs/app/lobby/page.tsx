@@ -12,7 +12,7 @@ import QuickMatchButton from "~~/app/_components/QuickMatchButton";
 import RoomCard from "~~/app/_components/RoomCard";
 import { useDeployedContractInfo, useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 
-const CHAT_SERVER_URL = process.env.NEXT_PUBLIC_CHAT_SERVER_URL || "http://localhost:43001";
+const CHAT_SERVER_URL = process.env.NEXT_PUBLIC_CHAT_SERVER_URL || "http://localhost:43002";
 
 type FilterTab = "mygame" | "waiting" | "active" | "ended";
 

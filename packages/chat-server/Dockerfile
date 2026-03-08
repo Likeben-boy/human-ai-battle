@@ -17,6 +17,6 @@ RUN apk add --no-cache ca-certificates tzdata
 
 COPY --from=builder /chat-server /usr/local/bin/chat-server
 
-EXPOSE 43001
+EXPOSE 43002
 
 ENTRYPOINT ["chat-server"]
