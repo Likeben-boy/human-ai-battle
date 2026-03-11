@@ -68,14 +68,15 @@ export function VotePanel({
     roomInfo && typeof roomInfo === "object" && "currentInterval" in roomInfo
       ? Number((roomInfo as any).currentInterval)
       : 0;
+  const roundWindowBlocks = currentInterval > 0 ? currentInterval : displayRoundBlocks;
   const currentBlock = blockNumber ?? 0;
   const settleTargetBlock = lastSettleBlock + currentInterval;
-  const displayTargetBlock = lastSettleBlock + displayRoundBlocks;
+  const displayTargetBlock = lastSettleBlock + roundWindowBlocks;
   const blocksRemaining =
     isGameActive && currentBlock > 0 && lastSettleBlock > 0 ? Math.max(0, displayTargetBlock - currentBlock) : 0;
   const progress =
-    isGameActive && displayRoundBlocks > 0 ? Math.min(1, Math.max(0, 1 - blocksRemaining / displayRoundBlocks)) : 0;
-  const isUrgent = isGameActive && blocksRemaining > 0 && blocksRemaining <= Math.ceil(displayRoundBlocks * 0.25);
+    isGameActive && roundWindowBlocks > 0 ? Math.min(1, Math.max(0, blocksRemaining / roundWindowBlocks)) : 0;
+  const isUrgent = isGameActive && blocksRemaining > 0 && blocksRemaining <= Math.ceil(roundWindowBlocks * 0.25);
   const isExpired = isGameActive && currentBlock > 0 && currentBlock >= settleTargetBlock && lastSettleBlock > 0;
 
   const myInfo = connectedAddress ? playerInfoMap[connectedAddress.toLowerCase()] : undefined;
@@ -175,7 +176,7 @@ export function VotePanel({
             progress={progress}
             isUrgent={isUrgent}
             isExpired={isExpired}
-            currentInterval={displayRoundBlocks}
+            currentInterval={roundWindowBlocks}
             onSettle={onSettle}
           />
         )}
@@ -482,7 +483,7 @@ function RoundCountdown({
   onSettle?: () => Promise<void>;
 }) {
   const [isSettling, setIsSettling] = useState(false);
-  const roundedBlocksRemaining = Math.max(0, Math.ceil(blocksRemaining));
+  const roundedBlocksRemaining = isExpired ? 0 : Math.max(1, Math.ceil(blocksRemaining));
   const progressPercent = Math.round(progress * 100);
 
   const handleSettle = async () => {
@@ -500,15 +501,15 @@ function RoundCountdown({
     : isUrgent
       ? "bg-red-500"
       : progress > 0.5
-        ? "bg-yellow-500"
-        : "bg-green-500";
+        ? "bg-green-500"
+        : "bg-yellow-500";
   const textColor = isExpired
     ? "text-orange-400"
     : isUrgent
       ? "text-red-400"
       : progress > 0.5
-        ? "text-yellow-400"
-        : "text-green-400";
+        ? "text-green-400"
+        : "text-yellow-400";
   const glowColor = isExpired
     ? "shadow-[0_0_8px_rgba(249,115,22,0.4)]"
     : isUrgent

@@ -468,13 +468,13 @@ function ArenaContent() {
   const currentBlock = interpolatedBlock;
   const realBlock = realBlockNumber ? Number(realBlockNumber) : 0;
   const settleTargetBlock = lastSettleBlock + currentInterval;
-  const displayRoundBlocks = isGameActive ? DISPLAY_ROUND_BLOCKS : 0;
+  const displayRoundBlocks = isGameActive ? (currentInterval > 0 ? currentInterval : DISPLAY_ROUND_BLOCKS) : 0;
   const displaySettleTargetBlock = lastSettleBlock + displayRoundBlocks;
   const blocksRemaining = isGameActive && currentBlock > 0 ? Math.max(0, displaySettleTargetBlock - currentBlock) : 0;
-  const roundedBlocksRemaining = Math.max(0, Math.ceil(blocksRemaining));
   // Use REAL block number for settle eligibility (not interpolated) to avoid premature attempts
   const intervalReached = isGameActive && realBlock >= settleTargetBlock && realBlock > 0 && lastSettleBlock > 0;
   const canSettle = intervalReached;
+  const roundedBlocksRemaining = canSettle ? 0 : Math.max(1, Math.ceil(blocksRemaining));
 
   const handleStartGame = async () => {
     if (!roomId) return;
