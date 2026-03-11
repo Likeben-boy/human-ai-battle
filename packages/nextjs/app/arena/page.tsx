@@ -33,6 +33,10 @@ const PHASE_COLORS: Record<number, string> = {
   2: "text-red-400",
 };
 
+const DISPLAY_ROUND_BLOCKS = 60;
+const ESTIMATED_BLOCK_TIME_MS = 2_000;
+const MAX_INTERPOLATED_BLOCK_LEAD = 1;
+
 function ArenaContent() {
   const searchParams = useSearchParams();
   const rawRoomId = searchParams.get("roomId");
@@ -86,13 +90,15 @@ function ArenaContent() {
   const {
     data: coreData,
     isLoading: coreLoading,
+    isError: coreIsError,
+    error: coreError,
     refetch: refetchCoreData,
   } = useReadContracts({
     contracts: coreContracts,
     query: { enabled: coreContracts.length > 0, refetchInterval: 2_000 },
   });
 
-  const roomLoading = !arenaInfo || coreLoading;
+  const roomLoading = !arenaInfo || (coreLoading && !coreData);
   const roomInfoRaw = coreData?.[0]?.result;
   const currentRoundData = coreData?.[1]?.result as bigint | undefined;
   const isPendingReveal = coreData?.[2]?.result as boolean | undefined;
@@ -101,6 +107,14 @@ function ArenaContent() {
   const roomInfoRef = useRef<typeof roomInfoRaw>(undefined);
   if (roomInfoRaw) roomInfoRef.current = roomInfoRaw;
   const roomInfo = roomInfoRaw ?? roomInfoRef.current;
+
+  const currentRoundRef = useRef<bigint | undefined>(undefined);
+  if (currentRoundData !== undefined) currentRoundRef.current = currentRoundData;
+  const stableCurrentRoundData = currentRoundData ?? currentRoundRef.current;
+
+  const pendingRevealRef = useRef<boolean | undefined>(undefined);
+  if (isPendingReveal !== undefined) pendingRevealRef.current = isPendingReveal;
+  const stablePendingReveal = isPendingReveal ?? pendingRevealRef.current;
 
   // Static multicall: getAllPlayers + getRoomPlayerNames (fetched once, no polling)
   const staticContracts = useMemo(() => {
@@ -131,17 +145,23 @@ function ArenaContent() {
 
   // Vote status multicall: hasVotedInRound (depends on currentRoundData from core)
   const voteCheckContracts = useMemo(() => {
-    if (!arenaInfo || roomId === undefined || !connectedAddress || !currentRoundData || currentRoundData === 0n)
+    if (
+      !arenaInfo ||
+      roomId === undefined ||
+      !connectedAddress ||
+      !stableCurrentRoundData ||
+      stableCurrentRoundData === 0n
+    )
       return [];
     return [
       {
         address: arenaInfo.address,
         abi: arenaInfo.abi,
         functionName: "hasVotedInRound" as const,
-        args: [roomId, currentRoundData, connectedAddress] as const,
+        args: [roomId, stableCurrentRoundData, connectedAddress] as const,
       },
     ];
-  }, [arenaInfo, roomId, connectedAddress, currentRoundData]);
+  }, [arenaInfo, roomId, connectedAddress, stableCurrentRoundData]);
 
   const { data: voteCheckData } = useReadContracts({
     contracts: voteCheckContracts,
@@ -152,7 +172,7 @@ function ArenaContent() {
 
   const { data: realBlockNumber } = useBlockNumber({ watch: true });
 
-  // Interpolated block number for smooth countdown (400ms per block estimate)
+  // Interpolated block number for smooth countdown (2s per block estimate on Polkadot Hub testnet)
   const [interpolatedBlock, setInterpolatedBlock] = useState(0);
   const lastRealBlockRef = useRef(0);
   const lastRealBlockTimeRef = useRef(0);
@@ -167,16 +187,20 @@ function ArenaContent() {
     }
   }, [realBlockNumber]);
 
-  // Tick interpolated block every 400ms between real updates
+  // Continuously interpolate between block updates so countdown bars move smoothly.
   useEffect(() => {
     if (lastRealBlockRef.current === 0) return;
-    const BLOCK_TIME_MS = 400;
-    const timer = setInterval(() => {
+    let frameId = 0;
+
+    const tick = () => {
       const elapsed = Date.now() - lastRealBlockTimeRef.current;
-      const extraBlocks = Math.floor(elapsed / BLOCK_TIME_MS);
+      const extraBlocks = Math.min(MAX_INTERPOLATED_BLOCK_LEAD, elapsed / ESTIMATED_BLOCK_TIME_MS);
       setInterpolatedBlock(lastRealBlockRef.current + extraBlocks);
-    }, BLOCK_TIME_MS);
-    return () => clearInterval(timer);
+      frameId = window.requestAnimationFrame(tick);
+    };
+
+    frameId = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frameId);
   }, [realBlockNumber]); // restart timer when real block updates
 
   // Game end data — no per-block polling (refetched manually on phase transition)
@@ -215,10 +239,10 @@ function ArenaContent() {
 
   // Refetch player info immediately when round advances (settle applies HP damage)
   useEffect(() => {
-    if (currentRoundData !== undefined && currentRoundData > 0n) {
+    if (stableCurrentRoundData !== undefined && stableCurrentRoundData > 0n) {
       refetchPlayerInfos();
     }
-  }, [currentRoundData, refetchPlayerInfos]);
+  }, [stableCurrentRoundData, refetchPlayerInfos]);
 
   // Build playerInfoMap: lowercase address → PlayerInfo
   const playerInfoMap = useMemo<Record<string, PlayerInfo>>(() => {
@@ -260,7 +284,7 @@ function ArenaContent() {
   // Derive phase early so we can skip WebSocket for ended rooms
   const phase =
     typeof roomInfo === "object" && roomInfo !== null && "phase" in roomInfo ? Number((roomInfo as any).phase) : 0;
-  const pendingReveal = Boolean(isPendingReveal);
+  const pendingReveal = Boolean(stablePendingReveal);
 
   // WebSocket chat connection — single instance for the whole arena page
   // Players in active game: WebSocket (token-based, no re-signing)
@@ -340,21 +364,51 @@ function ArenaContent() {
     );
   }
 
-  if (!roomInfo) {
+  if (!roomInfo && coreIsError) {
     return (
       <div className="flex items-center justify-center flex-1 bg-black">
         <div className="text-center p-8 border border-red-500/50 bg-red-950/20 rounded-lg max-w-md">
-          <div className="text-red-400 text-6xl mb-4 font-mono">404</div>
-          <h2 className="text-red-400 text-xl font-mono mb-2">ROOM NOT FOUND</h2>
+          <div className="text-red-400 text-6xl mb-4 font-mono">!</div>
+          <h2 className="text-red-400 text-xl font-mono mb-2">ARENA CONNECTION LOST</h2>
           <p className="text-gray-500 font-mono text-sm">
-            Room #{rawRoomId} does not exist or has been purged from the chain.
+            Failed to load room #{rawRoomId}. The room may still be valid, but this client could not read chain state.
           </p>
-          <Link
-            href="/lobby"
-            className="inline-block mt-6 px-6 py-2 border border-cyan-500/50 text-cyan-400 font-mono text-sm hover:bg-cyan-500/10 transition-colors"
-          >
-            RETURN TO LOBBY
-          </Link>
+          {coreError ? (
+            <p className="mt-3 text-xs font-mono text-gray-600 break-all">{String(coreError.message ?? coreError)}</p>
+          ) : null}
+          <div className="mt-6 flex items-center justify-center gap-3">
+            <button
+              onClick={() => refetchCoreData()}
+              className="px-6 py-2 border border-cyan-500/50 text-cyan-400 font-mono text-sm hover:bg-cyan-500/10 transition-colors"
+            >
+              RETRY
+            </button>
+            <Link
+              href="/lobby"
+              className="px-6 py-2 border border-green-700/50 arena-text-amber font-mono text-sm hover:bg-green-900/20 transition-colors"
+            >
+              RETURN TO LOBBY
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!roomInfo) {
+    return (
+      <div className="flex items-center justify-center flex-1 bg-black">
+        <div className="text-center">
+          <div className="text-cyan-400 font-mono text-lg animate-pulse mb-4">SYNCING ROOM STATE...</div>
+          <div className="flex justify-center gap-1">
+            {[0, 1, 2, 3, 4].map(i => (
+              <div
+                key={i}
+                className="w-2 h-8 bg-cyan-500/60 animate-pulse"
+                style={{ animationDelay: `${i * 0.15}s` }}
+              />
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -386,7 +440,7 @@ function ArenaContent() {
     typeof roomInfo === "object" && "aliveCount" in roomInfo ? Number((roomInfo as any).aliveCount) : 0;
   const playerCount =
     typeof roomInfo === "object" && "playerCount" in roomInfo ? Number((roomInfo as any).playerCount) : 0;
-  const currentRound = currentRoundData !== undefined ? Number(currentRoundData) : 0;
+  const currentRound = stableCurrentRoundData !== undefined ? Number(stableCurrentRoundData) : 0;
   const prizePool = typeof roomInfo === "object" && "prizePool" in roomInfo ? BigInt((roomInfo as any).prizePool) : 0n;
   const creator = typeof roomInfo === "object" && "creator" in roomInfo ? ((roomInfo as any).creator as string) : "";
   const lastSettleBlock =
@@ -414,7 +468,10 @@ function ArenaContent() {
   const currentBlock = interpolatedBlock;
   const realBlock = realBlockNumber ? Number(realBlockNumber) : 0;
   const settleTargetBlock = lastSettleBlock + currentInterval;
-  const blocksRemaining = isGameActive && currentBlock > 0 ? Math.max(0, settleTargetBlock - currentBlock) : 0;
+  const displayRoundBlocks = isGameActive ? DISPLAY_ROUND_BLOCKS : 0;
+  const displaySettleTargetBlock = lastSettleBlock + displayRoundBlocks;
+  const blocksRemaining = isGameActive && currentBlock > 0 ? Math.max(0, displaySettleTargetBlock - currentBlock) : 0;
+  const roundedBlocksRemaining = Math.max(0, Math.ceil(blocksRemaining));
   // Use REAL block number for settle eligibility (not interpolated) to avoid premature attempts
   const intervalReached = isGameActive && realBlock >= settleTargetBlock && realBlock > 0 && lastSettleBlock > 0;
   const canSettle = intervalReached;
@@ -508,7 +565,7 @@ function ArenaContent() {
                 {canSettle ? (
                   <span className="text-orange-400 font-mono text-xs font-bold animate-pulse">READY</span>
                 ) : (
-                  <span className="text-green-300 font-mono text-xs font-bold">{blocksRemaining} blocks</span>
+                  <span className="text-green-300 font-mono text-xs font-bold">{roundedBlocksRemaining} blocks</span>
                 )}
               </div>
             </>
@@ -682,10 +739,11 @@ function ArenaContent() {
             playerInfoMap={playerInfoMap}
             allPlayers={(allPlayers as string[]) || []}
             roomInfo={roomInfo}
-            roundNum={currentRoundData}
-            blockNumber={interpolatedBlock > 0 ? BigInt(interpolatedBlock) : undefined}
+            roundNum={stableCurrentRoundData}
+            blockNumber={interpolatedBlock > 0 ? interpolatedBlock : undefined}
             pendingReveal={pendingReveal}
             hasVotedOnChain={hasVotedOnChain}
+            displayRoundBlocks={DISPLAY_ROUND_BLOCKS}
             onEmergencyEnd={() => {
               refetchCoreData();
               refetchPlayerInfos();

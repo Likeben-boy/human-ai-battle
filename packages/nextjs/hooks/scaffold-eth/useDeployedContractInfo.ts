@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useIsMounted } from "usehooks-ts";
 import { usePublicClient } from "wagmi";
 import { useSelectedNetwork } from "~~/hooks/scaffold-eth";
@@ -48,15 +48,21 @@ export function useDeployedContractInfo<TContractName extends ContractName>(
   const selectedNetwork = useSelectedNetwork(chainId);
   const deployedContract = contracts?.[selectedNetwork.id]?.[contractName as ContractName] as Contract<TContractName>;
   const [status, setStatus] = useState<ContractCodeStatus>(ContractCodeStatus.LOADING);
+  const [retryNonce, setRetryNonce] = useState(0);
+  const lastStableStatusRef = useRef<ContractCodeStatus>(ContractCodeStatus.LOADING);
   const publicClient = usePublicClient({ chainId: selectedNetwork.id });
 
   useEffect(() => {
+    let cancelled = false;
+    let retryTimer: ReturnType<typeof setTimeout> | undefined;
+
     const checkContractDeployment = async () => {
       try {
-        if (!isMounted() || !publicClient) return;
+        if (!isMounted() || !publicClient || cancelled) return;
 
         if (!deployedContract) {
           setStatus(ContractCodeStatus.NOT_FOUND);
+          lastStableStatusRef.current = ContractCodeStatus.NOT_FOUND;
           return;
         }
 
@@ -64,20 +70,38 @@ export function useDeployedContractInfo<TContractName extends ContractName>(
           address: deployedContract.address,
         });
 
+        if (cancelled) return;
+
         // If contract code is `0x` => no contract deployed on that address
         if (code === "0x") {
           setStatus(ContractCodeStatus.NOT_FOUND);
+          lastStableStatusRef.current = ContractCodeStatus.NOT_FOUND;
           return;
         }
         setStatus(ContractCodeStatus.DEPLOYED);
+        lastStableStatusRef.current = ContractCodeStatus.DEPLOYED;
       } catch (e) {
         console.error(e);
-        setStatus(ContractCodeStatus.NOT_FOUND);
+        // Treat RPC hiccups as transient. Keep the last stable status and retry,
+        // instead of collapsing the contract into a false "not found" state.
+        if (lastStableStatusRef.current !== ContractCodeStatus.DEPLOYED) {
+          setStatus(ContractCodeStatus.LOADING);
+        }
+        retryTimer = setTimeout(() => {
+          if (!cancelled) {
+            setRetryNonce(nonce => nonce + 1);
+          }
+        }, 3000);
       }
     };
 
     checkContractDeployment();
-  }, [isMounted, contractName, deployedContract, publicClient]);
+
+    return () => {
+      cancelled = true;
+      if (retryTimer) clearTimeout(retryTimer);
+    };
+  }, [isMounted, contractName, deployedContract, publicClient, retryNonce]);
 
   return {
     data: status === ContractCodeStatus.DEPLOYED ? deployedContract : undefined,

@@ -18,6 +18,7 @@ export function VotePanel({
   roomInfo,
   roundNum,
   blockNumber,
+  displayRoundBlocks,
   pendingReveal,
   hasVotedOnChain,
   onEmergencyEnd,
@@ -29,7 +30,8 @@ export function VotePanel({
   allPlayers: string[];
   roomInfo: any;
   roundNum: bigint | undefined;
-  blockNumber: bigint | undefined;
+  blockNumber: number | undefined;
+  displayRoundBlocks: number;
   pendingReveal: boolean;
   hasVotedOnChain?: boolean;
   onEmergencyEnd?: () => void;
@@ -66,13 +68,14 @@ export function VotePanel({
     roomInfo && typeof roomInfo === "object" && "currentInterval" in roomInfo
       ? Number((roomInfo as any).currentInterval)
       : 0;
-  const currentBlock = blockNumber ? Number(blockNumber) : 0;
+  const currentBlock = blockNumber ?? 0;
   const settleTargetBlock = lastSettleBlock + currentInterval;
+  const displayTargetBlock = lastSettleBlock + displayRoundBlocks;
   const blocksRemaining =
-    isGameActive && currentBlock > 0 && lastSettleBlock > 0 ? Math.max(0, settleTargetBlock - currentBlock) : 0;
+    isGameActive && currentBlock > 0 && lastSettleBlock > 0 ? Math.max(0, displayTargetBlock - currentBlock) : 0;
   const progress =
-    isGameActive && currentInterval > 0 ? Math.min(1, Math.max(0, 1 - blocksRemaining / currentInterval)) : 0;
-  const isUrgent = isGameActive && blocksRemaining > 0 && blocksRemaining <= Math.ceil(currentInterval * 0.25);
+    isGameActive && displayRoundBlocks > 0 ? Math.min(1, Math.max(0, 1 - blocksRemaining / displayRoundBlocks)) : 0;
+  const isUrgent = isGameActive && blocksRemaining > 0 && blocksRemaining <= Math.ceil(displayRoundBlocks * 0.25);
   const isExpired = isGameActive && currentBlock > 0 && currentBlock >= settleTargetBlock && lastSettleBlock > 0;
 
   const myInfo = connectedAddress ? playerInfoMap[connectedAddress.toLowerCase()] : undefined;
@@ -172,7 +175,7 @@ export function VotePanel({
             progress={progress}
             isUrgent={isUrgent}
             isExpired={isExpired}
-            currentInterval={currentInterval}
+            currentInterval={displayRoundBlocks}
             onSettle={onSettle}
           />
         )}
@@ -479,6 +482,8 @@ function RoundCountdown({
   onSettle?: () => Promise<void>;
 }) {
   const [isSettling, setIsSettling] = useState(false);
+  const roundedBlocksRemaining = Math.max(0, Math.ceil(blocksRemaining));
+  const progressPercent = Math.round(progress * 100);
 
   const handleSettle = async () => {
     if (!onSettle || isSettling) return;
@@ -525,7 +530,7 @@ function RoundCountdown({
           <span className="text-orange-400 font-mono text-xs font-bold animate-pulse">READY</span>
         ) : (
           <span className={`font-mono text-sm font-bold tabular-nums ${textColor} ${isUrgent ? "animate-pulse" : ""}`}>
-            {blocksRemaining} <span className="text-[10px] font-normal">blocks</span>
+            {roundedBlocksRemaining} <span className="text-[10px] font-normal">blocks</span>
           </span>
         )}
       </div>
@@ -540,9 +545,9 @@ function RoundCountdown({
 
       <div className="flex items-center justify-between mt-1">
         <span className="text-gray-600 font-mono text-[10px]">
-          {blocksRemaining} / {currentInterval}
+          {roundedBlocksRemaining} / {currentInterval}
         </span>
-        <span className="text-gray-600 font-mono text-[10px]">{Math.round(progress * 100)}%</span>
+        <span className="text-gray-600 font-mono text-[10px]">{progressPercent}%</span>
       </div>
 
       {/* Settle button when round expired */}
