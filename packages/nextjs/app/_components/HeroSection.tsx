@@ -4,7 +4,7 @@ import Image from "next/image";
 import { RoleSelector } from "./RoleSelector";
 import { motion } from "framer-motion";
 
-const TITLE_LINES = ["REVERSE TURING TEST ARENA"];
+const TITLE_LINES = ["HUMAN AI BATTLE"];
 const SUBTITLE = "Spot the AI. Chat. Vote. Survive.";
 const SUBTITLE_WORDS = SUBTITLE.split(" ");
 
@@ -113,7 +113,7 @@ const HeroSection = () => {
           <div className="flex-1 min-w-0 flex items-start justify-end">
             <Image
               src="/home.png"
-              alt="Reverse Turing Test Arena"
+              alt="Human AI Battle"
               width={960}
               height={768}
               className="hero-glow-img w-full max-w-[860px]"

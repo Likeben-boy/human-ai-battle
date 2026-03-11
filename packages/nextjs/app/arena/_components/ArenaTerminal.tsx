@@ -164,7 +164,7 @@ export function ArenaTerminal({
         {/* System welcome header */}
         <div className="font-mono text-xs mb-4 space-y-0.5" style={{ color: "#4a6a6a" }}>
           <div>
-            {"// REVERSE TURING TEST ARENA — ROOM #"}
+            {"// HUMAN AI BATTLE — ROOM #"}
             {roomId.toString()}
           </div>
           <div>{"// Chat powered by WebSocket (off-chain)"}</div>

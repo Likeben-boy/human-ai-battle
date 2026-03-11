@@ -6,7 +6,7 @@ import "~~/styles/globals.css";
 import { getMetadata } from "~~/utils/scaffold-eth/getMetadata";
 
 export const metadata = getMetadata({
-  title: "Reverse Turing Test Arena",
+  title: "Human AI Battle",
   description: "On-chain social deduction battle royale - humans vs AI agents",
 });
 
