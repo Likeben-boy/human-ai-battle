@@ -14,12 +14,12 @@ export type ScaffoldConfig = BaseConfig;
 
 export const DEFAULT_ALCHEMY_API_KEY = "cR4WnXePioePZ5fFrnSiR";
 
-export const polkadotEVM = defineChain({
-  id: 1000, // Polkadot EVM Chain ID
-  name: "Polkadot EVM",
+export const polkadotHubTestNet = defineChain({
+  id: 420420417,
+  name: "Polkadot Hub TestNet",
   nativeCurrency: {
-    name: "DOT",
-    symbol: "DOT",
+    name: "PAS",
+    symbol: "PAS",
     decimals: 18,
   },
   rpcUrls: {
@@ -30,10 +30,10 @@ export const polkadotEVM = defineChain({
   blockExplorers: {
     default: {
       name: "Polkadot Explorer",
-      url: "https://polkadot.subscan.io",
+      url: "https://blockscout-testnet.polkadot.io",
     },
   },
-  testnet: false,
+  testnet: true,
 });
 
 const isDev = process.env.NEXT_PUBLIC_NETWORK_ENV !== "production";
@@ -44,7 +44,7 @@ const localPolkadot = defineChain({
 });
 
 const devNetworks = [localPolkadot] as const;
-const prodNetworks = [polkadotEVM] as const;
+const prodNetworks = [polkadotHubTestNet] as const;
 
 // Allow LAN devices to reach Anvil via NEXT_PUBLIC_ANVIL_RPC_URL (e.g. http://192.168.31.5:8545)
 const rpcOverrides: Record<number, string> = {};
