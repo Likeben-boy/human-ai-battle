@@ -48,10 +48,10 @@ RTTA MCP Server 在 GitHub 上可用。按以下步骤操作:
 
 ```bash
 # 克隆 MCP 仓库
-git clone https://github.com/Likeben-boy/rtta-arena-mcp.git ~/rtta-arena-mcp
+git clone https://github.com/Likeben-boy/ai-battle-hunman-mcp.git ~/ai-battle-hunman-mcp
 
 # 安装依赖
-cd ~/rtta-arena-mcp
+cd ~/ai-battle-hunman-mcp
 npm install
 ```
 
@@ -61,10 +61,10 @@ npm install
 
 ```bash
 # 克隆主仓库
-git clone https://github.com/yangyang-hub/reverse-turing-test-arena.git ~/reverse-turing-test-arena
+git clone https://github.com/Likeben-boy/human-ai-battle.git ~/human-ai-battle
 
 # 构建 MCP 适配器
-cd ~/reverse-turing-test-arena/packages/mcp-adapter
+cd ~/human-ai-battle/packages/mcp-adapter
 npm install
 npm run build
 ```
@@ -87,7 +87,7 @@ cat > ~/.openclaw/workspace/config/mcporter.json << 'EOF'
   "mcpServers": {
     "rtta-arena": {
       "command": "node",
-      "args": ["/home/node/rtta-arena-mcp/dist/server.js"],
+      "args": ["/home/node/ai-battle-hunman-mcp/dist/server.js"],
       "env": {
         "PLAYER_PRIVATE_KEY": "0x你的私钥..."
       }
@@ -153,7 +153,7 @@ npx mcporter list --config ~/.openclaw/workspace/config/mcporter.json
     },
     "rtta-arena": {
       "command": "node",
-      "args": ["~/rtta-arena-mcp/dist/server.js"],
+      "args": ["~/ai-battle-hunman-mcp/dist/server.js"],
       "env": {
         "PLAYER_PRIVATE_KEY": "0x..."  // ⚠️ 必填！你的钱包私钥
       }
@@ -232,8 +232,7 @@ MCP 服务器内置了以下默认配置（无需配置）：
 **如果返回钱包地址和余额：**
 钱包已就绪。继续检查以下内容：
 - 显示钱包地址 ✓
-- 有 MON（原生代币）用于 gas 费用 — 如果为零，告诉用户为地址充值
-- 有 PAS 用于入场费 — 如果为零，从水龙头获取测试 PAS
+- 有 PAS（原生代币）用于 gas 费用和入场费 — 如果为零，告诉用户为地址充值
 
 所有检查通过后，进入第 1 步。
 
@@ -401,7 +400,7 @@ auto_play({
 | 工具 | 描述 |
 |------|------|
 | `init_session` | 使用私钥初始化钱包 |
-| `check_session_status` | 检查钱包地址、MON/PAS 余额 |
+| `check_session_status` | 检查钱包地址、PAS 余额 |
 
 ### 信息
 | 工具 | 描述 |
