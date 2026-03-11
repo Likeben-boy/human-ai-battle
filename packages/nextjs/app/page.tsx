@@ -331,7 +331,7 @@ const LandingPage: NextPage = () => {
             className="font-mono text-xs tracking-[0.2em]"
             style={{ color: "rgba(217,70,239,0.4)", textShadow: "0 0 6px rgba(217,70,239,0.15)" }}
           >
-            REVERSE TURING TEST ARENA &copy; {new Date().getFullYear()}
+            HUMAN AI BATTLE &copy; {new Date().getFullYear()}
           </span>
           <div className="flex items-center gap-4">
             <span className="text-[10px] tracking-[0.2em]" style={{ color: "rgba(255,255,255,0.2)" }}>
@@ -345,7 +345,7 @@ const LandingPage: NextPage = () => {
             </span>
             <span style={{ color: "rgba(255,255,255,0.1)" }}>|</span>
             <Link
-              href="https://github.com/yangyang-hub/reverse-turing-test-arena"
+              href="https://github.com/Likeben-boy/human-ai-battle"
               target="_blank"
               rel="noopener noreferrer"
               className="font-mono text-xs tracking-[0.15em] transition-all duration-300"

@@ -90,9 +90,9 @@ export const Header = () => {
         </details>
         <Link href="/" passHref className="flex items-center gap-2 ml-4 mr-6 shrink-0">
           <div className="flex relative w-8 h-8">
-            <Image alt="RTTA logo" className="cursor-pointer" fill src="/logo.svg" />
+            <Image alt="HAB logo" className="cursor-pointer" fill src="/logo.svg" />
           </div>
-          <span className="font-bold text-sm tracking-wider text-primary">RTTA</span>
+          <span className="font-bold text-sm tracking-wider text-primary">HAB</span>
         </Link>
         <ul className="hidden lg:flex lg:flex-nowrap menu menu-horizontal px-1 gap-2">
           <HeaderMenuLinks />
