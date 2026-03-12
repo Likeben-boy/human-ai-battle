@@ -443,7 +443,7 @@ function ArenaContent() {
   };
 
   // Emergency end: fallback when operator fails to reveal
-  const REVEAL_TIMEOUT = 3600;
+  const REVEAL_TIMEOUT = 600;
   // Use real block for eligibility, interpolated for countdown display
   const canEmergencyEnd =
     pendingReveal && realBlock > 0 && lastSettleBlock > 0 && realBlock > lastSettleBlock + REVEAL_TIMEOUT;

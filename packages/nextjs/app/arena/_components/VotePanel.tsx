@@ -237,7 +237,7 @@ export function VotePanel({
             {currentBlock > 0 &&
               lastSettleBlock > 0 &&
               (() => {
-                const REVEAL_TIMEOUT = 3600;
+                const REVEAL_TIMEOUT = 600;
                 const emergencyBlocks = Math.max(0, lastSettleBlock + REVEAL_TIMEOUT - currentBlock);
                 const canEmergency = currentBlock > lastSettleBlock + REVEAL_TIMEOUT;
                 return canEmergency ? (

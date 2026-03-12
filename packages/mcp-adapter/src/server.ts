@@ -88,7 +88,7 @@ const rpcRateLimiter = new RateLimiter(20);
 let playerWallet: ethers.Wallet | null = null;
 
 // 合约地址和服务 URL（Polkadot EVM 默认值，可通过环境变量覆盖）
-const ARENA_CONTRACT = process.env.ARENA_CONTRACT_ADDRESS || "0x7126f782fbc7f319260dc8864fba755fccfddab9";
+const ARENA_CONTRACT = process.env.ARENA_CONTRACT_ADDRESS || "0x7fdd5c1fd08da8440019372f544a8759b43dab58";
 const CHAT_SERVER_URL = process.env.CHAT_SERVER_URL || "http://101.36.105.150:43002";
 
 // 链下聊天客户端（在 init_session 后初始化）

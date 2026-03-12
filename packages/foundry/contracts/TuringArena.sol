@@ -101,6 +101,7 @@ contract TuringArena is ReentrancyGuard {
 
     // Rewards: roomId => player => RewardInfo
     mapping(uint256 => mapping(address => RewardInfo)) public rewards;
+    uint256 public totalReservedRewards;
 
     // Track player's active room (0 = not in any room)
     mapping(address => uint256) public playerActiveRoom;
@@ -437,9 +438,6 @@ contract TuringArena is ReentrancyGuard {
         }
 
         // Step 3: Elimination logic
-        address[] memory eliminatedThisRound = new address[](room.aliveCount);
-        uint256 eliminatedCount = 0;
-
         if (zeroCount == room.aliveCount && room.aliveCount > 1) {
             // Tiebreaker: earliest voter survives
             address lastSurvivor = _findEarliestVoter(_roomId, round, allPlayers);
@@ -454,7 +452,6 @@ contract TuringArena is ReentrancyGuard {
             for (uint256 i = 0; i < allPlayers.length; i++) {
                 address playerAddr = allPlayers[i];
                 if (players[_roomId][playerAddr].isAlive && playerAddr != lastSurvivor) {
-                    eliminatedThisRound[eliminatedCount++] = playerAddr;
                     _markEliminated(_roomId, playerAddr, address(0), "tiebreaker");
                 }
             }
@@ -464,20 +461,21 @@ contract TuringArena is ReentrancyGuard {
                 address playerAddr = allPlayers[i];
                 if (players[_roomId][playerAddr].isAlive && players[_roomId][playerAddr].humanityScore <= 0) {
                     address eliminatedBy = _findVoterFor(_roomId, round, playerAddr, allPlayers);
-                    eliminatedThisRound[eliminatedCount++] = playerAddr;
                     _markEliminated(_roomId, playerAddr, eliminatedBy, "voted_out");
                 }
             }
         }
 
-        // Step 4: Update successful votes
-        for (uint256 i = 0; i < eliminatedCount; i++) {
-            address eliminatedPlayer = eliminatedThisRound[i];
-            for (uint256 j = 0; j < allPlayers.length; j++) {
-                address voter = allPlayers[j];
-                if (hasVotedInRound[_roomId][round][voter] && voteTarget[_roomId][round][voter] == eliminatedPlayer) {
-                    players[_roomId][voter].successfulVotes++;
-                }
+        // Step 4: Update successful votes with a single voter scan.
+        for (uint256 i = 0; i < allPlayers.length; i++) {
+            address voter = allPlayers[i];
+            if (!hasVotedInRound[_roomId][round][voter]) {
+                continue;
+            }
+
+            address target = voteTarget[_roomId][round][voter];
+            if (target != address(0) && !players[_roomId][target].isAlive) {
+                players[_roomId][voter].successfulVotes++;
             }
         }
 
@@ -488,6 +486,24 @@ contract TuringArena is ReentrancyGuard {
         // Step 6: If alive count <= 2, pause for operator reveal
         if (room.isActive && room.aliveCount <= 2) {
             pendingReveal[_roomId] = true;
+        }
+    }
+
+    function _reserveReward(uint256 _roomId, address _recipient, uint256 _amount) internal {
+        if (_amount == 0) {
+            return;
+        }
+        rewards[_roomId][_recipient].amount += _amount;
+        totalReservedRewards += _amount;
+    }
+
+    function _clearPlayerCommitments(uint256 _roomId, address[] storage _allPlayers) internal {
+        for (uint256 i = 0; i < _allPlayers.length; i++) {
+            playerActiveRoom[_allPlayers[i]] = 0;
+            bytes32 commitment = identityCommitments[_roomId][_allPlayers[i]];
+            if (commitment != bytes32(0)) {
+                delete usedCommitments[commitment];
+            }
         }
     }
 
@@ -613,6 +629,9 @@ contract TuringArena is ReentrancyGuard {
 
         // Verify commitments and set isAI
         for (uint256 i = 0; i < _players.length; i++) {
+            for (uint256 j = 0; j < i; j++) {
+                require(_players[i] != _players[j], "Duplicate player");
+            }
             bytes32 commitment = identityCommitments[_roomId][_players[i]];
             require(commitment != bytes32(0), "No commitment for player");
             bytes32 computed = keccak256(abi.encodePacked(_isAIs[i], _salts[i]));
@@ -687,13 +706,7 @@ contract TuringArena is ReentrancyGuard {
 
         // Clear active room and commitments for all players
         address[] storage allPlayers = roomPlayers[_roomId];
-        for (uint256 i = 0; i < allPlayers.length; i++) {
-            playerActiveRoom[allPlayers[i]] = 0;
-            bytes32 commitment = identityCommitments[_roomId][allPlayers[i]];
-            if (commitment != bytes32(0)) {
-                delete usedCommitments[commitment];
-            }
-        }
+        _clearPlayerCommitments(_roomId, allPlayers);
 
         // Emergency: split prize equally among alive players (no team bonus)
         uint256 totalPrize = room.prizePool;
@@ -701,7 +714,7 @@ contract TuringArena is ReentrancyGuard {
         uint256 remainingPool = totalPrize - protocolAmount;
 
         if (protocolAmount > 0) {
-            rewards[_roomId][protocolTreasury].amount += protocolAmount;
+            _reserveReward(_roomId, protocolTreasury, protocolAmount);
         }
 
         uint256 aliveCount = 0;
@@ -714,7 +727,7 @@ contract TuringArena is ReentrancyGuard {
             uint256 perPlayer = remainingPool / aliveCount;
             for (uint256 i = 0; i < allPlayers.length; i++) {
                 if (players[_roomId][allPlayers[i]].isAlive) {
-                    rewards[_roomId][allPlayers[i]].amount += perPlayer;
+                    _reserveReward(_roomId, allPlayers[i], perPlayer);
                 }
             }
         }
@@ -734,13 +747,7 @@ contract TuringArena is ReentrancyGuard {
 
         // Clear active room and commitments for all players so they can join new games
         address[] storage allPlayers = roomPlayers[_roomId];
-        for (uint256 i = 0; i < allPlayers.length; i++) {
-            playerActiveRoom[allPlayers[i]] = 0;
-            bytes32 commitment = identityCommitments[_roomId][allPlayers[i]];
-            if (commitment != bytes32(0)) {
-                delete usedCommitments[commitment];
-            }
-        }
+        _clearPlayerCommitments(_roomId, allPlayers);
 
         _gameStats[_roomId].humansWon = _humansWon;
 
@@ -782,7 +789,7 @@ contract TuringArena is ReentrancyGuard {
 
         // Protocol fee
         if (protocolAmount > 0) {
-            rewards[_roomId][protocolTreasury].amount += protocolAmount;
+            _reserveReward(_roomId, protocolTreasury, protocolAmount);
         }
 
         // Winning team reward: split equally among alive players on winning team
@@ -800,14 +807,14 @@ contract TuringArena is ReentrancyGuard {
                 Player storage p = players[_roomId][allPlayers[i]];
                 bool isWinningTeam = stats.humansWon ? !p.isAI : p.isAI;
                 if (p.isAlive && isWinningTeam) {
-                    rewards[_roomId][p.addr].amount += perWinner;
+                    _reserveReward(_roomId, p.addr, perWinner);
                 }
             }
         }
 
         // MVP reward
         if (stats.mvp != address(0) && stats.mvpVotes > 0) {
-            rewards[_roomId][stats.mvp].amount += mvpAmount;
+            _reserveReward(_roomId, stats.mvp, mvpAmount);
         }
 
         // Survival reward: split among ALL alive players (both teams)
@@ -821,7 +828,7 @@ contract TuringArena is ReentrancyGuard {
             uint256 perSurvivor = survivalPool / totalAlive;
             for (uint256 i = 0; i < allPlayers.length; i++) {
                 if (players[_roomId][allPlayers[i]].isAlive) {
-                    rewards[_roomId][allPlayers[i]].amount += perSurvivor;
+                    _reserveReward(_roomId, allPlayers[i], perSurvivor);
                 }
             }
         }
@@ -835,6 +842,7 @@ contract TuringArena is ReentrancyGuard {
 
         info.claimed = true;
         uint256 amount = info.amount;
+        totalReservedRewards -= amount;
 
         (bool s,) = msg.sender.call{value: amount}("");
         require(s, "Transfer failed");
@@ -852,7 +860,7 @@ contract TuringArena is ReentrancyGuard {
 
     function withdrawUnclaimed(uint256 _amount) external {
         require(msg.sender == protocolTreasury, "Only treasury");
-        require(_amount <= address(this).balance, "Insufficient balance");
+        require(_amount <= address(this).balance - totalReservedRewards, "Insufficient unreserved balance");
         (bool s,) = protocolTreasury.call{value: _amount}("");
         require(s, "Transfer failed");
     }

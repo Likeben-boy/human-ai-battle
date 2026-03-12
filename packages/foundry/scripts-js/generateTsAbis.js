@@ -225,6 +225,13 @@ function main() {
     current_path_to_broadcast
   );
 
+  const knownChainIds = new Set(Object.keys(deployments));
+  Object.keys(allGeneratedContracts).forEach((chainId) => {
+    if (!knownChainIds.has(chainId)) {
+      delete allGeneratedContracts[chainId];
+    }
+  });
+
   // Update contract keys based on deployments if they exist
   Object.entries(allGeneratedContracts).forEach(([chainId, contracts]) => {
     Object.entries(contracts).forEach(([contractName, contractData]) => {

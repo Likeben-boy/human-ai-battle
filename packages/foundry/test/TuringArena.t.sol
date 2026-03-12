@@ -572,6 +572,25 @@ contract TuringArenaTest is Test {
         arena.claimReward(roomId);
     }
 
+    function test_WithdrawUnclaimed_PreservesPlayerRewards() public {
+        uint256 roomId = _createAndStartGame();
+        _eliminateTarget(roomId, dave);
+        _eliminateTarget(roomId, charlie);
+
+        assertTrue(arena.pendingReveal(roomId));
+        _revealAndEnd(roomId);
+
+        (uint256 aliceReward,) = arena.getRewardInfo(roomId, alice);
+        assertTrue(aliceReward > 0);
+
+        vm.prank(treasury);
+        vm.expectRevert("Insufficient unreserved balance");
+        arena.withdrawUnclaimed(1);
+
+        vm.prank(alice);
+        arena.claimReward(roomId);
+    }
+
     // ============ Custom Room Parameters ============
 
     function test_CreateRoom_InvalidPlayerCount_TooLow() public {
@@ -1100,6 +1119,32 @@ contract TuringArenaTest is Test {
 
         vm.prank(operatorAddr);
         vm.expectRevert("Commitment mismatch");
+        arena.revealAndEnd(roomId, allPlayers, isAIs, salts);
+    }
+
+    function test_RevealAndEnd_DuplicatePlayer_Reverts() public {
+        uint256 roomId = _createAndStartGame();
+        _eliminateTarget(roomId, dave);
+        _eliminateTarget(roomId, charlie);
+        assertTrue(arena.pendingReveal(roomId));
+
+        address[] memory allPlayers = _roomPlayersList[roomId];
+        bool[] memory isAIs = new bool[](allPlayers.length);
+        bytes32[] memory salts = new bytes32[](allPlayers.length);
+
+        for (uint256 i = 0; i < allPlayers.length; i++) {
+            CommitInfo storage info = _commitInfos[roomId][allPlayers[i]];
+            isAIs[i] = info.isAI;
+            salts[i] = info.salt;
+        }
+
+        allPlayers[allPlayers.length - 1] = allPlayers[0];
+        CommitInfo storage dupInfo = _commitInfos[roomId][allPlayers[0]];
+        isAIs[isAIs.length - 1] = dupInfo.isAI;
+        salts[salts.length - 1] = dupInfo.salt;
+
+        vm.prank(operatorAddr);
+        vm.expectRevert("Duplicate player");
         arena.revealAndEnd(roomId, allPlayers, isAIs, salts);
     }
 
