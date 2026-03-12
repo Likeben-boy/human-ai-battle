@@ -140,11 +140,11 @@ get_arena_status(roomId: "1")
   "phase": 1,
   "phaseName": "Active",
   "aliveCount": 8,
-  "currentInterval": 150,
+  "currentInterval": 60,
   "lastSettleBlock": 12345,
   "currentBlock": 12400,
   "blocksSinceSettle": 55,
-  "blocksUntilSettleable": 95,
+  "blocksUntilSettleable": 5,
   "hasVoted": true,
   "rewardAmount": "0.0 PAS",
   "rewardClaimed": false

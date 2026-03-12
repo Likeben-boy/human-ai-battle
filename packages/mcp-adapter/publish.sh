@@ -17,16 +17,17 @@ NC='\033[0m' # No Color
 # 配置
 # ==============================================================================
 
-# 项目路径
-PROJECT_ROOT="/Users/likeben/Documents/hack_code/reverse-turing-test-arena"
-MCP_ADAPTER_DIR="$PROJECT_ROOT/packages/mcp-adapter"
+# 项目路径（动态获取脚本所在目录的父目录）
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+MCP_ADAPTER_DIR="$SCRIPT_DIR"
 
 # 临时发布目录
-RELEASE_DIR="/tmp/rtta-arena-mcp-release"
+RELEASE_DIR="/tmp/ai-battle-hunman-mcp-release"
 
 # Git 仓库配置
-REPO_URL="git@github.com:Likeben-boy/rtta-arena-mcp.git"
-REPO_NAME="rtta-arena-mcp"
+REPO_URL="git@github.com:Likeben-boy/ai-battle-hunman-mcp.git"
+REPO_NAME="ai-battle-hunman-mcp"
 
 # 版本号
 VERSION="1.0.0"
@@ -138,11 +139,11 @@ cat > package.json << 'EOF'
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Likeben-boy/rtta-arena-mcp.git"
+    "url": "git+https://github.com/Likeben-boy/ai-battle-hunman-mcp.git"
   },
-  "homepage": "https://github.com/Likeben-boy/rtta-arena-mcp#readme",
+  "homepage": "https://github.com/Likeben-boy/ai-battle-hunman-mcp#readme",
   "bugs": {
-    "url": "https://github.com/Likeben-boy/rtta-arena-mcp/issues"
+    "url": "https://github.com/Likeben-boy/ai-battle-hunman-mcp/issues"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -176,7 +177,7 @@ cat > README.md << 'EOF'
 - 🤖 **AI Agents** 通过 MCP 连接,以 30% 比例与人类混合
 - 🗣️ 通过聊天和投票进行社交推理,淘汰对方队伍
 - 🏆 淘汰所有敌方玩家即可获胜
-- 💰 赢家瓜分 USDC 奖池
+- 💰 赢家瓜分 PAS 奖池 (Polkadot 原生代币)
 
 **AI Agent 的目标**: 通过聊天伪装自己,投票淘汰所有人类玩家!
 
@@ -199,8 +200,7 @@ cat > README.md << 'EOF'
 | **查询** | `get_arena_status` | 房间状态 |
 | | `get_round_status` | 轮次信息 |
 | | `get_game_history` | 历史记录 |
-| **奖励** | `claim_reward` | 领取奖励 |
-| | `mint_test_usdc` | 铸造测试币 |
+| **奖励** | `claim_reward` | 领取 PAS 奖励 |
 
 ### 核心能力
 
@@ -336,7 +336,7 @@ log_info "✓ Pushed to GitHub successfully"
 
 log_info "=== Release Complete! ==="
 log_info ""
-log_info "📦 Repository URL: https://github.com/Likeben-boy/rtta-arena-mcp"
+log_info "📦 Repository URL: https://github.com/Likeben-boy/ai-battle-hunman-mcp"
 log_info ""
 log_info "Next steps:"
 log_info "1. Visit the repository and verify files"
@@ -345,8 +345,8 @@ log_info "   - Tag: v1.0.0"
 log_info "   - Title: MCP Adapter v1.0.0 - RTTA Arena Server"
 log_info "   - Description: See README.md"
 log_info "3. Users can install with:"
-log_info "   git clone https://github.com/Likeben-boy/rtta-arena-mcp.git"
-log_info "   cd rtta-arena-mcp"
+log_info "   git clone https://github.com/Likeben-boy/ai-battle-hunman-mcp.git"
+log_info "   cd ai-battle-hunman-mcp"
 log_info "   npm install"
 log_info ""
 log_info "Note: No .env file needed. Configure via Claude Desktop env vars."

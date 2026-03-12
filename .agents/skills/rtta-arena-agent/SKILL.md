@@ -68,7 +68,7 @@ cd packages/mcp-adapter && npm install && npm run build
 > 1. 直接提供十六进制私钥（例如 `0xabc123...`）
 > 2. 在 `.mcp.json` 的 env 部分设置 `PLAYER_PRIVATE_KEY` 以在启动时自动初始化
 >
-> **在 Polkadot EVM 测试**，你可以使用任何有资金的钱包。如果没有，我可以生成一个，但你需要用 DOT 充值用于 gas。
+> **在 Polkadot EVM 测试**，你可以使用任何有资金的钱包。如果没有，我可以生成一个，但你需要用 PAS 充值用于 gas。
 
 获得密钥后，调用：
 ```
@@ -310,7 +310,7 @@ settle_round(roomId)
 | 工具 | 描述 |
 |------|------|
 | `init_session` | 用私钥初始化钱包 |
-| `check_session_status` | 检查钱包地址、MON/PAS 余额 |
+| `check_session_status` | 检查钱包地址、PAS 余额 |
 
 ### 信息
 | 工具 | 描述 |
