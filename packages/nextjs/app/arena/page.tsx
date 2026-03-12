@@ -35,8 +35,6 @@ const PHASE_COLORS: Record<number, string> = {
 };
 
 const DISPLAY_ROUND_BLOCKS = 60;
-const ESTIMATED_BLOCK_TIME_MS = 1_500;
-const MAX_INTERPOLATED_BLOCK_LEAD = 2;
 const ARENA_BLOCK_POLL_INTERVAL_MS = 2_000;
 const CHAT_SERVER_URL = process.env.NEXT_PUBLIC_CHAT_SERVER_URL || "http://localhost:43002";
 
@@ -177,38 +175,6 @@ function ArenaContent() {
     watch: true,
     query: { refetchInterval: ARENA_BLOCK_POLL_INTERVAL_MS },
   });
-
-  // Interpolated block number for smooth countdown (2s per block estimate on Polkadot Hub testnet)
-  const [interpolatedBlock, setInterpolatedBlock] = useState(0);
-  const lastRealBlockRef = useRef(0);
-  const lastRealBlockTimeRef = useRef(0);
-
-  // Align to the latest real block when it arrives.
-  useEffect(() => {
-    if (realBlockNumber) {
-      const real = Number(realBlockNumber);
-      lastRealBlockRef.current = real;
-      lastRealBlockTimeRef.current = Date.now();
-      setInterpolatedBlock(real);
-    }
-  }, [realBlockNumber]);
-
-  // Continuously interpolate ahead of the last real block so the progress bar keeps moving
-  // between block polls, then real block updates snap it back into alignment.
-  useEffect(() => {
-    if (lastRealBlockRef.current === 0) return;
-    let frameId = 0;
-
-    const tick = () => {
-      const elapsed = Date.now() - lastRealBlockTimeRef.current;
-      const extraBlocks = Math.min(MAX_INTERPOLATED_BLOCK_LEAD, elapsed / ESTIMATED_BLOCK_TIME_MS);
-      setInterpolatedBlock(lastRealBlockRef.current + extraBlocks);
-      frameId = window.requestAnimationFrame(tick);
-    };
-
-    frameId = window.requestAnimationFrame(tick);
-    return () => window.cancelAnimationFrame(frameId);
-  }, [realBlockNumber]); // restart timer when real block updates
 
   // Game end data — no per-block polling (refetched manually on phase transition)
   const { data: gameStats, refetch: refetchGameStats } = useScaffoldReadContract({
@@ -378,17 +344,15 @@ function ArenaContent() {
       : 0;
   const canStartGame = phase === 0 && isCreator && playerCount === maxPlayers;
 
-  // Round timing — interpolated block for smooth countdown, real block for settle decisions
+  // Round timing — use real block for settle decisions and non-countdown UI.
   const isGameActive = phase === 1;
-  const currentBlock = interpolatedBlock > 0 ? interpolatedBlock : realBlockNumber ? Number(realBlockNumber) : 0;
   const realBlock = realBlockNumber ? Number(realBlockNumber) : 0;
   const settleTargetBlock = lastSettleBlock + currentInterval;
-  const blocksRemaining =
-    isGameActive && currentBlock > 0 ? Math.max(0, Math.ceil(settleTargetBlock - currentBlock)) : 0;
+  const roundedBlocksRemaining =
+    isGameActive && realBlock > 0 ? Math.max(0, Math.ceil(settleTargetBlock - realBlock)) : currentInterval;
   // Use REAL block number for settle eligibility (not interpolated) to avoid premature attempts
   const intervalReached = isGameActive && realBlock >= settleTargetBlock && realBlock > 0 && lastSettleBlock > 0;
   const canSettle = intervalReached;
-  const roundedBlocksRemaining = canSettle ? 0 : Math.max(1, blocksRemaining);
 
   const triggerBackendSettleCheck = useCallback(async () => {
     if (!roomId || !connectedAddress || phase !== 1 || pendingReveal || !isPlayerInGame) return null;
@@ -449,8 +413,8 @@ function ArenaContent() {
   const canEmergencyEnd =
     pendingReveal && realBlock > 0 && lastSettleBlock > 0 && realBlock > lastSettleBlock + REVEAL_TIMEOUT;
   const emergencyBlocksRemaining =
-    pendingReveal && currentBlock > 0 && lastSettleBlock > 0
-      ? Math.max(0, Math.ceil(lastSettleBlock + REVEAL_TIMEOUT - currentBlock))
+    pendingReveal && realBlock > 0 && lastSettleBlock > 0
+      ? Math.max(0, Math.ceil(lastSettleBlock + REVEAL_TIMEOUT - realBlock))
       : 0;
 
   const handleEmergencyEnd = async () => {
@@ -842,7 +806,7 @@ function ArenaContent() {
             allPlayers={(allPlayers as string[]) || []}
             roomInfo={roomInfo}
             roundNum={stableCurrentRoundData}
-            blockNumber={interpolatedBlock > 0 ? interpolatedBlock : undefined}
+            blockNumber={realBlock > 0 ? realBlock : undefined}
             pendingReveal={pendingReveal}
             hasVotedOnChain={hasVotedOnChain}
             displayRoundBlocks={DISPLAY_ROUND_BLOCKS}
