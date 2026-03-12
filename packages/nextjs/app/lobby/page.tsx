@@ -13,6 +13,7 @@ import RoomCard from "~~/app/_components/RoomCard";
 import { useDeployedContractInfo, useScaffoldReadContract } from "~~/hooks/scaffold-eth";
 
 const CHAT_SERVER_URL = process.env.NEXT_PUBLIC_CHAT_SERVER_URL || "http://localhost:43002";
+const LOBBY_REFRESH_INTERVAL_MS = 5_000;
 
 type FilterTab = "mygame" | "waiting" | "active" | "ended";
 
@@ -51,6 +52,7 @@ const LobbyPageContent = () => {
     contractName: "TuringArena",
     functionName: "playerActiveRoom",
     args: [connectedAddress ?? "0x0000000000000000000000000000000000000000"],
+    query: { refetchInterval: LOBBY_REFRESH_INTERVAL_MS },
     watch: false,
   });
   const myActiveRoom = activeRoomId ? Number(activeRoomId) : 0;
@@ -59,6 +61,7 @@ const LobbyPageContent = () => {
   const { data: roomCount, refetch: refetchRoomCount } = useScaffoldReadContract({
     contractName: "TuringArena",
     functionName: "getRoomCount",
+    query: { refetchInterval: LOBBY_REFRESH_INTERVAL_MS },
     watch: false,
   });
   const allRoomIds = useMemo(() => {
@@ -67,6 +70,15 @@ const LobbyPageContent = () => {
     for (let i = 1; i <= total; i++) ids.push(BigInt(i));
     return ids;
   }, [roomCount]);
+
+  const refreshRoomIds = useCallback(async () => {
+    const result = await refetchRoomCount();
+    const latestRoomCount =
+      result.data !== undefined ? Number(result.data) : roomCount !== undefined ? Number(roomCount) : 0;
+    const ids: bigint[] = [];
+    for (let i = 1; i <= latestRoomCount; i++) ids.push(BigInt(i));
+    return ids;
+  }, [refetchRoomCount, roomCount]);
 
   // Callback for child components to trigger data refresh after room operations
   const handleRoomChange = useCallback(() => {
@@ -96,12 +108,27 @@ const LobbyPageContent = () => {
   // Fetch room summaries from chat-server for public tabs (waiting/active/ended)
   useEffect(() => {
     if (activeFilter === "mygame") return;
+    let cancelled = false;
     const tab = FILTER_TABS.find(t => t.id === activeFilter);
     const phase = tab?.phaseRange[0];
-    fetch(`${CHAT_SERVER_URL}/api/rooms${phase !== undefined ? `?phase=${phase}` : ""}`)
-      .then(r => r.json())
-      .then(d => setServerRooms(d.rooms ?? []))
-      .catch(() => setServerRooms([]));
+    const fetchRooms = () => {
+      fetch(`${CHAT_SERVER_URL}/api/rooms${phase !== undefined ? `?phase=${phase}` : ""}`)
+        .then(r => r.json())
+        .then(d => {
+          if (!cancelled) setServerRooms(d.rooms ?? []);
+        })
+        .catch(() => {
+          if (!cancelled) setServerRooms([]);
+        });
+    };
+
+    fetchRooms();
+    const intervalId = window.setInterval(fetchRooms, LOBBY_REFRESH_INTERVAL_MS);
+
+    return () => {
+      cancelled = true;
+      window.clearInterval(intervalId);
+    };
   }, [activeFilter, roomListVersion]);
 
   // Merge identity_records rooms + active room (fallback if update-room-id hasn't run yet)
@@ -181,6 +208,7 @@ const LobbyPageContent = () => {
                 onNoMatch={() => setIsNoMatchOpen(true)}
                 autoMatch={isQuickMatch}
                 onRoomJoined={handleRoomChange}
+                refreshRoomIds={refreshRoomIds}
               />
             )}
             <PasBalance refreshKey={roomListVersion} />

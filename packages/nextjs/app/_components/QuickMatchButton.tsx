@@ -31,6 +31,7 @@ type QuickMatchButtonProps = {
   onNoMatch: () => void;
   autoMatch?: boolean;
   onRoomJoined?: () => void;
+  refreshRoomIds?: () => Promise<bigint[]>;
 };
 
 /* ─── Cyber-green input styles ─── */
@@ -53,7 +54,7 @@ const fieldInputFocusStyle: React.CSSProperties = {
   boxShadow: "inset 0 0 14px rgba(0,229,255,0.1), 0 0 8px rgba(0,229,255,0.15)",
 };
 
-const QuickMatchButton = ({ roomIds, onNoMatch, autoMatch, onRoomJoined }: QuickMatchButtonProps) => {
+const QuickMatchButton = ({ roomIds, onNoMatch, autoMatch, onRoomJoined, refreshRoomIds }: QuickMatchButtonProps) => {
   const { address: connectedAddress } = useAccount();
   const config = useConfig();
   const [isSearching, setIsSearching] = useState(false);
@@ -119,8 +120,10 @@ const QuickMatchButton = ({ roomIds, onNoMatch, autoMatch, onRoomJoined }: Quick
     const feeMaxWei = parseEther(String(matchFilters.maxFee));
 
     try {
-      for (let i = roomIds.length - 1; i >= 0; i--) {
-        const roomId = roomIds[i];
+      const latestRoomIds = refreshRoomIds ? await refreshRoomIds() : roomIds;
+
+      for (let i = latestRoomIds.length - 1; i >= 0; i--) {
+        const roomId = latestRoomIds[i];
 
         const roomInfo = (await readContract(config, {
           address: arenaContractInfo.address,
