@@ -70,17 +70,15 @@ export function VotePanel({
     roomInfo && typeof roomInfo === "object" && "currentInterval" in roomInfo
       ? Number((roomInfo as any).currentInterval)
       : 0;
-  const roundWindowBlocks = currentInterval > 0 ? currentInterval : displayRoundBlocks;
   const currentBlock = blockNumber ?? 0;
   const settleTargetBlock = lastSettleBlock + currentInterval;
-  const displayTargetBlock = lastSettleBlock + roundWindowBlocks;
   const blocksRemaining =
-    isGameActive && currentBlock > 0 && lastSettleBlock > 0 ? Math.max(0, displayTargetBlock - currentBlock) : 0;
+    isGameActive && currentBlock > 0 && lastSettleBlock > 0 ? Math.max(0, settleTargetBlock - currentBlock) : 0;
   const progress =
-    isGameActive && roundWindowBlocks > 0
-      ? Math.min(1, Math.max(0, (roundWindowBlocks - blocksRemaining) / roundWindowBlocks))
+    isGameActive && currentInterval > 0
+      ? Math.min(1, Math.max(0, (currentInterval - blocksRemaining) / currentInterval))
       : 0;
-  const isUrgent = isGameActive && blocksRemaining > 0 && blocksRemaining <= Math.ceil(roundWindowBlocks * 0.25);
+  const isUrgent = isGameActive && blocksRemaining > 0 && blocksRemaining <= Math.ceil(currentInterval * 0.25);
   const isExpired = isGameActive && currentBlock > 0 && currentBlock >= settleTargetBlock && lastSettleBlock > 0;
 
   const myInfo = connectedAddress ? playerInfoMap[connectedAddress.toLowerCase()] : undefined;
@@ -180,7 +178,8 @@ export function VotePanel({
             progress={progress}
             isUrgent={isUrgent}
             isExpired={isExpired}
-            currentInterval={roundWindowBlocks}
+            actualInterval={currentInterval}
+            displayTotal={displayRoundBlocks}
             blockNumber={blockNumber}
             lastSettleBlock={lastSettleBlock}
             onSettle={onSettle}
@@ -478,7 +477,8 @@ function RoundCountdown({
   progress,
   isUrgent,
   isExpired,
-  currentInterval,
+  actualInterval,
+  displayTotal,
   blockNumber,
   lastSettleBlock,
   onSettle,
@@ -487,7 +487,8 @@ function RoundCountdown({
   progress: number;
   isUrgent: boolean;
   isExpired: boolean;
-  currentInterval: number;
+  actualInterval: number;
+  displayTotal: number;
   blockNumber: number | undefined;
   lastSettleBlock: number;
   onSettle?: () => Promise<void>;
@@ -499,7 +500,7 @@ function RoundCountdown({
   const lastRealBlockRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (blockNumber === undefined || currentInterval <= 0 || lastSettleBlock <= 0) {
+    if (blockNumber === undefined || actualInterval <= 0 || lastSettleBlock <= 0) {
       setDisplayElapsedBlocks(0);
       lastRealBlockRef.current = null;
       roundStartRef.current = 0;
@@ -507,7 +508,7 @@ function RoundCountdown({
       return;
     }
 
-    const safeRealElapsed = Math.max(0, Math.min(currentInterval, blockNumber - lastSettleBlock));
+    const safeRealElapsed = Math.max(0, Math.min(actualInterval, blockNumber - lastSettleBlock));
 
     if (lastRealBlockRef.current !== blockNumber || roundStartRef.current !== lastSettleBlock) {
       lastRealBlockRef.current = blockNumber;
@@ -515,36 +516,38 @@ function RoundCountdown({
       roundStartTimeRef.current = performance.now();
       setDisplayElapsedBlocks(safeRealElapsed);
     }
-  }, [blockNumber, currentInterval, lastSettleBlock]);
+  }, [actualInterval, blockNumber, lastSettleBlock]);
 
   useEffect(() => {
-    if (blockNumber === undefined || currentInterval <= 0 || lastSettleBlock <= 0 || isExpired) return;
+    if (blockNumber === undefined || actualInterval <= 0 || lastSettleBlock <= 0 || isExpired) return;
 
     let frameId = 0;
 
     const tick = () => {
-      const baseElapsed = Math.max(0, Math.min(currentInterval, blockNumber - lastSettleBlock));
+      const baseElapsed = Math.max(0, Math.min(actualInterval, blockNumber - lastSettleBlock));
       const elapsedSinceSync = performance.now() - roundStartTimeRef.current;
-      const interpolatedElapsed = Math.min(currentInterval, baseElapsed + elapsedSinceSync / DISPLAY_BLOCK_TIME_MS);
+      const interpolatedElapsed = Math.min(actualInterval, baseElapsed + elapsedSinceSync / DISPLAY_BLOCK_TIME_MS);
       setDisplayElapsedBlocks(interpolatedElapsed);
       frameId = window.requestAnimationFrame(tick);
     };
 
     frameId = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(frameId);
-  }, [blockNumber, currentInterval, isExpired, lastSettleBlock]);
+  }, [actualInterval, blockNumber, isExpired, lastSettleBlock]);
 
   useEffect(() => {
     if (isExpired) {
-      setDisplayElapsedBlocks(currentInterval);
+      setDisplayElapsedBlocks(actualInterval);
     }
-  }, [currentInterval, isExpired]);
+  }, [actualInterval, isExpired]);
 
-  const clampedElapsedBlocks = Math.max(0, Math.min(currentInterval, displayElapsedBlocks));
-  const elapsedProgress = currentInterval > 0 ? clampedElapsedBlocks / currentInterval : progress;
-  const roundedBlocksRemaining = isExpired ? 0 : Math.max(0, Math.ceil(blocksRemaining));
-  const progressPercent = Math.round(elapsedProgress * 100);
-  const displayElapsedLabel = isExpired ? currentInterval.toString() : clampedElapsedBlocks.toFixed(1);
+  const clampedElapsedBlocks = Math.max(0, Math.min(actualInterval, displayElapsedBlocks));
+  const elapsedProgress = actualInterval > 0 ? clampedElapsedBlocks / actualInterval : progress;
+  const displayElapsed = isExpired
+    ? displayTotal
+    : Math.min(displayTotal, Math.max(0, Math.round(elapsedProgress * displayTotal)));
+  const displayRemaining = Math.max(0, displayTotal - displayElapsed);
+  const displayProgress = displayTotal > 0 ? displayElapsed / displayTotal : 0;
 
   const handleSettle = async () => {
     if (!onSettle || isSettling) return;
@@ -591,7 +594,7 @@ function RoundCountdown({
           <span className="text-orange-400 font-mono text-xs font-bold animate-pulse">READY</span>
         ) : (
           <span className={`font-mono text-sm font-bold tabular-nums ${textColor} ${isUrgent ? "animate-pulse" : ""}`}>
-            {displayElapsedLabel} <span className="text-[10px] font-normal">/ {currentInterval} blocks</span>
+            {displayElapsed} <span className="text-[10px] font-normal">/ {displayTotal}</span>
           </span>
         )}
       </div>
@@ -600,17 +603,13 @@ function RoundCountdown({
       <div className="h-1.5 w-full rounded-full arena-hp-track overflow-hidden">
         <div
           className={`h-full rounded-full transition-[width] duration-150 ease-linear ${barColor}`}
-          style={{ width: `${elapsedProgress * 100}%` }}
+          style={{ width: `${displayProgress * 100}%` }}
         />
       </div>
 
       <div className="flex items-center justify-between mt-1">
-        <span className="text-gray-600 font-mono text-[10px]">
-          elapsed {displayElapsedLabel} / {currentInterval}
-        </span>
-        <span className="text-gray-600 font-mono text-[10px]">
-          {roundedBlocksRemaining} blocks left · {progressPercent}%
-        </span>
+        <span className="text-gray-600 font-mono text-[10px]">{displayRemaining} left</span>
+        <span className="text-gray-600 font-mono text-[10px]">{Math.max(0, Math.ceil(blocksRemaining))} blocks</span>
       </div>
 
       {/* Settle button when round expired */}
