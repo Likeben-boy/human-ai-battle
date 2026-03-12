@@ -834,6 +834,8 @@ function ArenaContent() {
           mvpVotes={Number((gameStats as any).mvpVotes ?? 0)}
           myRewardAmount={rewardInfo ? BigInt((rewardInfo as any)[0] ?? 0) : 0n}
           myRewardClaimed={rewardInfo ? Boolean((rewardInfo as any)[1]) : false}
+          connectedAddress={connectedAddress}
+          myPlayerInfo={playerInfoMap[connectedAddress?.toLowerCase() ?? ""]}
           nameMap={nameMap}
           onDismiss={() => {
             setShowVictory(false);

@@ -5,6 +5,7 @@ import { Address } from "@scaffold-ui/components";
 import { motion } from "framer-motion";
 import { formatEther } from "viem";
 import { PixelAvatar } from "~~/app/arena/_components/PixelAvatar";
+import type { PlayerInfo } from "~~/app/arena/page";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { getPlayerAlias } from "~~/utils/playerAlias";
 
@@ -16,6 +17,8 @@ export const VictoryScreen = ({
   mvpVotes,
   myRewardAmount,
   myRewardClaimed,
+  connectedAddress,
+  myPlayerInfo,
   nameMap,
   onDismiss,
 }: {
@@ -26,6 +29,8 @@ export const VictoryScreen = ({
   mvpVotes: number;
   myRewardAmount: bigint;
   myRewardClaimed: boolean;
+  connectedAddress?: string;
+  myPlayerInfo?: PlayerInfo;
   nameMap?: Record<string, string>;
   onDismiss: () => void;
 }) => {
@@ -39,9 +44,18 @@ export const VictoryScreen = ({
 
   const playerAddresses = allPlayersProp;
   const mvpAlias = getPlayerAlias(playerAddresses, mvp, nameMap);
-
   // Detect emergencyEnd: gameStats not populated (mvp is zero address)
   const isEmergencyEnd = !mvp || mvp === "0x0000000000000000000000000000000000000000";
+  const myIsWinningTeam = myPlayerInfo ? (humansWon ? !myPlayerInfo.isAI : myPlayerInfo.isAI) : false;
+  const myIsMvp = Boolean(connectedAddress && mvp && connectedAddress.toLowerCase() === mvp.toLowerCase());
+  const myIsAlive = myPlayerInfo?.isAlive ?? false;
+  const rewardBreakdown = isEmergencyEnd
+    ? [{ label: "Emergency split", active: myRewardAmount > 0n }]
+    : [
+        { label: "Winning team share", active: myIsWinningTeam },
+        { label: "MVP bonus", active: myIsMvp && mvpVotes > 0 },
+        { label: "Survival bonus", active: myIsAlive },
+      ];
 
   // Particle celebration
   const initParticles = useCallback(() => {
@@ -174,6 +188,33 @@ export const VictoryScreen = ({
             <div className="bg-gray-900/50 border border-gray-800 rounded p-3 text-center">
               <div className="text-gray-500 font-mono text-xs">YOUR REWARD</div>
               <div className="text-green-400 font-mono text-lg">{formatEther(myRewardAmount)} PAS</div>
+              <div className="mt-3 space-y-1 text-left">
+                {rewardBreakdown.map(item => (
+                  <div key={item.label} className="flex items-center justify-between font-mono text-[11px]">
+                    <span className="text-gray-500">{item.label}</span>
+                    <span className={item.active ? "text-green-400" : "text-gray-600"}>
+                      {item.active ? "YES" : "NO"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+        {myRewardAmount === 0n && !isEmergencyEnd && (
+          <div className="mb-8 max-w-sm mx-auto">
+            <div className="bg-gray-900/40 border border-gray-800 rounded p-3 text-center">
+              <div className="text-gray-500 font-mono text-xs">REWARD RULES</div>
+              <div className="mt-3 space-y-1 text-left">
+                {rewardBreakdown.map(item => (
+                  <div key={item.label} className="flex items-center justify-between font-mono text-[11px]">
+                    <span className="text-gray-500">{item.label}</span>
+                    <span className={item.active ? "text-green-400" : "text-gray-600"}>
+                      {item.active ? "YES" : "NO"}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         )}

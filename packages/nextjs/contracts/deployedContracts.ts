@@ -1597,7 +1597,7 @@ const deployedContracts = {
   },
   420420417: {
     TuringArena: {
-      address: "0x7fdd5c1fd08da8440019372f544a8759b43dab58",
+      address: "0x2235c5021109d708c7b3e7bf48dc60073a52abaf",
       abi: [
         {
           type: "constructor",
@@ -3182,7 +3182,7 @@ const deployedContracts = {
         },
       ],
       inheritedFunctions: {},
-      deployedOnBlock: 6296318,
+      deployedOnBlock: 6312988,
     },
   },
 } as const;

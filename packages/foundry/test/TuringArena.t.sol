@@ -110,6 +110,15 @@ contract TuringArenaTest is Test {
         // Room auto-starts when full — no need for manual startGame
     }
 
+    /// @dev Creates a room with 5 players: alice, bob, charlie (humans) + dave, frank (AIs)
+    function _createFivePlayerGame_HumansVsAIs() internal returns (uint256 roomId) {
+        roomId = _createRoom(alice, TuringArena.RoomTier.Quick, 5, QUICK_FEE, false);
+        _approveAndJoin(bob, roomId, false);
+        _approveAndJoin(charlie, roomId, false);
+        _approveAndJoin(dave, roomId, true);
+        _approveAndJoin(frank, roomId, true);
+    }
+
     function _advanceRound(uint256 roomId) internal {
         TuringArena.Room memory room = arena.getRoomInfo(roomId);
         vm.roll(room.lastSettleBlock + room.currentInterval + 1);
@@ -527,6 +536,39 @@ contract TuringArenaTest is Test {
         // Verify protocol = 10% of prize pool
         uint256 expectedProtocol = (room.prizePool * 1000) / 10000;
         assertEq(treasuryReward, expectedProtocol);
+    }
+
+    function test_RewardDistribution_WinningTeamSplitAcrossAllWinningHumans() public {
+        uint256 roomId = _createFivePlayerGame_HumansVsAIs();
+
+        _eliminateTarget(roomId, dave);
+        _eliminateTarget(roomId, frank);
+
+        _revealAndEnd(roomId);
+
+        TuringArena.Room memory room = arena.getRoomInfo(roomId);
+        assertTrue(room.isEnded);
+
+        (uint256 aliceReward,) = arena.getRewardInfo(roomId, alice);
+        (uint256 bobReward,) = arena.getRewardInfo(roomId, bob);
+        (uint256 charlieReward,) = arena.getRewardInfo(roomId, charlie);
+        (uint256 daveReward,) = arena.getRewardInfo(roomId, dave);
+        (uint256 frankReward,) = arena.getRewardInfo(roomId, frank);
+        (uint256 treasuryReward,) = arena.getRewardInfo(roomId, treasury);
+
+        uint256 totalPrize = room.prizePool;
+        uint256 expectedProtocol = (totalPrize * 1000) / 10000;
+        uint256 expectedWinningSharePerHuman = ((totalPrize * 7000) / 10000) / 3;
+        uint256 expectedMvpReward = (totalPrize * 1000) / 10000;
+        uint256 expectedSurvivalSharePerAlive = ((totalPrize * 1000) / 10000) / 3;
+        uint256 expectedBaseHumanReward = expectedWinningSharePerHuman + expectedSurvivalSharePerAlive;
+
+        assertEq(treasuryReward, expectedProtocol);
+        assertEq(aliceReward, expectedBaseHumanReward + expectedMvpReward);
+        assertEq(bobReward, expectedBaseHumanReward);
+        assertEq(charlieReward, expectedBaseHumanReward);
+        assertEq(daveReward, 0);
+        assertEq(frankReward, 0);
     }
 
     function test_ClaimReward() public {

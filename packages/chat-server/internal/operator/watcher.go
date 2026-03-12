@@ -385,6 +385,16 @@ func (w *Watcher) CheckSettleNow(ctx context.Context, roomId int) (bool, string,
 		w.cache.RefreshNow(roomId)
 	}
 	w.notifyRoomStateUpdate(roomId, "round_settled")
+
+	// If this settle eliminated enough players to end the game, trigger reveal immediately
+	// instead of waiting for the next frontend poll or watcher tick.
+	revealTriggered, revealReason, revealErr := w.CheckRoomNow(ctx, roomId)
+	if revealErr != nil {
+		log.Printf("[Watcher] Immediate post-settle finish check failed for room %d: reason=%s err=%v", roomId, revealReason, revealErr)
+	} else if revealTriggered {
+		return true, fmt.Sprintf("round_settled_%s", revealReason), nil
+	}
+
 	return true, "round_settled", nil
 }
 

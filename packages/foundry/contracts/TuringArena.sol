@@ -792,21 +792,21 @@ contract TuringArena is ReentrancyGuard {
             _reserveReward(_roomId, protocolTreasury, protocolAmount);
         }
 
-        // Winning team reward: split equally among alive players on winning team
-        uint256 winningAliveCount = 0;
+        // Winning team reward: split equally among all players on the winning team
+        uint256 winningTeamCount = 0;
         for (uint256 i = 0; i < allPlayers.length; i++) {
             Player storage p = players[_roomId][allPlayers[i]];
             bool isWinningTeam = stats.humansWon ? !p.isAI : p.isAI;
-            if (p.isAlive && isWinningTeam) {
-                winningAliveCount++;
+            if (isWinningTeam) {
+                winningTeamCount++;
             }
         }
-        if (winningAliveCount > 0) {
-            uint256 perWinner = winningTeamPool / winningAliveCount;
+        if (winningTeamCount > 0) {
+            uint256 perWinner = winningTeamPool / winningTeamCount;
             for (uint256 i = 0; i < allPlayers.length; i++) {
                 Player storage p = players[_roomId][allPlayers[i]];
                 bool isWinningTeam = stats.humansWon ? !p.isAI : p.isAI;
-                if (p.isAlive && isWinningTeam) {
+                if (isWinningTeam) {
                     _reserveReward(_roomId, p.addr, perWinner);
                 }
             }
