@@ -428,7 +428,7 @@ function ArenaContent() {
     setIsSettling(true);
     try {
       const result = await triggerBackendSettleCheck();
-      if (!result || (!result.triggered && result.reason !== "already_settling" && result.reason !== "not_ready")) {
+      if (!result || (!result.triggered && result.reason !== "already_settling")) {
         await writeArena({ functionName: "settleRound", args: [roomId] });
       }
       await Promise.all([refetchCoreData(), refetchPlayerInfos()]);

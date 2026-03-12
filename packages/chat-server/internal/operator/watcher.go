@@ -107,17 +107,19 @@ func (w *Watcher) checkActiveRooms(ctx context.Context) {
 		return
 	}
 
-	w.mu.Lock()
-	defer w.mu.Unlock()
-
 	hitRateLimit := false
 
 	for _, roomId := range roomIds {
+		w.mu.Lock()
+		alreadyRevealed := w.revealedRooms[roomId]
+		failCount := w.failCount[roomId]
+		w.mu.Unlock()
+
 		// Skip rooms already revealed or permanently failed
-		if w.revealedRooms[roomId] {
+		if alreadyRevealed {
 			continue
 		}
-		if w.failCount[roomId] >= maxRevealRetries {
+		if failCount >= maxRevealRetries {
 			continue
 		}
 
@@ -170,22 +172,38 @@ func (w *Watcher) checkActiveRooms(ctx context.Context) {
 		}
 
 		if shouldReveal {
-			log.Printf("[Watcher] Room %d is pending reveal, triggering revealAndEnd (attempt %d/%d)", roomId, w.failCount[roomId]+1, maxRevealRetries)
+			reason := "pending_reveal"
+			if !pending {
+				if w.cache != nil && w.cache.GetAliveCount(roomId) >= 0 && w.cache.GetAliveCount(roomId) <= 2 && w.cache.GetPhase(roomId) == 1 {
+					reason = "alive_count_threshold"
+				} else {
+					reason = "team_eliminated"
+				}
+			}
+			log.Printf("[Watcher] Room %d is pending reveal, triggering revealAndEnd (attempt %d/%d)", roomId, failCount+1, maxRevealRetries)
 			if err := w.triggerReveal(ctx, roomId); err != nil {
+				w.mu.Lock()
 				w.failCount[roomId]++
-				if w.failCount[roomId] >= maxRevealRetries {
+				updatedFailCount := w.failCount[roomId]
+				w.mu.Unlock()
+				if updatedFailCount >= maxRevealRetries {
 					log.Printf("[Watcher] Room %d: giving up after %d failed attempts: %v (emergencyEnd available as fallback)", roomId, maxRevealRetries, err)
 				} else {
 					log.Printf("[Watcher] Failed to reveal room %d: %v", roomId, err)
 				}
 			} else {
+				w.mu.Lock()
 				w.revealedRooms[roomId] = true
 				delete(w.failCount, roomId)
+				w.mu.Unlock()
+				w.notifyRoomStateUpdate(roomId, reason)
 			}
 		}
 	}
 
 	// Adjust backoff based on rate limiting
+	w.mu.Lock()
+	defer w.mu.Unlock()
 	if hitRateLimit {
 		if w.backoffMultiplier < maxBackoff {
 			w.backoffMultiplier++
