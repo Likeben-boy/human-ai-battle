@@ -35,10 +35,9 @@ const PHASE_COLORS: Record<number, string> = {
 };
 
 const DISPLAY_ROUND_BLOCKS = 60;
-const ESTIMATED_BLOCK_TIME_MS = 1_900;
-const MAX_INTERPOLATED_BLOCK_LEAD = 1;
+const ESTIMATED_BLOCK_TIME_MS = 1_500;
+const MAX_INTERPOLATED_BLOCK_LEAD = 2;
 const ARENA_BLOCK_POLL_INTERVAL_MS = 2_000;
-const MIN_CATCH_UP_BLOCK_TIME_MS = 500;
 const CHAT_SERVER_URL = process.env.NEXT_PUBLIC_CHAT_SERVER_URL || "http://localhost:43002";
 
 function ArenaContent() {
@@ -181,62 +180,29 @@ function ArenaContent() {
 
   // Interpolated block number for smooth countdown (2s per block estimate on Polkadot Hub testnet)
   const [interpolatedBlock, setInterpolatedBlock] = useState(0);
-  const interpolatedBlockRef = useRef(0);
   const lastRealBlockRef = useRef(0);
-  const targetBlockRef = useRef(0);
-  const animationStartBlockRef = useRef(0);
-  const animationStartTimeRef = useRef(0);
-  const blockTimeMsRef = useRef(ESTIMATED_BLOCK_TIME_MS);
+  const lastRealBlockTimeRef = useRef(0);
 
-  useEffect(() => {
-    interpolatedBlockRef.current = interpolatedBlock;
-  }, [interpolatedBlock]);
-
-  // Move toward the newest real block instead of snapping so late RPC responses
-  // do not create sudden 3-4 block jumps in the countdown UI.
+  // Align to the latest real block when it arrives.
   useEffect(() => {
     if (realBlockNumber) {
       const real = Number(realBlockNumber);
-      const now = Date.now();
-      const currentDisplayed = interpolatedBlockRef.current > 0 ? interpolatedBlockRef.current : real;
-      const delta = Math.max(0, real - currentDisplayed);
-
       lastRealBlockRef.current = real;
-      targetBlockRef.current = real;
-      animationStartBlockRef.current = currentDisplayed;
-      animationStartTimeRef.current = now;
-
-      if (interpolatedBlockRef.current === 0 || delta === 0) {
-        blockTimeMsRef.current = ESTIMATED_BLOCK_TIME_MS;
-        interpolatedBlockRef.current = real;
-        setInterpolatedBlock(real);
-        return;
-      }
-
-      if (delta <= 1) {
-        blockTimeMsRef.current = ESTIMATED_BLOCK_TIME_MS;
-      } else {
-        blockTimeMsRef.current = Math.max(MIN_CATCH_UP_BLOCK_TIME_MS, ARENA_BLOCK_POLL_INTERVAL_MS / delta);
-      }
+      lastRealBlockTimeRef.current = Date.now();
+      setInterpolatedBlock(real);
     }
   }, [realBlockNumber]);
 
-  // Continuously interpolate toward the latest observed block so countdown bars move smoothly.
+  // Continuously interpolate ahead of the last real block so the progress bar keeps moving
+  // between block polls, then real block updates snap it back into alignment.
   useEffect(() => {
-    if (targetBlockRef.current === 0) return;
+    if (lastRealBlockRef.current === 0) return;
     let frameId = 0;
 
     const tick = () => {
-      const elapsed = Date.now() - animationStartTimeRef.current;
-      const targetBlock = targetBlockRef.current;
-      const startBlock = animationStartBlockRef.current;
-      const progressBlocks = elapsed / blockTimeMsRef.current;
-      const nextBlock = Math.min(targetBlock, startBlock + progressBlocks);
-      const maxVisibleBlock = lastRealBlockRef.current + MAX_INTERPOLATED_BLOCK_LEAD;
-      const clampedNextBlock = Math.min(nextBlock, maxVisibleBlock);
-
-      interpolatedBlockRef.current = clampedNextBlock;
-      setInterpolatedBlock(clampedNextBlock);
+      const elapsed = Date.now() - lastRealBlockTimeRef.current;
+      const extraBlocks = Math.min(MAX_INTERPOLATED_BLOCK_LEAD, elapsed / ESTIMATED_BLOCK_TIME_MS);
+      setInterpolatedBlock(lastRealBlockRef.current + extraBlocks);
       frameId = window.requestAnimationFrame(tick);
     };
 

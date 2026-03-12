@@ -44,7 +44,7 @@ const ArenaABI = `[
       {
         "components": [
           {"internalType": "address", "name": "addr", "type": "address"},
-          {"internalType": "uint256", "name": "humanityScore", "type": "uint256"},
+          {"internalType": "int256", "name": "humanityScore", "type": "int256"},
           {"internalType": "bool", "name": "isAlive", "type": "bool"},
           {"internalType": "bool", "name": "isAI", "type": "bool"},
           {"internalType": "uint256", "name": "joinBlock", "type": "uint256"},
@@ -98,6 +98,13 @@ const ArenaABI = `[
       {"internalType": "bytes32[]", "name": "_salts", "type": "bytes32[]"}
     ],
     "name": "revealAndEnd",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [{"internalType": "uint256", "name": "_roomId", "type": "uint256"}],
+    "name": "settleRound",
     "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
