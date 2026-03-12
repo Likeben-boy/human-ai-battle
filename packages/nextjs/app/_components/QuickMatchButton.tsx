@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { readContract } from "@wagmi/core";
+import { readContract, waitForTransactionReceipt } from "@wagmi/core";
 import { AnimatePresence, motion } from "framer-motion";
 import { formatEther, parseEther } from "viem";
 import { useAccount, useConfig } from "wagmi";
@@ -157,11 +157,14 @@ const QuickMatchButton = ({ roomIds, onNoMatch, autoMatch, onRoomJoined }: Quick
           // Get commitment + operator signature from chat-server
           const { commitment, operatorSig } = await getJoinAuth(Number(roomId), false, maxPlayers);
 
-          await writeArena({
+          const joinHash = await writeArena({
             functionName: "joinRoom",
             args: [roomId, commitment, operatorSig, trimmedName],
             value: entryFee,
           });
+          if (joinHash) {
+            await waitForTransactionReceipt(config, { hash: joinHash });
+          }
 
           notification.remove(joinNotifId);
           notification.success(

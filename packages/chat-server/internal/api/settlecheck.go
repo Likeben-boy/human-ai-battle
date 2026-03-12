@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 	"strconv"
+	"log"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rtta/chat-server/internal/operator"
@@ -36,10 +37,12 @@ func HandleCheckSettle(opService *operator.Service, watcher *operator.Watcher) g
 
 		triggered, reason, err := watcher.CheckSettleNow(c.Request.Context(), roomId)
 		if err != nil {
+			log.Printf("[API] check-settle failed for room %d: reason=%s err=%v", roomId, reason, err)
 			c.JSON(http.StatusInternalServerError, gin.H{
 				"error":     "Immediate settle check failed",
 				"triggered": false,
 				"reason":    reason,
+				"detail":    err.Error(),
 			})
 			return
 		}

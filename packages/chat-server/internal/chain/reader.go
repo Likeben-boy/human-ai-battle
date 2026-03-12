@@ -42,12 +42,14 @@ func NewChainReader(rpcURL, contractAddr string) (*ChainReader, error) {
 
 // RoomInfo holds parsed room state from the contract.
 type RoomInfo struct {
-	Phase        uint8
-	AliveCount   int
-	PlayerCount  int
-	IsActive     bool
-	IsEnded      bool
-	CurrentRound uint64
+	Phase           uint8
+	AliveCount      int
+	PlayerCount     int
+	IsActive        bool
+	IsEnded         bool
+	CurrentRound    uint64
+	CurrentInterval uint64
+	LastSettleBlock uint64
 }
 
 // PlayerInfo holds parsed player state.
@@ -256,11 +258,13 @@ func (r *ChainReader) UnpackRoomInfo(data []byte) (*RoomInfo, error) {
 	room = converted.(roomTuple)
 
 	return &RoomInfo{
-		Phase:       room.Phase,
-		AliveCount:  int(room.AliveCount.Int64()),
-		PlayerCount: int(room.PlayerCount.Int64()),
-		IsActive:    room.IsActive,
-		IsEnded:     room.IsEnded,
+		Phase:           room.Phase,
+		AliveCount:      int(room.AliveCount.Int64()),
+		PlayerCount:     int(room.PlayerCount.Int64()),
+		IsActive:        room.IsActive,
+		IsEnded:         room.IsEnded,
+		CurrentInterval: room.CurrentInterval.Uint64(),
+		LastSettleBlock: room.LastSettleBlock.Uint64(),
 	}, nil
 }
 

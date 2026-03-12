@@ -18,14 +18,16 @@ type CachedPlayer struct {
 
 // CachedRoom holds a snapshot of room state from the contract.
 type CachedRoom struct {
-	Phase         uint8
-	CurrentRound  uint64
-	AliveCount    int
-	PlayerCount   int
-	PendingReveal bool
-	Players       map[string]*CachedPlayer // lowercase address → player state
-	PlayerNames   map[string]string        // lowercase address → name
-	UpdatedAt     time.Time
+	Phase           uint8
+	CurrentRound    uint64
+	CurrentInterval uint64
+	LastSettleBlock uint64
+	AliveCount      int
+	PlayerCount     int
+	PendingReveal   bool
+	Players         map[string]*CachedPlayer // lowercase address → player state
+	PlayerNames     map[string]string        // lowercase address → name
+	UpdatedAt       time.Time
 }
 
 // RoomStateCache polls the contract for room state on a schedule.
@@ -269,14 +271,16 @@ func (c *RoomStateCache) batchRefreshRoom(ctx context.Context, roomId int) bool 
 
 	c.mu.Lock()
 	c.rooms[roomId] = &CachedRoom{
-		Phase:         roomInfo.Phase,
-		CurrentRound:  round,
-		AliveCount:    roomInfo.AliveCount,
-		PlayerCount:   roomInfo.PlayerCount,
-		PendingReveal: pendingReveal,
-		Players:       playersMap,
-		PlayerNames:   playerNames,
-		UpdatedAt:     time.Now(),
+		Phase:           roomInfo.Phase,
+		CurrentRound:    round,
+		CurrentInterval: roomInfo.CurrentInterval,
+		LastSettleBlock: roomInfo.LastSettleBlock,
+		AliveCount:      roomInfo.AliveCount,
+		PlayerCount:     roomInfo.PlayerCount,
+		PendingReveal:   pendingReveal,
+		Players:         playersMap,
+		PlayerNames:     playerNames,
+		UpdatedAt:       time.Now(),
 	}
 	c.mu.Unlock()
 
@@ -396,14 +400,16 @@ func (c *RoomStateCache) individualRefreshRoom(ctx context.Context, roomId int) 
 
 	c.mu.Lock()
 	c.rooms[roomId] = &CachedRoom{
-		Phase:         meta.roomInfo.Phase,
-		CurrentRound:  meta.round,
-		AliveCount:    meta.roomInfo.AliveCount,
-		PlayerCount:   meta.roomInfo.PlayerCount,
-		PendingReveal: meta.pendingReveal,
-		Players:       playersMap,
-		PlayerNames:   playerNames,
-		UpdatedAt:     time.Now(),
+		Phase:           meta.roomInfo.Phase,
+		CurrentRound:    meta.round,
+		CurrentInterval: meta.roomInfo.CurrentInterval,
+		LastSettleBlock: meta.roomInfo.LastSettleBlock,
+		AliveCount:      meta.roomInfo.AliveCount,
+		PlayerCount:     meta.roomInfo.PlayerCount,
+		PendingReveal:   meta.pendingReveal,
+		Players:         playersMap,
+		PlayerNames:     playerNames,
+		UpdatedAt:       time.Now(),
 	}
 	c.mu.Unlock()
 }
@@ -482,15 +488,17 @@ func (c *RoomStateCache) IsPlayerInRoom(roomId int, addr string) (bool, bool) {
 
 // RoomStateJSON is the REST-friendly snapshot of a cached room.
 type RoomStateJSON struct {
-	RoomID        int                        `json:"roomId"`
-	Phase         uint8                      `json:"phase"`
-	CurrentRound  uint64                     `json:"currentRound"`
-	PendingReveal bool                       `json:"pendingReveal"`
-	AliveCount    int                        `json:"aliveCount"`
-	PlayerCount   int                        `json:"playerCount"`
-	Players       map[string]*CachedPlayer   `json:"players"`
-	PlayerNames   map[string]string          `json:"playerNames"`
-	UpdatedAt     time.Time                  `json:"updatedAt"`
+	RoomID          int                      `json:"roomId"`
+	Phase           uint8                    `json:"phase"`
+	CurrentRound    uint64                   `json:"currentRound"`
+	CurrentInterval uint64                   `json:"currentInterval"`
+	LastSettleBlock uint64                   `json:"lastSettleBlock"`
+	PendingReveal   bool                     `json:"pendingReveal"`
+	AliveCount      int                      `json:"aliveCount"`
+	PlayerCount     int                      `json:"playerCount"`
+	Players         map[string]*CachedPlayer `json:"players"`
+	PlayerNames     map[string]string        `json:"playerNames"`
+	UpdatedAt       time.Time                `json:"updatedAt"`
 }
 
 // GetRoomState returns a REST-friendly snapshot of the cached room.
@@ -503,14 +511,16 @@ func (c *RoomStateCache) GetRoomState(roomId int) *RoomStateJSON {
 		return nil
 	}
 	return &RoomStateJSON{
-		RoomID:        roomId,
-		Phase:         room.Phase,
-		CurrentRound:  room.CurrentRound,
-		PendingReveal: room.PendingReveal,
-		AliveCount:    room.AliveCount,
-		PlayerCount:   room.PlayerCount,
-		Players:       room.Players,
-		PlayerNames:   room.PlayerNames,
-		UpdatedAt:     room.UpdatedAt,
+		RoomID:          roomId,
+		Phase:           room.Phase,
+		CurrentRound:    room.CurrentRound,
+		CurrentInterval: room.CurrentInterval,
+		LastSettleBlock: room.LastSettleBlock,
+		PendingReveal:   room.PendingReveal,
+		AliveCount:      room.AliveCount,
+		PlayerCount:     room.PlayerCount,
+		Players:         room.Players,
+		PlayerNames:     room.PlayerNames,
+		UpdatedAt:       room.UpdatedAt,
 	}
 }

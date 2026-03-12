@@ -108,6 +108,10 @@ func (w *Watcher) checkActiveRooms(ctx context.Context) {
 	}
 
 	hitRateLimit := false
+	currentBlock, blockErr := w.client.BlockNumber(ctx)
+	if blockErr != nil {
+		log.Printf("[Watcher] Failed to get current block for auto-settle checks: %v", blockErr)
+	}
 
 	for _, roomId := range roomIds {
 		w.mu.Lock()
@@ -124,13 +128,34 @@ func (w *Watcher) checkActiveRooms(ctx context.Context) {
 		}
 
 		// Use cache to skip non-active rooms (ended/waiting) — no RPC needed
+		var cachedState *chain.RoomStateJSON
 		if w.cache != nil {
-			cachedPhase := w.cache.GetPhase(roomId)
+			cachedState = w.cache.GetRoomState(roomId)
+			cachedPhase := uint8(255)
+			if cachedState != nil {
+				cachedPhase = cachedState.Phase
+			}
 			// Phase 0=Waiting, 2=Ended — neither can have pendingReveal
 			if cachedPhase == 0 || cachedPhase == 2 {
 				continue
 			}
 			// Phase 255 = not in cache — only check if DB has a record (first-time rooms)
+		}
+
+		if cachedState != nil && cachedState.Phase == 1 && !cachedState.PendingReveal && blockErr == nil &&
+			cachedState.CurrentInterval > 0 && cachedState.LastSettleBlock > 0 &&
+			currentBlock >= cachedState.LastSettleBlock+cachedState.CurrentInterval {
+			triggered, reason, err := w.CheckSettleNow(ctx, roomId)
+			if err != nil {
+				if strings.Contains(err.Error(), "429") || strings.Contains(err.Error(), "Too Many Requests") {
+					log.Printf("[Watcher] Rate limited settling room %d, backing off", roomId)
+					hitRateLimit = true
+					break
+				}
+				log.Printf("[Watcher] Failed auto-settle check for room %d: %v", roomId, err)
+			} else if triggered || reason == "already_settling" {
+				continue
+			}
 		}
 
 		// Stagger: wait between room checks to avoid RPC burst
@@ -329,6 +354,15 @@ func (w *Watcher) CheckSettleNow(ctx context.Context, roomId int) (bool, string,
 			}
 			if state.PendingReveal {
 				return false, "pending_reveal", nil
+			}
+			if state.LastSettleBlock > 0 && state.CurrentInterval > 0 {
+				currentBlock, err := w.client.BlockNumber(ctx)
+				if err != nil {
+					return false, "block_number_check_failed", err
+				}
+				if currentBlock < state.LastSettleBlock+state.CurrentInterval {
+					return false, "not_ready", nil
+				}
 			}
 		}
 	}

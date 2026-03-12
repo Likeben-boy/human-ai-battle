@@ -75,7 +75,9 @@ export function VotePanel({
   const blocksRemaining =
     isGameActive && currentBlock > 0 && lastSettleBlock > 0 ? Math.max(0, displayTargetBlock - currentBlock) : 0;
   const progress =
-    isGameActive && roundWindowBlocks > 0 ? Math.min(1, Math.max(0, blocksRemaining / roundWindowBlocks)) : 0;
+    isGameActive && roundWindowBlocks > 0
+      ? Math.min(1, Math.max(0, (roundWindowBlocks - blocksRemaining) / roundWindowBlocks))
+      : 0;
   const isUrgent = isGameActive && blocksRemaining > 0 && blocksRemaining <= Math.ceil(roundWindowBlocks * 0.25);
   const isExpired = isGameActive && currentBlock > 0 && currentBlock >= settleTargetBlock && lastSettleBlock > 0;
 

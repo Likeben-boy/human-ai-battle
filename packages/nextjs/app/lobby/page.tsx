@@ -183,7 +183,7 @@ const LobbyPageContent = () => {
                 onRoomJoined={handleRoomChange}
               />
             )}
-            <PasBalance />
+            <PasBalance refreshKey={roomListVersion} />
           </div>
         </div>
 
@@ -650,12 +650,17 @@ const NoMatchModal = ({
   </AnimatePresence>
 );
 
-const PasBalance = () => {
+const PasBalance = ({ refreshKey }: { refreshKey: number }) => {
   const { address } = useAccount();
 
-  const { data: balance } = useBalance({
+  const { data: balance, refetch } = useBalance({
     address: address,
   });
+
+  useEffect(() => {
+    if (!address) return;
+    void refetch();
+  }, [address, refetch, refreshKey]);
 
   if (!address) return null;
 

@@ -2,8 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { waitForTransactionReceipt } from "@wagmi/core";
 import { formatEther } from "viem";
-import { useAccount } from "wagmi";
+import { useAccount, useConfig } from "wagmi";
 import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { useChatAuth } from "~~/hooks/scaffold-eth/useChatAuth";
 import { notification } from "~~/utils/scaffold-eth";
@@ -48,6 +49,7 @@ type RoomCardProps = {
 const RoomCard = ({ roomId, roomInfo: propRoomInfo, activeRoomId, onRoomChange }: RoomCardProps) => {
   const router = useRouter();
   const { address: connectedAddress } = useAccount();
+  const config = useConfig();
   const [isLeaving, setIsLeaving] = useState(false);
   const [isClaiming, setIsClaiming] = useState(false);
   const { deleteIdentity } = useChatAuth();
@@ -127,7 +129,10 @@ const RoomCard = ({ roomId, roomInfo: propRoomInfo, activeRoomId, onRoomChange }
   const handleLeave = async () => {
     setIsLeaving(true);
     try {
-      await writeArena({ functionName: "leaveRoom", args: [roomId] });
+      const leaveHash = await writeArena({ functionName: "leaveRoom", args: [roomId] });
+      if (leaveHash) {
+        await waitForTransactionReceipt(config, { hash: leaveHash });
+      }
       deleteIdentity(Number(roomId)).catch(() => {});
       onRoomChange?.();
     } catch (e: any) {
@@ -144,7 +149,10 @@ const RoomCard = ({ roomId, roomInfo: propRoomInfo, activeRoomId, onRoomChange }
   const handleClaim = async () => {
     setIsClaiming(true);
     try {
-      await writeArena({ functionName: "claimReward", args: [roomId] });
+      const claimHash = await writeArena({ functionName: "claimReward", args: [roomId] });
+      if (claimHash) {
+        await waitForTransactionReceipt(config, { hash: claimHash });
+      }
       notification.success("Reward claimed!");
       onRoomChange?.();
     } catch (e: any) {
