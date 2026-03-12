@@ -94,6 +94,11 @@ func (c *RoomStateCache) StartPolling(ctx context.Context) {
 	}
 }
 
+// RefreshNow forces an immediate refresh for a single room.
+func (c *RoomStateCache) RefreshNow(roomId int) {
+	go c.refreshRoom(roomId)
+}
+
 func (c *RoomStateCache) refreshAll() {
 	c.mu.RLock()
 	ids := make([]int, 0, len(c.watchers))

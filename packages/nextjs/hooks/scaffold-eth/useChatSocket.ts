@@ -59,6 +59,7 @@ export function useChatSocket(roomId: number | undefined, mode: "ws" | "poll" | 
   const [isConnected, setIsConnected] = useState(false);
   const [myMessageCount, setMyMessageCount] = useState(0);
   const [myIsAI, setMyIsAI] = useState<boolean | undefined>(undefined);
+  const [roomStateVersion, setRoomStateVersion] = useState(0);
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const tokenFailedRef = useRef(false);
@@ -176,6 +177,9 @@ export function useChatSocket(roomId: number | undefined, mode: "ws" | "poll" | 
               },
             ]);
             break;
+          case "room_state_updated":
+            setRoomStateVersion(prev => prev + 1);
+            break;
           case "error":
             if (data.code === "auth_failed" && !tokenFailedRef.current) {
               // Token expired — clear and reconnect (will try SIWE fallback)
@@ -228,5 +232,5 @@ export function useChatSocket(roomId: number | undefined, mode: "ws" | "poll" | 
     [roomId],
   );
 
-  return { messages, sendMessage, isConnected, myMessageCount, myIsAI };
+  return { messages, sendMessage, isConnected, myMessageCount, myIsAI, roomStateVersion };
 }

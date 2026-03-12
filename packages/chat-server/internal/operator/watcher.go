@@ -24,9 +24,12 @@ type Watcher struct {
 	contract common.Address
 	abi      abi.ABI
 	cache    *chain.RoomStateCache
+	notify   func(int, any)
 	pollMs   int
 	// Track rooms that have been revealed or permanently failed (to skip them)
 	mu            sync.Mutex
+	checkingRooms map[int]bool
+	settlingRooms map[int]bool
 	revealedRooms map[int]bool
 	failCount     map[int]int // room → consecutive failure count
 	// 429 backoff: multiplier for next tick (resets on success)
@@ -40,7 +43,14 @@ const (
 )
 
 // NewWatcher creates a reveal watcher.
-func NewWatcher(service *Service, rpcURL, contractAddr string, abiJSON string, pollMs int, cache *chain.RoomStateCache) (*Watcher, error) {
+func NewWatcher(
+	service *Service,
+	rpcURL, contractAddr string,
+	abiJSON string,
+	pollMs int,
+	cache *chain.RoomStateCache,
+	notify func(int, any),
+) (*Watcher, error) {
 	client, err := ethclient.Dial(rpcURL)
 	if err != nil {
 		return nil, err
@@ -57,7 +67,10 @@ func NewWatcher(service *Service, rpcURL, contractAddr string, abiJSON string, p
 		contract:          common.HexToAddress(contractAddr),
 		abi:               parsed,
 		cache:             cache,
+		notify:            notify,
 		pollMs:            pollMs,
+		checkingRooms:     make(map[int]bool),
+		settlingRooms:     make(map[int]bool),
 		revealedRooms:     make(map[int]bool),
 		failCount:         make(map[int]int),
 		backoffMultiplier: 1,
@@ -181,6 +194,146 @@ func (w *Watcher) checkActiveRooms(ctx context.Context) {
 	} else {
 		w.backoffMultiplier = 1 // reset on clean tick
 	}
+}
+
+// CheckRoomNow immediately evaluates a single room for reveal conditions.
+// Returns whether a reveal tx was triggered and a short reason string.
+func (w *Watcher) CheckRoomNow(ctx context.Context, roomId int) (bool, string, error) {
+	w.mu.Lock()
+	if w.checkingRooms[roomId] {
+		w.mu.Unlock()
+		return false, "already_checking", nil
+	}
+	if w.revealedRooms[roomId] {
+		w.mu.Unlock()
+		return false, "already_revealed", nil
+	}
+	if w.failCount[roomId] >= maxRevealRetries {
+		w.mu.Unlock()
+		return false, "max_retries_reached", nil
+	}
+	w.checkingRooms[roomId] = true
+	w.mu.Unlock()
+	defer func() {
+		w.mu.Lock()
+		delete(w.checkingRooms, roomId)
+		w.mu.Unlock()
+	}()
+
+	if w.cache != nil {
+		w.cache.RefreshNow(roomId)
+		// Give the async cache refresh a brief head start before reading cache-backed signals.
+		time.Sleep(200 * time.Millisecond)
+	}
+
+	pending, err := w.isPendingReveal(ctx, roomId)
+	if err != nil {
+		return false, "pending_reveal_check_failed", err
+	}
+
+	shouldReveal := pending
+	reason := "pending_reveal"
+
+	if !shouldReveal && w.cache != nil {
+		aliveCount := w.cache.GetAliveCount(roomId)
+		isActive := w.cache.GetPhase(roomId) == 1
+		if isActive && aliveCount >= 0 && aliveCount <= 2 {
+			shouldReveal = true
+			reason = "alive_count_threshold"
+		}
+	}
+
+	if !shouldReveal {
+		teamElim, err := w.isTeamEliminated(roomId)
+		if err != nil {
+			return false, "team_elimination_check_failed", err
+		}
+		if teamElim {
+			shouldReveal = true
+			reason = "team_eliminated"
+		}
+	}
+
+	if !shouldReveal {
+		return false, "not_ready", nil
+	}
+
+	if err := w.triggerReveal(ctx, roomId); err != nil {
+		w.mu.Lock()
+		w.failCount[roomId]++
+		attempts := w.failCount[roomId]
+		w.mu.Unlock()
+		return false, fmt.Sprintf("trigger_failed_attempt_%d", attempts), err
+	}
+
+	w.mu.Lock()
+	w.revealedRooms[roomId] = true
+	delete(w.failCount, roomId)
+	w.mu.Unlock()
+	w.notifyRoomStateUpdate(roomId, reason)
+
+	return true, reason, nil
+}
+
+func (w *Watcher) notifyRoomStateUpdate(roomId int, reason string) {
+	if w.notify == nil {
+		return
+	}
+	w.notify(roomId, map[string]any{
+		"type":   "room_state_updated",
+		"roomId": roomId,
+		"reason": reason,
+	})
+}
+
+// CheckSettleNow immediately evaluates whether a room can settle the current round
+// and submits settleRound if the chain accepts it.
+func (w *Watcher) CheckSettleNow(ctx context.Context, roomId int) (bool, string, error) {
+	w.mu.Lock()
+	if w.settlingRooms[roomId] {
+		w.mu.Unlock()
+		return false, "already_settling", nil
+	}
+	w.settlingRooms[roomId] = true
+	w.mu.Unlock()
+	defer func() {
+		w.mu.Lock()
+		delete(w.settlingRooms, roomId)
+		w.mu.Unlock()
+	}()
+
+	if w.cache != nil {
+		w.cache.RefreshNow(roomId)
+		time.Sleep(200 * time.Millisecond)
+		if state := w.cache.GetRoomState(roomId); state != nil {
+			if state.Phase != 1 {
+				return false, "not_active", nil
+			}
+			if state.PendingReveal {
+				return false, "pending_reveal", nil
+			}
+		}
+	}
+
+	if err := w.triggerSettle(ctx, roomId); err != nil {
+		msg := err.Error()
+		switch {
+		case strings.Contains(msg, "Round not ended yet"):
+			return false, "not_ready", nil
+		case strings.Contains(msg, "Pending reveal"):
+			return false, "pending_reveal", nil
+		case strings.Contains(msg, "Game not active"):
+			return false, "not_active", nil
+		default:
+			return false, "trigger_failed", err
+		}
+	}
+
+	if w.cache != nil {
+		w.cache.RefreshNow(roomId)
+	}
+	w.notifyRoomStateUpdate(roomId, "round_settled")
+	return true, "round_settled", nil
 }
 
 // getActiveRoomIds queries the DB for distinct room IDs that have identity records.
@@ -330,6 +483,39 @@ func (w *Watcher) triggerReveal(ctx context.Context, roomId int) error {
 			return fmt.Errorf("timeout waiting for receipt")
 		case <-time.After(2 * time.Second):
 			// retry
+		}
+	}
+}
+
+func (w *Watcher) triggerSettle(ctx context.Context, roomId int) error {
+	data, err := w.abi.Pack("settleRound", big.NewInt(int64(roomId)))
+	if err != nil {
+		return fmt.Errorf("failed to pack settleRound: %w", err)
+	}
+
+	txHash, err := w.sendTx(ctx, data)
+	if err != nil {
+		return fmt.Errorf("failed to send settleRound tx: %w", err)
+	}
+
+	log.Printf("[Watcher] settleRound tx sent for room %d: %s", roomId, txHash.Hex())
+
+	receiptCtx, cancel := context.WithTimeout(ctx, 60*time.Second)
+	defer cancel()
+
+	for {
+		receipt, err := w.client.TransactionReceipt(receiptCtx, txHash)
+		if err == nil {
+			if receipt.Status == 0 {
+				return fmt.Errorf("settleRound transaction reverted for room %d", roomId)
+			}
+			log.Printf("[Watcher] settleRound confirmed for room %d, block: %d", roomId, receipt.BlockNumber.Uint64())
+			return nil
+		}
+		select {
+		case <-receiptCtx.Done():
+			return fmt.Errorf("timeout waiting for settle receipt")
+		case <-time.After(2 * time.Second):
 		}
 	}
 }

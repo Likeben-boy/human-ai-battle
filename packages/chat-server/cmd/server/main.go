@@ -74,6 +74,7 @@ func main() {
 
 	// Initialize operator service (optional — only if private key is configured)
 	var opService *operator.Service
+	var watcher *operator.Watcher
 	if cfg.OperatorPrivateKey != "" {
 		opService, err = operator.NewService(cfg.OperatorPrivateKey, database, cache)
 		if err != nil {
@@ -81,7 +82,15 @@ func main() {
 		}
 
 		// Start the reveal watcher
-		watcher, err := operator.NewWatcher(opService, cfg.RpcURL, cfg.ArenaContractAddress, chain.ArenaABI, cfg.WatcherPollMs, cache)
+		watcher, err = operator.NewWatcher(
+			opService,
+			cfg.RpcURL,
+			cfg.ArenaContractAddress,
+			chain.ArenaABI,
+			cfg.WatcherPollMs,
+			cache,
+			hub.Broadcast,
+		)
 		if err != nil {
 			log.Printf("[Watcher] Failed to init watcher: %v (reveal monitoring disabled)", err)
 		} else {
@@ -92,7 +101,7 @@ func main() {
 	}
 
 	// Setup HTTP router
-	router := api.SetupRouter(database, hub, authSvc, cache, opService, roomListCache, cfg.CorsOrigin)
+	router := api.SetupRouter(database, hub, authSvc, cache, opService, watcher, roomListCache, cfg.CorsOrigin)
 
 	// Graceful shutdown
 	go func() {

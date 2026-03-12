@@ -29,7 +29,7 @@ export function VotePanel({
   allPlayers: string[];
   roomInfo: any;
   roundNum: bigint | undefined;
-  blockNumber: bigint | undefined;
+  blockNumber: number | undefined;
   pendingReveal: boolean;
   hasVotedOnChain?: boolean;
   onEmergencyEnd?: () => void;
@@ -66,10 +66,12 @@ export function VotePanel({
     roomInfo && typeof roomInfo === "object" && "currentInterval" in roomInfo
       ? Number((roomInfo as any).currentInterval)
       : 0;
-  const currentBlock = blockNumber ? Number(blockNumber) : 0;
+  const currentBlock = blockNumber ?? 0;
   const settleTargetBlock = lastSettleBlock + currentInterval;
   const blocksRemaining =
-    isGameActive && currentBlock > 0 && lastSettleBlock > 0 ? Math.max(0, settleTargetBlock - currentBlock) : 0;
+    isGameActive && currentBlock > 0 && lastSettleBlock > 0
+      ? Math.max(0, Math.ceil(settleTargetBlock - currentBlock))
+      : 0;
   const progress =
     isGameActive && currentInterval > 0 ? Math.min(1, Math.max(0, 1 - blocksRemaining / currentInterval)) : 0;
   const isUrgent = isGameActive && blocksRemaining > 0 && blocksRemaining <= Math.ceil(currentInterval * 0.25);

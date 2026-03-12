@@ -28,6 +28,7 @@ func SetupRouter(
 	authSvc *auth.Service,
 	cache *chain.RoomStateCache,
 	opService *operator.Service,
+	watcher *operator.Watcher,
 	roomListCache *chain.RoomListCache,
 	corsOrigin string,
 ) *gin.Engine {
@@ -62,6 +63,8 @@ func SetupRouter(
 	{
 		rooms.POST("/:roomId/messages", HandlePostMessage(database, hub, cache, opService))
 		rooms.GET("/:roomId/identity", HandleGetPlayerIdentity(opService))
+		rooms.POST("/:roomId/check-finish", HandleCheckFinish(opService, watcher))
+		rooms.POST("/:roomId/check-settle", HandleCheckSettle(opService, watcher))
 	}
 
 	// Operator endpoints (require Bearer token)

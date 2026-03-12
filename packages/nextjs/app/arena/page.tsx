@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAccount, useBlockNumber, useReadContracts } from "wagmi";
@@ -11,6 +11,7 @@ import { VictoryScreen } from "~~/app/arena/_components/VictoryScreen";
 import { VotePanel } from "~~/app/arena/_components/VotePanel";
 import { useDeployedContractInfo, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { useChatSocket } from "~~/hooks/scaffold-eth/useChatSocket";
+import { getStoredChatToken } from "~~/utils/chatToken";
 
 export type PlayerInfo = {
   addr: string;
@@ -32,6 +33,12 @@ const PHASE_COLORS: Record<number, string> = {
   1: "text-green-400",
   2: "text-red-400",
 };
+
+const ESTIMATED_BLOCK_TIME_MS = 1_900;
+const BLOCK_INTERPOLATION_TICK_MS = 100;
+const MAX_EXTRAPOLATED_BLOCKS = 8;
+const ARENA_BLOCK_POLL_INTERVAL_MS = 2_000;
+const CHAT_SERVER_URL = process.env.NEXT_PUBLIC_CHAT_SERVER_URL || "http://localhost:43002";
 
 function ArenaContent() {
   const searchParams = useSearchParams();
@@ -150,9 +157,12 @@ function ArenaContent() {
 
   const hasVotedOnChain = voteCheckData?.[0]?.result as boolean | undefined;
 
-  const { data: realBlockNumber } = useBlockNumber({ watch: true });
+  const { data: realBlockNumber } = useBlockNumber({
+    watch: true,
+    query: { refetchInterval: ARENA_BLOCK_POLL_INTERVAL_MS },
+  });
 
-  // Interpolated block number for smooth countdown (400ms per block estimate)
+  // Interpolated block number for smooth countdown between real block updates.
   const [interpolatedBlock, setInterpolatedBlock] = useState(0);
   const lastRealBlockRef = useRef(0);
   const lastRealBlockTimeRef = useRef(0);
@@ -167,15 +177,14 @@ function ArenaContent() {
     }
   }, [realBlockNumber]);
 
-  // Tick interpolated block every 400ms between real updates
+  // Advance block estimate using the observed average testnet block time.
   useEffect(() => {
     if (lastRealBlockRef.current === 0) return;
-    const BLOCK_TIME_MS = 400;
     const timer = setInterval(() => {
       const elapsed = Date.now() - lastRealBlockTimeRef.current;
-      const extraBlocks = Math.floor(elapsed / BLOCK_TIME_MS);
-      setInterpolatedBlock(lastRealBlockRef.current + extraBlocks);
-    }, BLOCK_TIME_MS);
+      const estimatedBlocks = Math.min(elapsed / ESTIMATED_BLOCK_TIME_MS, MAX_EXTRAPOLATED_BLOCKS);
+      setInterpolatedBlock(lastRealBlockRef.current + estimatedBlocks);
+    }, BLOCK_INTERPOLATION_TICK_MS);
     return () => clearInterval(timer);
   }, [realBlockNumber]); // restart timer when real block updates
 
@@ -285,6 +294,7 @@ function ArenaContent() {
     isConnected,
     myMessageCount,
     myIsAI: chatMyIsAI,
+    roomStateVersion,
   } = useChatSocket(parsedRoomIdForChat, chatMode);
 
   // Settle state
@@ -293,6 +303,8 @@ function ArenaContent() {
   const [showBriefing, setShowBriefing] = useState(true);
   const [isEmergencyEnding, setIsEmergencyEnding] = useState(false);
   const prevPhaseRef = useRef(phase);
+  const prevAliveCountRef = useRef<number | null>(null);
+  const settleNudgedRoundRef = useRef<number | null>(null);
   useEffect(() => {
     if (phase === 2 && prevPhaseRef.current !== 2 && prevPhaseRef.current !== 0) {
       // Refetch gameStats before showing victory — avoids stale default (humansWon=false)
@@ -300,6 +312,195 @@ function ArenaContent() {
     }
     prevPhaseRef.current = phase;
   }, [phase, refetchGameStats]);
+
+  const aliveCount =
+    roomInfo !== null && typeof roomInfo === "object" && "aliveCount" in roomInfo
+      ? Number((roomInfo as any).aliveCount)
+      : 0;
+  const playerCount =
+    roomInfo !== null && typeof roomInfo === "object" && "playerCount" in roomInfo
+      ? Number((roomInfo as any).playerCount)
+      : 0;
+  const currentRound = currentRoundData !== undefined ? Number(currentRoundData) : 0;
+  const prizePool =
+    roomInfo !== null && typeof roomInfo === "object" && "prizePool" in roomInfo
+      ? BigInt((roomInfo as any).prizePool)
+      : 0n;
+  const creator =
+    roomInfo !== null && typeof roomInfo === "object" && "creator" in roomInfo
+      ? ((roomInfo as any).creator as string)
+      : "";
+  const lastSettleBlock =
+    roomInfo !== null && typeof roomInfo === "object" && "lastSettleBlock" in roomInfo
+      ? Number((roomInfo as any).lastSettleBlock)
+      : 0;
+  const currentInterval =
+    roomInfo !== null && typeof roomInfo === "object" && "currentInterval" in roomInfo
+      ? Number((roomInfo as any).currentInterval)
+      : 0;
+
+  const myIsAI = chatMyIsAI ?? false;
+
+  const phaseLabel = PHASE_LABELS[phase] ?? "UNKNOWN";
+  const phaseColor = PHASE_COLORS[phase] ?? "text-gray-400";
+
+  const isPlayerInGame =
+    connectedAddress && allPlayers
+      ? (allPlayers as string[]).some(p => p.toLowerCase() === connectedAddress.toLowerCase())
+      : false;
+
+  const isCreator = connectedAddress ? creator.toLowerCase() === connectedAddress.toLowerCase() : false;
+  const maxPlayers =
+    roomInfo !== null && typeof roomInfo === "object" && "maxPlayers" in roomInfo
+      ? Number((roomInfo as any).maxPlayers)
+      : 0;
+  const canStartGame = phase === 0 && isCreator && playerCount === maxPlayers;
+
+  // Round timing — interpolated block for smooth countdown, real block for settle decisions
+  const isGameActive = phase === 1;
+  const currentBlock = interpolatedBlock > 0 ? interpolatedBlock : realBlockNumber ? Number(realBlockNumber) : 0;
+  const realBlock = realBlockNumber ? Number(realBlockNumber) : 0;
+  const settleTargetBlock = lastSettleBlock + currentInterval;
+  const blocksRemaining =
+    isGameActive && currentBlock > 0 ? Math.max(0, Math.ceil(settleTargetBlock - currentBlock)) : 0;
+  // Use REAL block number for settle eligibility (not interpolated) to avoid premature attempts
+  const intervalReached = isGameActive && realBlock >= settleTargetBlock && realBlock > 0 && lastSettleBlock > 0;
+  const canSettle = intervalReached;
+
+  const triggerBackendSettleCheck = useCallback(async () => {
+    if (!roomId || !connectedAddress || phase !== 1 || pendingReveal || !isPlayerInGame) return null;
+    const stored = getStoredChatToken();
+    if (!stored || stored.address !== connectedAddress.toLowerCase()) return null;
+
+    const response = await fetch(`${CHAT_SERVER_URL}/api/rooms/${roomId.toString()}/check-settle`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${stored.token}`,
+      },
+    });
+    if (!response.ok) return null;
+    return response.json().catch(() => null);
+  }, [connectedAddress, isPlayerInGame, pendingReveal, phase, roomId]);
+
+  const handleStartGame = async () => {
+    if (!roomId) return;
+    try {
+      await writeArena({ functionName: "startGame", args: [roomId] });
+    } catch (e) {
+      console.error("Failed to start game:", e);
+    }
+  };
+
+  const handleLeave = async () => {
+    if (!roomId) return;
+    try {
+      await writeArena({ functionName: "leaveRoom", args: [roomId] });
+      router.push("/lobby");
+    } catch (e) {
+      console.error("Failed to leave room:", e);
+    }
+  };
+
+  const handleSettle = async () => {
+    if (!roomId || isSettling) return;
+    setIsSettling(true);
+    try {
+      const result = await triggerBackendSettleCheck();
+      if (!result || (!result.triggered && result.reason !== "already_settling" && result.reason !== "not_ready")) {
+        await writeArena({ functionName: "settleRound", args: [roomId] });
+      }
+      await Promise.all([refetchCoreData(), refetchPlayerInfos()]);
+    } catch (e: any) {
+      const msg = e?.message || "";
+      if (!msg.includes("Round not ended yet")) {
+        console.error("Settle failed:", e);
+      }
+    } finally {
+      setIsSettling(false);
+    }
+  };
+
+  // Emergency end: fallback when operator fails to reveal
+  const REVEAL_TIMEOUT = 3600;
+  // Use real block for eligibility, interpolated for countdown display
+  const canEmergencyEnd =
+    pendingReveal && realBlock > 0 && lastSettleBlock > 0 && realBlock > lastSettleBlock + REVEAL_TIMEOUT;
+  const emergencyBlocksRemaining =
+    pendingReveal && currentBlock > 0 && lastSettleBlock > 0
+      ? Math.max(0, Math.ceil(lastSettleBlock + REVEAL_TIMEOUT - currentBlock))
+      : 0;
+
+  const handleEmergencyEnd = async () => {
+    if (!roomId || isEmergencyEnding) return;
+    setIsEmergencyEnding(true);
+    try {
+      await writeArena({ functionName: "emergencyEnd", args: [roomId] });
+      await Promise.all([refetchCoreData(), refetchPlayerInfos()]);
+    } catch (e: any) {
+      console.error("Emergency end failed:", e);
+    } finally {
+      setIsEmergencyEnding(false);
+    }
+  };
+
+  useEffect(() => {
+    const prevAliveCount = prevAliveCountRef.current;
+    prevAliveCountRef.current = aliveCount;
+
+    if (!roomId || !connectedAddress || phase !== 1 || pendingReveal) return;
+    if (prevAliveCount === null || aliveCount >= prevAliveCount) return;
+
+    const stored = getStoredChatToken();
+    if (!stored || stored.address !== connectedAddress.toLowerCase()) return;
+
+    fetch(`${CHAT_SERVER_URL}/api/rooms/${roomId.toString()}/check-finish`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${stored.token}`,
+      },
+    })
+      .then(async response => {
+        if (!response.ok) return null;
+        return response.json().catch(() => null);
+      })
+      .then(result => {
+        if (result?.triggered || result?.reason === "already_checking") {
+          void Promise.all([refetchCoreData(), refetchPlayerInfos()]);
+        }
+      })
+      .catch(() => {
+        // Best-effort nudge to the backend watcher. Normal polling remains the fallback.
+      });
+  }, [aliveCount, connectedAddress, pendingReveal, phase, refetchCoreData, refetchPlayerInfos, roomId]);
+
+  useEffect(() => {
+    if (roomStateVersion <= 0) return;
+    void Promise.all([refetchCoreData(), refetchPlayerInfos()]);
+  }, [refetchCoreData, refetchPlayerInfos, roomStateVersion]);
+
+  useEffect(() => {
+    if (!canSettle || currentRound <= 0 || pendingReveal || !isPlayerInGame) return;
+    if (settleNudgedRoundRef.current === currentRound) return;
+
+    settleNudgedRoundRef.current = currentRound;
+    void triggerBackendSettleCheck()
+      .then(result => {
+        if (result?.triggered || result?.reason === "already_settling") {
+          void Promise.all([refetchCoreData(), refetchPlayerInfos()]);
+        }
+      })
+      .catch(() => {
+        // Best-effort automatic settle nudge. Manual settle remains available.
+      });
+  }, [
+    canSettle,
+    currentRound,
+    isPlayerInGame,
+    pendingReveal,
+    refetchCoreData,
+    refetchPlayerInfos,
+    triggerBackendSettleCheck,
+  ]);
 
   if (!rawRoomId || roomId === undefined) {
     return (
@@ -381,101 +582,6 @@ function ArenaContent() {
       </div>
     );
   }
-
-  const aliveCount =
-    typeof roomInfo === "object" && "aliveCount" in roomInfo ? Number((roomInfo as any).aliveCount) : 0;
-  const playerCount =
-    typeof roomInfo === "object" && "playerCount" in roomInfo ? Number((roomInfo as any).playerCount) : 0;
-  const currentRound = currentRoundData !== undefined ? Number(currentRoundData) : 0;
-  const prizePool = typeof roomInfo === "object" && "prizePool" in roomInfo ? BigInt((roomInfo as any).prizePool) : 0n;
-  const creator = typeof roomInfo === "object" && "creator" in roomInfo ? ((roomInfo as any).creator as string) : "";
-  const lastSettleBlock =
-    typeof roomInfo === "object" && "lastSettleBlock" in roomInfo ? Number((roomInfo as any).lastSettleBlock) : 0;
-  const currentInterval =
-    typeof roomInfo === "object" && "currentInterval" in roomInfo ? Number((roomInfo as any).currentInterval) : 0;
-
-  const myIsAI = chatMyIsAI ?? false;
-
-  const phaseLabel = PHASE_LABELS[phase] ?? "UNKNOWN";
-  const phaseColor = PHASE_COLORS[phase] ?? "text-gray-400";
-
-  const isPlayerInGame =
-    connectedAddress && allPlayers
-      ? (allPlayers as string[]).some(p => p.toLowerCase() === connectedAddress.toLowerCase())
-      : false;
-
-  const isCreator = connectedAddress ? creator.toLowerCase() === connectedAddress.toLowerCase() : false;
-  const maxPlayers =
-    typeof roomInfo === "object" && "maxPlayers" in roomInfo ? Number((roomInfo as any).maxPlayers) : 0;
-  const canStartGame = phase === 0 && isCreator && playerCount === maxPlayers;
-
-  // Round timing — interpolated block for smooth countdown, real block for settle decisions
-  const isGameActive = phase === 1;
-  const currentBlock = interpolatedBlock;
-  const realBlock = realBlockNumber ? Number(realBlockNumber) : 0;
-  const settleTargetBlock = lastSettleBlock + currentInterval;
-  const blocksRemaining = isGameActive && currentBlock > 0 ? Math.max(0, settleTargetBlock - currentBlock) : 0;
-  // Use REAL block number for settle eligibility (not interpolated) to avoid premature attempts
-  const intervalReached = isGameActive && realBlock >= settleTargetBlock && realBlock > 0 && lastSettleBlock > 0;
-  const canSettle = intervalReached;
-
-  const handleStartGame = async () => {
-    if (!roomId) return;
-    try {
-      await writeArena({ functionName: "startGame", args: [roomId] });
-    } catch (e) {
-      console.error("Failed to start game:", e);
-    }
-  };
-
-  const handleLeave = async () => {
-    if (!roomId) return;
-    try {
-      await writeArena({ functionName: "leaveRoom", args: [roomId] });
-      router.push("/lobby");
-    } catch (e) {
-      console.error("Failed to leave room:", e);
-    }
-  };
-
-  const handleSettle = async () => {
-    if (!roomId || isSettling) return;
-    setIsSettling(true);
-    try {
-      await writeArena({ functionName: "settleRound", args: [roomId] });
-      await Promise.all([refetchCoreData(), refetchPlayerInfos()]);
-    } catch (e: any) {
-      const msg = e?.message || "";
-      if (!msg.includes("Round not ended yet")) {
-        console.error("Settle failed:", e);
-      }
-    } finally {
-      setIsSettling(false);
-    }
-  };
-
-  // Emergency end: fallback when operator fails to reveal
-  const REVEAL_TIMEOUT = 3600;
-  // Use real block for eligibility, interpolated for countdown display
-  const canEmergencyEnd =
-    pendingReveal && realBlock > 0 && lastSettleBlock > 0 && realBlock > lastSettleBlock + REVEAL_TIMEOUT;
-  const emergencyBlocksRemaining =
-    pendingReveal && currentBlock > 0 && lastSettleBlock > 0
-      ? Math.max(0, lastSettleBlock + REVEAL_TIMEOUT - currentBlock)
-      : 0;
-
-  const handleEmergencyEnd = async () => {
-    if (!roomId || isEmergencyEnding) return;
-    setIsEmergencyEnding(true);
-    try {
-      await writeArena({ functionName: "emergencyEnd", args: [roomId] });
-      await Promise.all([refetchCoreData(), refetchPlayerInfos()]);
-    } catch (e: any) {
-      console.error("Emergency end failed:", e);
-    } finally {
-      setIsEmergencyEnding(false);
-    }
-  };
 
   return (
     <div className="flex flex-col flex-1 min-h-0 overflow-hidden arena-bg text-gray-100">
@@ -683,7 +789,7 @@ function ArenaContent() {
             allPlayers={(allPlayers as string[]) || []}
             roomInfo={roomInfo}
             roundNum={currentRoundData}
-            blockNumber={interpolatedBlock > 0 ? BigInt(interpolatedBlock) : undefined}
+            blockNumber={currentBlock > 0 ? currentBlock : undefined}
             pendingReveal={pendingReveal}
             hasVotedOnChain={hasVotedOnChain}
             onEmergencyEnd={() => {
