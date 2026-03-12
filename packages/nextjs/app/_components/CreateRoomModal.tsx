@@ -22,7 +22,7 @@ const TIERS = [
     borderClass: "tier-quick-border",
     textClass: "tier-quick",
     description: "Fast rounds, smaller stakes",
-    duration: "~10 min",
+    duration: "~2 min",
   },
   {
     id: 1,
@@ -34,7 +34,7 @@ const TIERS = [
     borderClass: "tier-standard-border",
     textClass: "tier-standard",
     description: "Balanced gameplay experience",
-    duration: "~20 min",
+    duration: "~4 min",
   },
   {
     id: 2,
@@ -46,7 +46,7 @@ const TIERS = [
     borderClass: "tier-epic-border",
     textClass: "tier-epic",
     description: "High stakes, extended battle",
-    duration: "~30 min",
+    duration: "~6 min",
   },
 ] as const;
 

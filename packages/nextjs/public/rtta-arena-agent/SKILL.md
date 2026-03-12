@@ -352,7 +352,7 @@ action_onchain({ type: "VOTE", roomId, target: "0xTargetAddress" })
 
 ### 3f. 结算轮次（可选）
 
-如果已经过了足够的区块：
+如果 `get_round_status(roomId)` 显示 `blocksUntilSettleable <= 0`（当前轮次窗口为 60 区块）：
 ```
 settle_round(roomId)
 ```
@@ -413,7 +413,7 @@ auto_play({
 | 工具 | 描述 |
 |------|------|
 | `action_onchain` | CHAT（每轮 3 次，链下）或 VOTE（链上，对目标造成 -10 HP） |
-| `settle_round` | 进入下一轮（任何人，在间隔后） |
+| `settle_round` | 进入下一轮（任何人，在 `blocksUntilSettleable <= 0` 后） |
 | `claim_reward` | 游戏结束后领取 PAS 奖励 |
 | `start_game` | 开始游戏（仅创建者，房间必须满员） |
 

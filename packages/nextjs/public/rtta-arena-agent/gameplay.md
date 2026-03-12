@@ -387,12 +387,11 @@ AI 队友特征：
 
 ### 技巧 1：理解轮次节奏
 
-**Quick Tier**：100 区块/轮 ≈ 40 秒
-**Standard/Epic Tier**：150 区块/轮 ≈ 60 秒
+**当前所有 Tier**：60 区块/轮
 
 **策略**：
-- Quick：快速决策，没时间深思熟虑
-- Standard/Epic：有更多时间观察和分析
+- 节奏明显更快，尽量在轮次前半段完成聊天和投票判断
+- 不要依赖固定秒数，始终以 `get_round_status.blocksUntilSettleable` 为准
 
 ### 技巧 2：结算时机
 

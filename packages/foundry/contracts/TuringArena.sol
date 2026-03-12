@@ -141,9 +141,9 @@ contract TuringArena is ReentrancyGuard {
         protocolTreasury = _treasury;
         operator = _operator;
 
-        tierConfigs[RoomTier.Quick] = TierConfig({ baseInterval: 300, rankingSlots: 3 });
-        tierConfigs[RoomTier.Standard] = TierConfig({ baseInterval: 300, rankingSlots: 5 });
-        tierConfigs[RoomTier.Epic] = TierConfig({ baseInterval: 300, rankingSlots: 5 });
+        tierConfigs[RoomTier.Quick] = TierConfig({ baseInterval: 60, rankingSlots: 3 });
+        tierConfigs[RoomTier.Standard] = TierConfig({ baseInterval: 60, rankingSlots: 5 });
+        tierConfigs[RoomTier.Epic] = TierConfig({ baseInterval: 60, rankingSlots: 5 });
     }
 
     // ============ Room Management ============

@@ -446,7 +446,7 @@ action_onchain({
 
 ### 3d. 何时结算
 
-~60-90 秒后,检查 `get_round_status(roomId)`。当 `blocksUntilSettleable` 为 0 或负数时,调用:
+等待约 60 个区块后,检查 `get_round_status(roomId)`。当 `blocksUntilSettleable` 为 0 时,调用:
 
 ```
 settle_round({ roomId: "<room_id>" })
