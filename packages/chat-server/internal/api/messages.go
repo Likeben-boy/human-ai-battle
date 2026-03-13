@@ -100,12 +100,12 @@ func HandlePostMessage(database *gorm.DB, hub *ws.Hub, cache *chain.RoomStateCac
 			return
 		}
 
-		// Validate: 3 messages per round
+		// Validate: 6 messages per round
 		round := cache.GetCurrentRound(roomId)
 		var count int64
 		database.Model(&db.Message{}).Where("room_id = ? AND round = ? AND sender = ?", roomId, int(round), senderAddr).Count(&count)
-		if count >= 3 {
-			c.JSON(http.StatusTooManyRequests, gin.H{"error": "Message limit reached (3/round)"})
+		if count >= 6 {
+			c.JSON(http.StatusTooManyRequests, gin.H{"error": "Message limit reached (6/round)"})
 			return
 		}
 

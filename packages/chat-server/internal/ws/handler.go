@@ -191,7 +191,7 @@ func (h *Handler) handleSendMessage(client *Client, msg *IncomingMessage) {
 		}
 	}
 
-	// Validate: 3 messages per round
+	// Validate: 6 messages per round
 	round := h.cache.GetCurrentRound(roomId)
 	var count int64
 	h.database.Model(&db.Message{}).Where("room_id = ? AND round = ? AND sender = ?", roomId, int(round), addr).Count(&count)
