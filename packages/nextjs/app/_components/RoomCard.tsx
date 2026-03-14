@@ -7,6 +7,7 @@ import { formatEther } from "viem";
 import { useAccount, useConfig } from "wagmi";
 import { useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { useChatAuth } from "~~/hooks/scaffold-eth/useChatAuth";
+import { formatPasAmount } from "~~/utils/formatPasAmount";
 import { notification } from "~~/utils/scaffold-eth";
 
 const TIER_CONFIG = [
@@ -276,7 +277,7 @@ const RoomCard = ({ roomId, roomInfo: propRoomInfo, activeRoomId, onRoomChange }
                 {isClaiming ? (
                   <span className="loading loading-spinner loading-xs" />
                 ) : (
-                  `CLAIM ${formatEther(myRewardAmount)}`
+                  `CLAIM ${formatPasAmount(myRewardAmount)}`
                 )}
               </button>
             )}

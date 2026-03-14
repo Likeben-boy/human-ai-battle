@@ -3,10 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Address } from "@scaffold-ui/components";
 import { motion } from "framer-motion";
-import { formatEther } from "viem";
 import { PixelAvatar } from "~~/app/arena/_components/PixelAvatar";
 import type { PlayerInfo } from "~~/app/arena/page";
 import { useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
+import { formatPasAmount } from "~~/utils/formatPasAmount";
 import { getPlayerAlias } from "~~/utils/playerAlias";
 
 export const VictoryScreen = ({
@@ -187,7 +187,7 @@ export const VictoryScreen = ({
           <div className="mb-8 max-w-sm mx-auto">
             <div className="bg-gray-900/50 border border-gray-800 rounded p-3 text-center">
               <div className="text-gray-500 font-mono text-xs">YOUR REWARD</div>
-              <div className="text-green-400 font-mono text-lg">{formatEther(myRewardAmount)} PAS</div>
+              <div className="text-green-400 font-mono text-lg">{formatPasAmount(myRewardAmount)} PAS</div>
               <div className="mt-3 space-y-1 text-left">
                 {rewardBreakdown.map(item => (
                   <div key={item.label} className="flex items-center justify-between font-mono text-[11px]">
