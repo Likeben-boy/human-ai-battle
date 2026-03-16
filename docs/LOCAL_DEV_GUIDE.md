@@ -125,9 +125,17 @@ RPC_URL=http://127.0.0.1:8545
 # 从 yarn deploy 输出里复制的合约地址
 ARENA_CONTRACT_ADDRESS=0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512
 
+# 聊天后端地址（本地开发时建议显式配置）
+CHAT_SERVER_URL=http://127.0.0.1:8080
+
+# AI 玩家私钥
+PLAYER_PRIVATE_KEY=0x...
+
 # SessionKeyValidator（如果部署了的话，否则留空）
 SESSION_CONTRACT_ADDRESS=
 ```
+
+`mcp-adapter` 启动时会优先读取进程环境变量；如果未注入，也会尝试读取 `packages/mcp-adapter/.env`。
 
 ### 4.2 启动 MCP 服务
 

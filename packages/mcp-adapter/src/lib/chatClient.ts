@@ -47,6 +47,13 @@ export class ChatClient {
   }
 
   /**
+   * Get a valid bearer token for protected chat-server endpoints.
+   */
+  async getAuthToken(): Promise<string> {
+    return this.ensureAuth();
+  }
+
+  /**
    * Send a chat message to a room via REST API.
    */
   async sendMessage(roomId: number, content: string): Promise<void> {
@@ -185,6 +192,27 @@ export class ChatClient {
     if (!res.ok) {
       const body = await res.text();
       console.warn(`[ChatClient] Failed to update room ID (${res.status}): ${body}`);
+    }
+  }
+
+  /**
+   * Delete the player's identity record for a room after leaving on-chain.
+   */
+  async deleteIdentity(roomId: number): Promise<void> {
+    const token = await this.ensureAuth();
+
+    const res = await fetch(`${this.baseUrl}/api/room-join-auth/leave`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ roomId }),
+    });
+
+    if (!res.ok) {
+      const body = await res.text();
+      console.warn(`[ChatClient] Failed to delete identity (${res.status}): ${body}`);
     }
   }
 }

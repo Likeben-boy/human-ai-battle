@@ -6,6 +6,9 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 // 导入 ethers.js 库，用于与以太坊区块链交互
 import { ethers } from "ethers";
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 // 导入 ABI（应用二进制接口）定义文件，用于合约调用
 import { ARENA_ABI } from "./lib/contracts.js";
 // 导入阶段名称常量
@@ -14,6 +17,34 @@ import { PHASE_NAMES } from "./lib/types.js";
 import { ChatClient } from "./lib/chatClient.js";
 
 // ============ 全局变量初始化 ============
+
+const loadEnvFile = () => {
+  const currentDir = path.dirname(fileURLToPath(import.meta.url));
+  const envPath = path.resolve(currentDir, "../.env");
+  if (!existsSync(envPath)) return;
+
+  const envContent = readFileSync(envPath, "utf8");
+  for (const rawLine of envContent.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith("#")) continue;
+    const separatorIndex = line.indexOf("=");
+    if (separatorIndex === -1) continue;
+
+    const key = line.slice(0, separatorIndex).trim();
+    if (!key || process.env[key] !== undefined) continue;
+
+    let value = line.slice(separatorIndex + 1).trim();
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+    process.env[key] = value;
+  }
+};
+
+loadEnvFile();
 
 // 创建 MCP 服务器实例，用于提供 AI Agent 可调用的工具
 const server = new McpServer({
@@ -329,8 +360,8 @@ server.tool(
       // 所以通过 chat-server identity API 验证身份
       if (chatClient) {
         try {
-          const identityRes = await fetch(`${CHAT_SERVER_URL}/api/rooms/${roomId}/identity/${playerWallet.address}`, {
-            headers: { Authorization: `Bearer ${await chatClient["ensureAuth"]()}` },
+          const identityRes = await fetch(`${CHAT_SERVER_URL}/api/rooms/${roomId}/identity`, {
+            headers: { Authorization: `Bearer ${await chatClient.getAuthToken()}` },
           });
           if (identityRes.ok) {
             const identity = await identityRes.json();
@@ -820,6 +851,14 @@ server.tool(
       const tx = await contract.leaveRoom(roomId);
       await tx.wait(); // 等待交易被打包
 
+      if (chatClient) {
+        try {
+          await chatClient.deleteIdentity(Number(roomId));
+        } catch (e) {
+          console.warn("[leave_room] Failed to delete identity:", e);
+        }
+      }
+
       // 根据是否为创建者返回不同的消息
       const msg = isCreator
         ? `Left room ${roomId} as creator — room cancelled, all players refunded.`
@@ -1122,15 +1161,15 @@ server.tool(
 // ============ 启动服务器 ============
 // 主函数：创建传输层并连接服务器
 async function main() {
-  // 如果设置了 PLAYER_PRIVATE_KEY 环境变量，自动初始化钱包
-  const envKey = process.env.PLAYER_PRIVATE_KEY;
+  // 如果设置了 PLAYER_PRIVATE_KEY / PRIVATE_KEY 环境变量，自动初始化钱包
+  const envKey = process.env.PLAYER_PRIVATE_KEY || process.env.PRIVATE_KEY;
   if (envKey) {
     try {
       playerWallet = new ethers.Wallet(envKey, provider);
       chatClient = new ChatClient(CHAT_SERVER_URL, playerWallet);
-      console.error(`[AUTO-INIT] Wallet initialized from PLAYER_PRIVATE_KEY: ${playerWallet.address}`);
+      console.error(`[AUTO-INIT] Wallet initialized from environment key: ${playerWallet.address}`);
     } catch (error) {
-      console.error(`[AUTO-INIT] Failed to initialize wallet from PLAYER_PRIVATE_KEY: ${error}`);
+      console.error(`[AUTO-INIT] Failed to initialize wallet from environment key: ${error}`);
     }
   }
 

@@ -7,7 +7,7 @@ MCP 服务器已成功配置到项目的 `.mcp.json` 文件中。
 ### 配置位置
 - **项目级 MCP 配置**: `.mcp.json`
 - **服务器入口**: `packages/mcp-adapter/dist/server.js`
-- **环境变量**: `packages/mcp-adapter/.env`
+- **环境变量**: `.mcp.json` 的 `env` 或 `packages/mcp-adapter/.env`
 
 ### MCP 服务器配置
 
@@ -21,7 +21,7 @@ MCP 服务器已成功配置到项目的 `.mcp.json` 文件中。
     "env": {
       "RPC_URL": "http://127.0.0.1:8545",
       "ARENA_CONTRACT_ADDRESS": "0x700b6A60ce7EaaEA56F065753d8dcB9653dbAD35",
-      "PRIVATE_KEY": "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
+      "PLAYER_PRIVATE_KEY": "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d"
     }
   }
 }
@@ -154,7 +154,7 @@ start_autoplay({
 |------|------|------|
 | RPC_URL | ✓ | 区块链 RPC 节点地址 |
 | ARENA_CONTRACT_ADDRESS | ✓ | TuringArena 合约地址 |
-| PRIVATE_KEY | ✓ | AI Agent 私钥 |
+| PLAYER_PRIVATE_KEY | ✓ | AI Agent 私钥（兼容 `PRIVATE_KEY`，推荐使用这个名称） |
 
 ## 注意事项
 
