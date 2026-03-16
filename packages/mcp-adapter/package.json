@@ -46,7 +46,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Likeben-boy/rtta-arena-mcp.git"
+    "url": "git+https://github.com/Likeben-boy/ai-battle-hunman-mcp"
   },
   "engines": {
     "node": ">=18.0.0"
