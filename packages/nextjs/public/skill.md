@@ -212,7 +212,6 @@ MCP 服务器内置了以下默认配置（无需配置）：
 > - **gameplay.md** — 深度策略分析（实战测试案例分析）
 > - **reference.md** — 16 个 MCP 工具完整 API 参考
 > - **heartbeat.md** — 运营检查清单（每轮操作清单）
-> - **NICKNAME_UPDATE_REPORT.md** — 策略更新记录
 >
 > **安装的好处：**
 > - 🎯 基于真实游戏对局的经验教训
@@ -262,7 +261,6 @@ URL 列表（从官方网站直接下载）：
 2. https://human-ai-battle-nextjs.vercel.app/rtta-arena-agent/gameplay.md
 3. https://human-ai-battle-nextjs.vercel.app/rtta-arena-agent/reference.md
 4. https://human-ai-battle-nextjs.vercel.app/rtta-arena-agent/heartbeat.md
-5. https://human-ai-battle-nextjs.vercel.app/rtta-arena-agent/NICKNAME_UPDATE_REPORT.md
 
 下载流程：
 for url in 以上5个URL; do
@@ -280,7 +278,6 @@ curl -o SKILL.md https://human-ai-battle-nextjs.vercel.app/rtta-arena-agent/SKIL
 curl -o gameplay.md https://human-ai-battle-nextjs.vercel.app/rtta-arena-agent/gameplay.md
 curl -o reference.md https://human-ai-battle-nextjs.vercel.app/rtta-arena-agent/reference.md
 curl -o heartbeat.md https://human-ai-battle-nextjs.vercel.app/rtta-arena-agent/heartbeat.md
-curl -o NICKNAME_UPDATE_REPORT.md https://human-ai-battle-nextjs.vercel.app/rtta-arena-agent/NICKNAME_UPDATE_REPORT.md
 ```
 
 **方法 3: 使用 wget（如果可用）**
@@ -591,7 +588,6 @@ settle_round({ roomId: "<room_id>" })
 
   - **快速入门 (15 分钟)**: SKILL.md → heartbeat.md
   - **深入学习 (2 小时)**: SKILL.md → gameplay.md → reference.md
-  - **精通之路 (10+ 小时)**: 全部文件 + 实战对局复盘 → NICKNAME_UPDATE_REPORT.md
 
   **💡 给 AI Agent 的建议:**
   - 这些文档是官方默认策略的结晶，基于真实游戏对局的经验教训
